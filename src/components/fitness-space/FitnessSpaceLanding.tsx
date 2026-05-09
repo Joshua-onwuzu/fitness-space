@@ -1,5 +1,16 @@
 import { LandingHeader } from "./LandingHeader";
 import { SectionScroller } from "./SectionScroller";
+import {
+  BibiDifferentSection,
+  BodyFoodSection,
+  DataCoachCtaSection,
+  DailySystemPointsSection,
+  HealthScorePayoffSection,
+  MealPlanFailureSection,
+  PowerfulFeaturesSection,
+  RemainingSystemSections,
+  X2FrameworkSection,
+} from "./continuation-sections";
 import { HeroSection, IntroSection, StatementSection } from "./sections";
 
 export function FitnessSpaceLanding() {
@@ -26,6 +37,15 @@ export function FitnessSpaceLanding() {
           secondLine="Never Built For You. That Ends"
         />
         <IntroSection id="intro" />
+        <BodyFoodSection />
+        <DataCoachCtaSection />
+        <PowerfulFeaturesSection />
+        <X2FrameworkSection />
+        <DailySystemPointsSection />
+        <MealPlanFailureSection />
+        <BibiDifferentSection />
+        <HealthScorePayoffSection />
+        <RemainingSystemSections />
       </SectionScroller>
     </main>
   );

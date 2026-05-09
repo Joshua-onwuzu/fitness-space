@@ -10,6 +10,7 @@ type ScrollSectionProps = {
   contentClassName?: string;
   id?: string;
   intensity?: number;
+  nativeScroll?: boolean;
 };
 
 export function ScrollSection({
@@ -18,6 +19,7 @@ export function ScrollSection({
   contentClassName = "",
   id,
   intensity = 64,
+  nativeScroll = false,
 }: ScrollSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const prefersReducedMotion = useReducedMotion();
@@ -39,13 +41,18 @@ export function ScrollSection({
   return (
     <section
       data-section
+      data-native-scroll-section={nativeScroll ? "" : undefined}
       id={id}
       ref={sectionRef}
-      className={`relative h-svh snap-start overflow-hidden bg-black text-white ${className}`}
+      className={`relative snap-start bg-black text-white ${
+        nativeScroll ? "min-h-svh overflow-visible" : "h-svh overflow-hidden"
+      } ${className}`}
     >
       <motion.div
-        className={`relative h-full w-full ${contentClassName}`}
-        style={prefersReducedMotion ? undefined : { y, opacity }}
+        className={`relative w-full ${
+          nativeScroll ? "min-h-svh" : "h-full"
+        } ${contentClassName}`}
+        style={nativeScroll || prefersReducedMotion ? undefined : { y, opacity }}
       >
         {children}
       </motion.div>

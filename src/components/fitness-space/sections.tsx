@@ -1,6 +1,7 @@
 import Image from "next/image";
 
-import { assets, benefitCards } from "./data";
+import { assets } from "./data";
+import { IntroBenefits } from "./IntroBenefits";
 import { ScrollSection } from "./ScrollSection";
 
 export function HeroSection() {
@@ -131,79 +132,7 @@ export function IntroSection({ id }: IntroSectionProps) {
         </p>
       </div>
 
-      <div className="relative mt-7 flex h-[51svh] min-h-[330px] w-full max-w-[1060px] items-center justify-center sm:mt-9 md:h-[55svh]">
-        <FeatureCard className="left-0 top-[24%]">
-          {benefitCards[0]}
-        </FeatureCard>
-        <FeatureCard className="bottom-[18%] left-[4%]">
-          {benefitCards[1]}
-        </FeatureCard>
-        <FeatureCard className="right-[2%] top-[23%]">
-          {benefitCards[2]}
-        </FeatureCard>
-        <FeatureCard className="bottom-[25%] right-0">
-          {benefitCards[3]}
-        </FeatureCard>
-        <PhoneShowcase />
-      </div>
-
-      <div className="grid w-full max-w-xl grid-cols-1 gap-2 text-left text-xs sm:grid-cols-2 md:hidden">
-        {benefitCards.map((card) => (
-          <MobileFeatureCard key={card}>{card}</MobileFeatureCard>
-        ))}
-      </div>
+      <IntroBenefits />
     </ScrollSection>
-  );
-}
-
-type FeatureCardProps = {
-  children: string;
-  className?: string;
-};
-
-function FeatureCard({ children, className = "" }: FeatureCardProps) {
-  return (
-    <div
-      className={`absolute z-20 hidden min-h-[74px] w-[330px] items-center gap-4 rounded-lg bg-white px-4 text-left text-sm capitalize leading-5 text-black shadow-[0_24px_80px_rgba(0,0,0,0.4)] md:flex ${className}`}
-    >
-      <Image
-        alt=""
-        className="h-6 w-6 shrink-0"
-        height={24}
-        src={assets.bullet}
-        width={24}
-      />
-      <span>{children}</span>
-    </div>
-  );
-}
-
-function MobileFeatureCard({ children }: FeatureCardProps) {
-  return (
-    <div className="flex min-h-11 items-center gap-3 rounded-lg bg-white px-3 py-2 capitalize leading-4 text-black">
-      <Image
-        alt=""
-        className="h-5 w-5 shrink-0"
-        height={24}
-        src={assets.bullet}
-        width={24}
-      />
-      <span>{children}</span>
-    </div>
-  );
-}
-
-function PhoneShowcase() {
-  return (
-    <div className="relative z-10 aspect-[547/820] w-[190px] sm:w-[230px] lg:w-[300px] xl:w-[340px]">
-      <div className="pointer-events-none absolute left-1/2 top-[15%] h-[56%] w-[42%] -translate-x-1/2 rounded-[28px] shadow-[2px_2px_55px_14px_rgba(242,164,18,0.72)]" />
-      <Image
-        alt="Fitness Space app shown on a phone held in hand"
-        className="relative z-10 h-full w-full object-contain"
-        height={820}
-        src={assets.phoneComposite}
-        width={547}
-      />
-    </div>
   );
 }
