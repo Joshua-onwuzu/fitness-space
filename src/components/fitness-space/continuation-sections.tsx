@@ -11,6 +11,7 @@ import {
 } from "./data";
 import { ScrollSection } from "./ScrollSection";
 import { FinalRemainingSections } from "./FinalRemainingSections";
+import { FadeInOnScroll } from "./FadeInOnScroll";
 import {
   HealthScorePayoffReveal,
   X2NutritionReveal,
@@ -268,7 +269,7 @@ export function MealPlanFailureSection() {
       id="meal-plan-failure"
       intensity={42}
     >
-      <article className="flex h-full w-full flex-col items-center justify-center bg-black text-center text-white">
+      <FadeInOnScroll className="flex h-full w-full flex-col items-center justify-center bg-black text-center text-white">
         <h2 className="max-w-[1115px] text-[39px] font-normal leading-tight text-white md:text-[64px]">
           Why Every Meal Plan
           <br />
@@ -289,7 +290,7 @@ export function MealPlanFailureSection() {
             rice.
           </p>
         </div>
-      </article>
+      </FadeInOnScroll>
     </ScrollSection>
   );
 }
@@ -377,9 +378,11 @@ function RemainingSystemIntroSection() {
       intensity={42}
     >
       <RemainingFrame className="flex items-center justify-center text-center">
-        <h2 className="whitespace-nowrap text-[clamp(2.25rem,5.84svh,64px)] font-normal leading-normal text-white max-md:whitespace-normal">
-          One System. Everything You Need.
-        </h2>
+        <FadeInOnScroll>
+          <h2 className="whitespace-nowrap text-[clamp(2.25rem,5.84svh,64px)] font-normal leading-normal text-white max-md:whitespace-normal">
+            One System. Everything You Need.
+          </h2>
+        </FadeInOnScroll>
       </RemainingFrame>
     </ScrollSection>
   );
