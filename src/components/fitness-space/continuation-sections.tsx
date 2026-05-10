@@ -17,6 +17,7 @@ import {
   X2NutritionReveal,
 } from "./X2NutritionReveal";
 import { RemainingWeHearYouReveal } from "./RemainingWeHearYouReveal";
+import { RemainingSystemReveal } from "./RemainingSystemReveal";
 
 function SectionPill({ children }: { children: string }) {
   return (
@@ -356,35 +357,25 @@ export function HealthScorePayoffSection() {
 }
 
 export function RemainingSystemSections() {
+  const [introPanel, ...productPanels] = remainingSystemPanels;
+
   return (
     <>
-      <RemainingSystemIntroSection />
-      {remainingSystemPanels.map((panel) => (
+      <ScrollSection
+        className="px-4 py-14 sm:px-8 lg:px-12"
+        contentClassName="flex items-center justify-center"
+        id="one-system"
+        intensity={42}
+      >
+        <RemainingSystemReveal panel={introPanel} />
+      </ScrollSection>
+      {productPanels.map((panel) => (
         <RemainingProductPanelSection key={panel.id} panel={panel} />
       ))}
       <RemainingCommunitySupportSection />
       <RemainingWeHearYouSection />
       <FinalRemainingSections />
     </>
-  );
-}
-
-function RemainingSystemIntroSection() {
-  return (
-    <ScrollSection
-      className="px-4 py-14 sm:px-8 lg:px-12"
-      contentClassName="flex items-center justify-center"
-      id="one-system"
-      intensity={42}
-    >
-      <RemainingFrame className="flex items-center justify-center text-center">
-        <FadeInOnScroll>
-          <h2 className="whitespace-nowrap text-[clamp(2.25rem,5.84svh,64px)] font-normal leading-normal text-white max-md:whitespace-normal">
-            One System. Everything You Need.
-          </h2>
-        </FadeInOnScroll>
-      </RemainingFrame>
-    </ScrollSection>
   );
 }
 

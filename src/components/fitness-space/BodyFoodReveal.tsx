@@ -23,6 +23,8 @@ export const bodyFoodRevealTiming = {
   dailyCardDelay: 0,
   dailyShrinkDelay: 0,
   dailyCardDuration: 0.52,
+  dailyNextCardDuration: 0,
+  dailyPairExitDuration: 0.16,
   dailyCardLift: 18,
   dailyShrinkDuration: 0.9,
 } as const;
@@ -74,6 +76,10 @@ export function BodyFoodReveal() {
   const pairIndex = Math.max(stage - 1, 0);
   const coachingCardDelay =
     stage === 1 ? bodyFoodRevealTiming.dailyCardDelay : 0;
+  const coachingCardDuration =
+    stage === 1
+      ? bodyFoodRevealTiming.dailyCardDuration
+      : bodyFoodRevealTiming.dailyNextCardDuration;
 
   useEffect(() => {
     stageRef.current = stage;
@@ -231,17 +237,20 @@ export function BodyFoodReveal() {
             className="relative z-20 grid w-full grid-cols-[minmax(0,1fr)_minmax(88px,20vw)_minmax(0,1fr)] items-center gap-x-1 sm:grid-cols-[minmax(0,1fr)_minmax(130px,22vw)_minmax(0,1fr)] md:gap-x-6"
             exit={{ opacity: 0, y: stage === 1 ? -18 : 18 }}
             key={`coaching-pair-${stage}-${animationCycle}`}
+            transition={{ duration: bodyFoodRevealTiming.dailyPairExitDuration }}
           >
             <CoachingCardAsset
               align="left"
               card={coachingCardPairs[pairIndex][0]}
               delay={coachingCardDelay}
+              duration={coachingCardDuration}
             />
             <div aria-hidden="true" />
             <CoachingCardAsset
               align="right"
               card={coachingCardPairs[pairIndex][1]}
               delay={coachingCardDelay}
+              duration={coachingCardDuration}
             />
           </motion.div>
         ) : null}
@@ -262,10 +271,12 @@ function CoachingCardAsset({
   align,
   card,
   delay,
+  duration,
 }: {
   align: "left" | "right";
   card: CoachingCardImage;
   delay: number;
+  duration: number;
 }) {
   return (
     <motion.div
@@ -278,7 +289,7 @@ function CoachingCardAsset({
       }}
       transition={{
         delay,
-        duration: bodyFoodRevealTiming.dailyCardDuration,
+        duration,
       }}
     >
       <Image
