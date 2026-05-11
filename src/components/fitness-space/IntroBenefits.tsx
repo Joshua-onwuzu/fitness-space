@@ -120,6 +120,7 @@ function FeatureCard({ children, className = "", index }: FeatureCardProps) {
         alt=""
         className="h-6 w-6 shrink-0"
         height={24}
+        sizes="24px"
         src={assets.bullet}
         width={24}
       />
@@ -139,6 +140,7 @@ function MobileFeatureCard({ children, index }: FeatureCardProps) {
         alt=""
         className="h-5 w-5 shrink-0"
         height={24}
+        sizes="20px"
         src={assets.bullet}
         width={24}
       />
@@ -158,6 +160,7 @@ function PhoneShowcase() {
         alt="Fitness Space app shown on a phone held in hand"
         className="relative z-10 h-full w-full object-contain"
         height={820}
+        sizes="(min-width: 1280px) 340px, (min-width: 1024px) 300px, (min-width: 640px) 230px, 190px"
         src={assets.phoneComposite}
         width={547}
       />

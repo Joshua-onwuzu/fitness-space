@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 import { assets, healthScorePayoffCards, x2NutritionCards } from "./data";
+import { PrimaryCta } from "./PrimaryCta";
 
 type SectionStepEvent = CustomEvent<{
   direction: -1 | 1;
@@ -157,6 +158,7 @@ export function X2NutritionReveal() {
           alt=""
           className="absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 object-cover opacity-70"
           height={1256}
+          sizes="100vw"
           src={assets.x2FrameworkPattern}
           width={2054}
         />
@@ -267,6 +269,7 @@ function X2NutritionOrderCard({
           alt=""
           className="absolute -left-[48%] -top-[42%] h-[202%] w-[162%] object-cover opacity-[0.07]"
           height={1071}
+          sizes="100vw"
           src={assets.x2SystemPattern}
           width={1752}
         />
@@ -278,12 +281,7 @@ function X2NutritionOrderCard({
             <p className="mt-3 text-sm font-normal capitalize leading-[1.72] text-white sm:mt-4 sm:text-base sm:leading-[1.875]">
               {card.description}
             </p>
-            <a
-              className="mt-5 inline-flex rounded-[7px] bg-white px-[11px] py-2 text-xs font-semibold capitalize text-black transition hover:bg-white/90 sm:mt-7 sm:text-sm"
-              href="#hero"
-            >
-              &nbsp;&nbsp;Meet Bibi &mdash; It&apos;s Free&nbsp;
-            </a>
+            <PrimaryCta className="mt-5 px-[22px] py-2 text-xs sm:mt-7 sm:text-sm" />
           </div>
           <div className="mx-auto w-full max-w-[220px] sm:hidden">
             <NutritionScoreCardAsset image={card.image} />
@@ -310,6 +308,7 @@ function NutritionScoreCardAsset({
       alt={image.alt}
       className="h-auto w-full"
       height={image.height}
+      sizes="(min-width: 640px) 330px, 220px"
       src={image.src}
       width={image.width}
     />

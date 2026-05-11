@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Fitness Space Landing
 
-## Getting Started
+Next.js App Router landing page for Fitness Space and Bibi, the AI nutrition
+and fitness coach for Nigerian food, African meals, habit tracking and
+sustainable weight loss.
 
-First, run the development server:
+## Local Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## SEO Environment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Set these in production before launch:
 
-## Learn More
+```bash
+NEXT_PUBLIC_SITE_URL=https://your-production-domain.example
+NEXT_PUBLIC_SIGNUP_URL=https://your-signup-or-onboarding-url.example
+```
 
-To learn more about Next.js, take a look at the following resources:
+`NEXT_PUBLIC_SITE_URL` controls canonical URLs, sitemap URLs, robots host,
+OpenGraph URLs and JSON-LD entity IDs. `NEXT_PUBLIC_SIGNUP_URL` controls every
+primary "Meet Bibi - It's Free" CTA.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## SEO Verification
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+After deployment, verify:
 
-## Deploy on Vercel
+```bash
+curl -I "$NEXT_PUBLIC_SITE_URL/"
+curl -I "$NEXT_PUBLIC_SITE_URL/robots.txt"
+curl -I "$NEXT_PUBLIC_SITE_URL/sitemap.xml"
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Then inspect the deployed URL in Google Search Console and validate structured
+data with the Google Rich Results Test.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Measurement Plan
+
+Track the landing page with:
+
+- Google Search Console indexing, queries, impressions, CTR and sitemap status.
+- Bing Webmaster Tools indexing and query coverage.
+- CTA click events from organic sessions.
+- Scroll depth checkpoints for the major sections.
+- Core Web Vitals field data, especially LCP, INP and CLS at p75.
+- Organic conversion rate from the primary signup CTA.
+
+Targets:
+
+- `/`, `/robots.txt` and `/sitemap.xml` return 200.
+- The home page canonical resolves to `NEXT_PUBLIC_SITE_URL`.
+- p75 LCP is 2.5s or faster.
+- p75 INP is 200ms or faster.
+- p75 CLS is 0.1 or lower.

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 import { assets, coachingCardPairs } from "./data";
+import { PrimaryCta } from "./PrimaryCta";
 
 type SectionStepEvent = CustomEvent<{
   direction: -1 | 1;
@@ -194,6 +195,7 @@ export function BodyFoodReveal() {
                 className="h-full w-auto max-w-[78vw] object-contain"
                 height={1536}
                 priority={false}
+                sizes="(min-width: 768px) 360px, 78vw"
                 src={assets.bibiStanding}
                 width={1024}
               />
@@ -217,16 +219,14 @@ export function BodyFoodReveal() {
             >
               <BibiHeadline suffix="Knows Your Food." />
             </motion.div>
-            <motion.a
+            <motion.div
               animate="visible"
-              className="mt-5 inline-flex rounded-[7px] bg-white px-4 py-2 text-xs font-semibold capitalize text-black transition hover:bg-white/90 sm:text-sm"
               custom={bodyFoodRevealTiming.ctaDelay}
-              href="#daily-system"
               initial={initial}
               variants={revealVariants}
             >
-              Meet Bibi &mdash; It&apos;s Free
-            </motion.a>
+              <PrimaryCta className="mt-5 px-4 py-2 text-xs sm:text-sm" />
+            </motion.div>
           </motion.div>
         ) : null}
       </AnimatePresence>
@@ -297,6 +297,7 @@ function CoachingCardAsset({
         className="h-auto w-[43vw] max-w-[200px] drop-shadow-[0_28px_70px_rgba(0,0,0,0.38)] sm:max-w-[280px] md:w-[31vw] md:max-w-[390px]"
         height={card.height}
         priority={false}
+        sizes="(min-width: 768px) 31vw, 43vw"
         src={card.src}
         width={card.width}
       />

@@ -88,6 +88,7 @@ export function RemainingWeHearYouQuoteCard({
         alt=""
         className="absolute left-[calc(50%-0.85px)] top-[-316.21px] h-[1255.923px] w-[2054.306px] max-w-none -translate-x-1/2 object-cover"
         height={1256}
+        sizes="100vw"
         src={assets.remainingWeHearYouCardPattern}
         width={2054}
       />

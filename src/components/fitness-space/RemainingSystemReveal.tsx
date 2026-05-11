@@ -185,6 +185,7 @@ function RemainingRevealPhoneMockup({
         alt={phone.alt}
         className="h-full w-full object-cover object-top"
         height={1295}
+        sizes="371px"
         src={phone.src}
         width={596}
       />

@@ -427,14 +427,14 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
       const sections = getSections();
       const targetIndex = sections.indexOf(targetSection);
-      const currentIndex = getCurrentIndex();
-      if (targetIndex === -1 || targetIndex === currentIndex) {
+      if (targetIndex === -1) {
         return;
       }
 
       event.preventDefault();
       markInput();
-      moveBy(targetIndex > currentIndex ? 1 : -1);
+      window.history.pushState(null, "", `#${targetId}`);
+      scrollToIndex(targetIndex);
     };
 
     window.addEventListener("wheel", onWheel, { passive: false });

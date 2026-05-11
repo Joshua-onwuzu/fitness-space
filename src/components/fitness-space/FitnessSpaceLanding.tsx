@@ -11,7 +11,12 @@ import {
   RemainingSystemSections,
   X2FrameworkSection,
 } from "./continuation-sections";
-import { HeroSection, IntroSection, StatementSection } from "./sections";
+import {
+  HeroSection,
+  IntroSection,
+  SearchAnswerSection,
+  StatementSection,
+} from "./sections";
 
 export function FitnessSpaceLanding() {
   return (
@@ -37,6 +42,7 @@ export function FitnessSpaceLanding() {
           secondLine="Never Built For You. That Ends"
         />
         <IntroSection id="intro" />
+        <SearchAnswerSection />
         <BodyFoodSection />
         <DataCoachCtaSection />
         <PowerfulFeaturesSection />

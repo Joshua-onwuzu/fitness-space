@@ -18,6 +18,7 @@ import {
 } from "./X2NutritionReveal";
 import { RemainingWeHearYouReveal } from "./RemainingWeHearYouReveal";
 import { RemainingSystemReveal } from "./RemainingSystemReveal";
+import { PrimaryCta } from "./PrimaryCta";
 
 function SectionPill({ children }: { children: string }) {
   return (
@@ -62,6 +63,7 @@ function RemainingPhoneMockup({
         alt={phone.alt}
         className="h-full w-full object-cover object-top"
         height={1295}
+        sizes="371px"
         src={phone.src}
         width={596}
       />
@@ -96,6 +98,7 @@ export function DataCoachCtaSection() {
           alt=""
           className="absolute left-[-32%] top-[-64%] h-[230%] w-[160%] object-cover opacity-95"
           height={1256}
+          sizes="100vw"
           src={assets.coachPattern}
           width={2054}
         />
@@ -105,18 +108,14 @@ export function DataCoachCtaSection() {
               Bibi does not just track you. She coaches you. Every day. Based on
               your data.
             </h2>
-            <a
-              className="mt-8 inline-flex rounded-[7px] bg-white px-4 py-2 text-xs font-semibold capitalize text-black transition hover:bg-white/90 sm:text-sm"
-              href="#features"
-            >
-              Meet Bibi &mdash; It&apos;s Free
-            </a>
+            <PrimaryCta className="mt-8 px-4 py-2 text-xs sm:text-sm" />
           </div>
           <div className="absolute bottom-[-16%] right-[7%] hidden h-[112%] w-[min(28vw,330px)] overflow-hidden rounded-[34px] border-[10px] border-black bg-black shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:block">
             <Image
               alt="Fitness Space app coaching view"
               className="h-full w-full object-cover object-top"
               height={1295}
+              sizes="(min-width: 640px) 28vw, 0px"
               src={assets.coachScreen}
               width={596}
             />
@@ -205,33 +204,56 @@ export function DailySystemPointsSection() {
           point compounds into real results — and real discounts.
         </p>
 
-        <div className="mt-[3.9svh] hidden w-full max-w-[816px] md:block">
-          <div className="grid grid-cols-[159px_minmax(0,591px)_66px]">
-            <div className="flex min-h-[min(5.2svh,60px)] items-center border-b border-white/10 text-[24px] font-bold leading-none text-white/50">
-              Activity
-            </div>
-            <div className="flex min-h-[min(5.2svh,60px)] items-center border-b border-l border-white/10 pl-[59px] text-[24px] font-bold leading-none text-white/50">
-              What it does
-            </div>
-            <div className="flex min-h-[min(5.2svh,60px)] items-center border-b border-l border-white/10 pl-[15px] text-[24px] font-bold leading-none text-white/50">
-              Points
-            </div>
-
+        <table className="mt-[3.9svh] hidden w-full max-w-[816px] table-fixed border-collapse md:table">
+          <caption className="sr-only">
+            Fitness Space Health Score activities and daily point values
+          </caption>
+          <colgroup>
+            <col className="w-[159px]" />
+            <col />
+            <col className="w-[86px]" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th
+                className="min-h-[min(5.2svh,60px)] border-b border-white/10 py-4 pr-5 text-left text-[24px] font-bold leading-none text-white/50"
+                scope="col"
+              >
+                Activity
+              </th>
+              <th
+                className="min-h-[min(5.2svh,60px)] border-b border-l border-white/10 py-4 pl-[59px] pr-8 text-left text-[24px] font-bold leading-none text-white/50"
+                scope="col"
+              >
+                What it does
+              </th>
+              <th
+                className="min-h-[min(5.2svh,60px)] border-b border-l border-white/10 py-4 pl-[15px] text-left text-[24px] font-bold leading-none text-white/50"
+                scope="col"
+              >
+                Points
+              </th>
+            </tr>
+          </thead>
+          <tbody>
             {healthScoreActivities.map((row) => (
-              <div className="contents" key={row.activity}>
-                <div className="flex min-h-[min(5.2svh,60px)] items-center border-b border-white/10 pr-5 text-sm font-normal leading-normal text-white/70">
+              <tr key={row.activity}>
+                <th
+                  className="border-b border-white/10 py-3 pr-5 text-left text-sm font-normal leading-normal text-white/70"
+                  scope="row"
+                >
                   {row.activity}
-                </div>
-                <div className="flex min-h-[min(5.2svh,60px)] items-center border-b border-l border-white/10 pl-[59px] pr-8 text-sm font-normal leading-normal text-white/70">
+                </th>
+                <td className="border-b border-l border-white/10 py-3 pl-[59px] pr-8 text-sm font-normal leading-normal text-white/70">
                   {row.description}
-                </div>
-                <div className="flex min-h-[min(5.2svh,60px)] items-center border-b border-l border-white/10 pl-[15px] text-sm font-normal leading-normal text-white/70">
+                </td>
+                <td className="border-b border-l border-white/10 py-3 pl-[15px] text-sm font-normal leading-normal text-white/70">
                   {row.points}
-                </div>
-              </div>
+                </td>
+              </tr>
             ))}
-          </div>
-        </div>
+          </tbody>
+        </table>
 
         <div className="mt-[3svh] grid w-full max-w-[560px] gap-2 md:hidden">
           {healthScoreActivities.map((row) => (
@@ -309,6 +331,7 @@ export function BibiDifferentSection() {
           alt=""
           className="absolute left-[-32%] top-[-64%] h-[230%] w-[160%] object-cover opacity-[0.18]"
           height={1256}
+          sizes="100vw"
           src={assets.x2FrameworkPattern}
           width={2054}
         />
@@ -322,19 +345,17 @@ export function BibiDifferentSection() {
               at your mother’s house? She applies the system to your real life
               — every single time.
             </p>
-            <a
-              className="mt-[3.7svh] inline-flex h-[50px] min-w-[273px] items-center justify-center rounded-[7px] bg-[#f54900] px-6 text-center text-sm font-semibold text-white transition hover:bg-[#ff6420]"
-              href="#intro"
-            >
-              Meet Bibi — It’s Free
-            </a>
+            <PrimaryCta
+              className="mt-[3.7svh] h-[50px] min-w-[273px] px-6 text-sm"
+              variant="orange"
+            />
           </div>
         </div>
         <Image
           alt="Bibi standing in a fitness outfit"
           className="absolute bottom-0 right-0 h-[89%] w-auto object-contain max-md:right-[-18%] max-md:h-[48%] sm:right-[4%] lg:right-0"
           height={1448}
-          priority
+          sizes="(min-width: 1024px) 520px, (min-width: 640px) 430px, 220px"
           src={assets.bibiDifferent}
           width={1086}
         />
@@ -417,12 +438,7 @@ function RemainingProductPanelSection({
             </div>
           ))}
           {"cta" in panel ? (
-            <a
-              className="mt-[2px] inline-flex rounded-[7px] bg-white px-[11px] py-2 text-sm font-semibold capitalize text-black transition hover:bg-white/90"
-              href="#hero"
-            >
-              &nbsp;&nbsp;Meet Bibi — It&apos;s Free&nbsp;
-            </a>
+            <PrimaryCta className="mt-[2px] px-[22px] py-2 text-sm" />
           ) : null}
         </div>
 

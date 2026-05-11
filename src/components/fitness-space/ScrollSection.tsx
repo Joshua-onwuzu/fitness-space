@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { useRef } from "react";
 
 type ScrollSectionProps = {
+  animateOnScroll?: boolean;
   children: ReactNode;
   className?: string;
   contentClassName?: string;
@@ -14,6 +15,7 @@ type ScrollSectionProps = {
 };
 
 export function ScrollSection({
+  animateOnScroll = true,
   children,
   className = "",
   contentClassName = "",
@@ -52,7 +54,11 @@ export function ScrollSection({
         className={`relative w-full ${
           nativeScroll ? "min-h-svh" : "h-full"
         } ${contentClassName}`}
-        style={nativeScroll || prefersReducedMotion ? undefined : { y, opacity }}
+        style={
+          !animateOnScroll || nativeScroll || prefersReducedMotion
+            ? undefined
+            : { y, opacity }
+        }
       >
         {children}
       </motion.div>

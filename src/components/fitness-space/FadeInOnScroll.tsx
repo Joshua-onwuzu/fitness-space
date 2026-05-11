@@ -6,19 +6,22 @@ import type { ReactNode } from "react";
 type FadeInOnScrollProps = {
   children: ReactNode;
   className?: string;
+  initialVisible?: boolean;
 };
 
 export function FadeInOnScroll({
   children,
   className = "",
+  initialVisible = false,
 }: FadeInOnScrollProps) {
   const prefersReducedMotion = useReducedMotion();
+  const shouldStartVisible = initialVisible || prefersReducedMotion;
 
   return (
     <motion.div
-      animate={prefersReducedMotion ? "visible" : undefined}
+      animate={shouldStartVisible ? "visible" : undefined}
       className={className}
-      initial="hidden"
+      initial={shouldStartVisible ? "visible" : "hidden"}
       variants={{
         hidden: {
           opacity: 0,
@@ -34,7 +37,7 @@ export function FadeInOnScroll({
         },
       }}
       viewport={{ amount: 0.72, once: false }}
-      whileInView="visible"
+      whileInView={shouldStartVisible ? undefined : "visible"}
     >
       {children}
     </motion.div>

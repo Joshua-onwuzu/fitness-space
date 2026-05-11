@@ -65,7 +65,7 @@ export const healthScoreActivities = [
   },
   {
     activity: "Weight Loss Drink",
-    description: "Heals your gut and enhances fat burning overnight",
+    description: "Supports your evening routine and helps reinforce consistency",
     points: "5 pts",
   },
 ] as const;
@@ -87,7 +87,7 @@ export const x2NutritionCards = [
     description:
       "Bibi turns each meal into a simple score so you can see what is balanced and what needs work.",
     image: {
-      alt: "2X Nutrition System scoring card placeholder",
+      alt: "2X Nutrition System meal score explanation card",
       height: 716,
       src: assets.x2NutritionCard,
       width: 1147,
@@ -98,7 +98,7 @@ export const x2NutritionCards = [
     description:
       "Every card can explain the next small change, from carbs to vegetables, protein and portion balance.",
     image: {
-      alt: "2X Nutrition System scoring card placeholder",
+      alt: "2X Nutrition System next-step coaching card",
       height: 716,
       src: assets.x2NutritionCard,
       width: 1147,
@@ -109,7 +109,7 @@ export const x2NutritionCards = [
     description:
       "Use the same framework meal after meal until healthy choices become easier to repeat.",
     image: {
-      alt: "2X Nutrition System scoring card placeholder",
+      alt: "2X Nutrition System daily repeat framework card",
       height: 716,
       src: assets.x2NutritionCard,
       width: 1147,
@@ -123,7 +123,7 @@ export const healthScorePayoffCards = [
     description:
       "Every completed activity adds points to your score, from hydration and workouts to meals, steps and fasting.",
     image: {
-      alt: "Health Score progress card placeholder",
+      alt: "Health Score progress card",
       height: 716,
       src: assets.x2NutritionCard,
       width: 1147,
@@ -134,7 +134,7 @@ export const healthScorePayoffCards = [
     description:
       "The more points you earn before renewal, the bigger your discount becomes. Showing up now lowers what you pay later.",
     image: {
-      alt: "Health Score renewal discount card placeholder",
+      alt: "Health Score renewal discount card",
       height: 716,
       src: assets.x2NutritionCard,
       width: 1147,

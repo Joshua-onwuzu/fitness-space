@@ -2,6 +2,7 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 
 import { assets, finalTestimonials, finalTrialFacts } from "./data";
+import { PrimaryCta } from "./PrimaryCta";
 import { ScrollSection } from "./ScrollSection";
 
 function FinalFrame({
@@ -54,16 +55,10 @@ function FinalButton({
   variant?: "orange" | "white";
 }) {
   return (
-    <a
-      className={`inline-flex items-center justify-center rounded-[7px] px-[11.25px] py-[8.25px] text-center text-[14px] font-semibold capitalize leading-normal transition ${
-        variant === "orange"
-          ? "bg-[#f54900] text-white hover:bg-[#ff6420]"
-          : "bg-white text-black hover:bg-white/90"
-      } ${className}`}
-      href="#hero"
-    >
-      &nbsp;&nbsp;Meet Bibi — It&apos;s Free&nbsp;
-    </a>
+    <PrimaryCta
+      className={`px-[22px] py-[8.25px] text-[14px] ${className}`}
+      variant={variant}
+    />
   );
 }
 
@@ -224,6 +219,7 @@ function FourteenDayPayoffSection() {
           alt=""
           className="absolute left-[-438.2px] top-[-316.21px] h-[1255.923px] w-[2054.306px] max-w-none object-cover"
           height={1256}
+          sizes="100vw"
           src={assets.finalBlackPattern}
           width={2054}
         />
@@ -236,6 +232,7 @@ function FourteenDayPayoffSection() {
           alt="Bibi fitness coach"
           className="absolute bottom-[-25px] left-1/2 z-10 h-[434px] w-[325px] -translate-x-1/2 object-cover max-md:h-[360px] max-md:w-[270px]"
           height={1448}
+          sizes="325px"
           src={assets.finalBibi}
           width={1086}
         />
@@ -261,6 +258,7 @@ function FinalFooterCtaSection() {
             alt=""
             className="absolute left-[-438.2px] top-[-316.21px] h-[1255.923px] w-[2054.306px] max-w-none object-cover"
             height={1256}
+            sizes="100vw"
             src={assets.finalOrangePattern}
             width={2054}
           />
@@ -276,6 +274,7 @@ function FinalFooterCtaSection() {
             alt="Fitness Space logo"
             className="absolute bottom-[31.8px] left-10 h-[23.197px] w-[200px] object-contain max-md:left-5 max-md:w-[150px]"
             height={201}
+            sizes="(min-width: 768px) 200px, 150px"
             src={assets.finalFooterLogo}
             width={1733}
           />
@@ -291,6 +290,7 @@ function FinalFooterCtaSection() {
           alt="Bibi fitness coach"
           className="absolute left-1/2 top-[416px] z-10 h-[438px] w-[329px] -translate-x-1/2 object-cover max-md:top-[370px] max-md:h-[360px] max-md:w-[270px]"
           height={1448}
+          sizes="329px"
           src={assets.finalBibi}
           width={1086}
         />
