@@ -11,7 +11,7 @@ html {
   background: var(--background);
   overscroll-behavior: none;
   scroll-behavior: smooth;
-  scroll-snap-type: y mandatory;
+  scroll-snap-type: none;
   scrollbar-width: none;
 }
 

@@ -13,6 +13,7 @@ const INPUT_SILENCE_MS = 180;
 const INTERNAL_STEP_LOCK_MS = 1300;
 const WHEEL_THRESHOLD = 36;
 const TOUCH_THRESHOLD = 48;
+const NATIVE_SECTION_END_BUFFER_PX = 32;
 
 type SectionStepDetail = {
   direction: -1 | 1;
@@ -27,7 +28,10 @@ export function SectionScroller({ children }: SectionScrollerProps) {
   const lockedRef = useRef(false);
   const settleFrameRef = useRef<number | null>(null);
   const touchStartYRef = useRef<number | null>(null);
+  const touchUsedNativeScrollRef = useRef(false);
   const lastInputAtRef = useRef(0);
+  const nativeWheelResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const nativeWheelScrollRef = useRef(false);
   const stepUnlockRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sameDirectionSuppressRef = useRef<{
     direction: -1 | 1;
@@ -45,12 +49,27 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       Array.from(
         containerRef.current?.querySelectorAll<HTMLElement>("[data-section]") ??
           [],
+      ).filter(
+        (section) =>
+          section.offsetHeight > 0 &&
+          window.getComputedStyle(section).display !== "none",
       );
 
     const getCurrentIndex = () => {
       const sections = getSections();
       if (!sections.length) {
         return 0;
+      }
+
+      const thresholdY = window.scrollY + Math.min(window.innerHeight * 0.45, 280);
+      const containingIndex = sections.findIndex(
+        (section) =>
+          thresholdY >= section.offsetTop &&
+          thresholdY < section.offsetTop + section.offsetHeight,
+      );
+
+      if (containingIndex !== -1) {
+        return containingIndex;
       }
 
       return sections.reduce((closestIndex, section, index) => {
@@ -66,13 +85,33 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       section: HTMLElement | undefined,
       direction: -1 | 1,
     ) => {
-      if (!section?.hasAttribute("data-native-scroll-section")) {
+      if (!section) {
         return false;
+      }
+
+      const isNativeScrollSection =
+        section.hasAttribute("data-native-scroll-section") ||
+        section.offsetHeight > window.innerHeight + 2;
+
+      if (!isNativeScrollSection) {
+        return false;
+      }
+
+      if (section.hasAttribute("data-internal-scroll-section")) {
+        const maxScrollTop = section.scrollHeight - section.clientHeight;
+
+        if (direction === 1) {
+          return section.scrollTop < maxScrollTop - 2;
+        }
+
+        return section.scrollTop > 2;
       }
 
       const sectionTop = section.offsetTop;
       const sectionBottom = sectionTop + section.offsetHeight;
-      const maxScrollY = Math.max(sectionBottom - window.innerHeight, sectionTop);
+      const maxScrollY =
+        Math.max(sectionBottom - window.innerHeight, sectionTop) +
+        NATIVE_SECTION_END_BUFFER_PX;
 
       if (direction === 1) {
         return window.scrollY < maxScrollY - 2;
@@ -80,6 +119,13 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
       return window.scrollY > sectionTop + 2;
     };
+
+    const isAtNativeBoundary = (
+      section: HTMLElement | undefined,
+      direction: -1 | 1,
+    ) => section?.hasAttribute("data-native-scroll-section")
+      ? !canScrollNativeSection(section, direction)
+      : false;
 
     const markInput = () => {
       lastInputAtRef.current = performance.now();
@@ -95,12 +141,54 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       }, INPUT_SILENCE_MS);
     };
 
+    const markNativeWheelScroll = () => {
+      nativeWheelScrollRef.current = true;
+
+      if (nativeWheelResetRef.current) {
+        clearTimeout(nativeWheelResetRef.current);
+      }
+
+      nativeWheelResetRef.current = setTimeout(() => {
+        nativeWheelScrollRef.current = false;
+      }, INPUT_SILENCE_MS);
+    };
+
     const clearSameDirectionSuppress = () => {
       if (sameDirectionSuppressRef.current?.resetTimer) {
         clearTimeout(sameDirectionSuppressRef.current.resetTimer);
       }
 
       sameDirectionSuppressRef.current = null;
+    };
+
+    const resetInteractionState = () => {
+      lockedRef.current = false;
+      touchStartYRef.current = null;
+      touchUsedNativeScrollRef.current = false;
+      nativeWheelScrollRef.current = false;
+      wheelDeltaRef.current = 0;
+
+      if (settleFrameRef.current) {
+        cancelAnimationFrame(settleFrameRef.current);
+        settleFrameRef.current = null;
+      }
+
+      if (wheelResetRef.current) {
+        clearTimeout(wheelResetRef.current);
+        wheelResetRef.current = null;
+      }
+
+      if (stepUnlockRef.current) {
+        clearTimeout(stepUnlockRef.current);
+        stepUnlockRef.current = null;
+      }
+
+      if (nativeWheelResetRef.current) {
+        clearTimeout(nativeWheelResetRef.current);
+        nativeWheelResetRef.current = null;
+      }
+
+      clearSameDirectionSuppress();
     };
 
     const scheduleSameDirectionSuppressClear = () => {
@@ -159,13 +247,26 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       settleFrameRef.current = requestAnimationFrame(check);
     };
 
-    const scrollToIndex = (index: number) => {
+    const resetInternalScrollPosition = (
+      section: HTMLElement,
+      direction: -1 | 1,
+    ) => {
+      if (!section.hasAttribute("data-internal-scroll-section")) {
+        return;
+      }
+
+      section.scrollTop =
+        direction === -1 ? section.scrollHeight - section.clientHeight : 0;
+    };
+
+    const scrollToIndex = (index: number, direction: -1 | 1) => {
       const sections = getSections();
       const target = sections[index];
       if (!target) {
         return;
       }
 
+      resetInternalScrollPosition(target, direction);
       lockedRef.current = true;
       markInput();
       wheelDeltaRef.current = 0;
@@ -246,7 +347,11 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
       const sections = getSections();
       const currentIndex = getCurrentIndex();
-      if (stepWithinSection(sections[currentIndex], direction)) {
+      const currentSection = sections[currentIndex];
+      if (
+        !isAtNativeBoundary(currentSection, direction) &&
+        stepWithinSection(currentSection, direction)
+      ) {
         return;
       }
 
@@ -256,7 +361,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       );
 
       if (nextIndex !== currentIndex) {
-        scrollToIndex(nextIndex);
+        scrollToIndex(nextIndex, direction);
       }
     };
 
@@ -271,6 +376,15 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       if (!lockedRef.current && canScrollNativeSection(currentSection, direction)) {
         wheelDeltaRef.current = 0;
         markInput();
+        markNativeWheelScroll();
+        return;
+      }
+
+      if (nativeWheelScrollRef.current) {
+        event.preventDefault();
+        wheelDeltaRef.current = 0;
+        markInput();
+        markNativeWheelScroll();
         return;
       }
 
@@ -315,6 +429,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
     const onTouchStart = (event: TouchEvent) => {
       markInput();
+      touchUsedNativeScrollRef.current = false;
       touchStartYRef.current = event.touches[0]?.clientY ?? null;
     };
 
@@ -337,6 +452,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       const direction = touchStartYRef.current - currentY > 0 ? 1 : -1;
       const currentSection = getSections()[getCurrentIndex()];
       if (canScrollNativeSection(currentSection, direction)) {
+        touchUsedNativeScrollRef.current = true;
         markInput();
         return;
       }
@@ -349,7 +465,9 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
     const onTouchEnd = (event: TouchEvent) => {
       const startY = touchStartYRef.current;
+      const usedNativeScroll = touchUsedNativeScrollRef.current;
       touchStartYRef.current = null;
+      touchUsedNativeScrollRef.current = false;
 
       if (startY === null) {
         return;
@@ -362,6 +480,10 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
       const delta = startY - endY;
       if (Math.abs(delta) >= TOUCH_THRESHOLD) {
+        if (usedNativeScroll) {
+          return;
+        }
+
         if (lockedRef.current) {
           return;
         }
@@ -451,20 +573,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       window.removeEventListener("touchend", onTouchEnd);
       window.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("click", onAnchorClick);
-
-      if (settleFrameRef.current) {
-        cancelAnimationFrame(settleFrameRef.current);
-      }
-
-      if (wheelResetRef.current) {
-        clearTimeout(wheelResetRef.current);
-      }
-
-      if (stepUnlockRef.current) {
-        clearTimeout(stepUnlockRef.current);
-      }
-
-      clearSameDirectionSuppress();
+      resetInteractionState();
     };
   }, [prefersReducedMotion]);
 

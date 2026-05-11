@@ -129,7 +129,7 @@ export function BodyFoodReveal() {
 
   return (
     <motion.div
-      className="relative flex h-full w-full items-center justify-center"
+      className="relative flex h-full w-full items-center justify-center max-sm:min-h-[1018px]"
       onViewportEnter={() => {
         setIsInViewport(true);
         setImageRevealCycle((cycle) => cycle + 1);
@@ -150,7 +150,7 @@ export function BodyFoodReveal() {
       <AnimatePresence>
         {isInViewport && stage === 0 ? (
           <motion.div
-            className="absolute left-0 top-[18%] z-20 max-w-[360px] text-left sm:left-[2%] lg:left-[4%]"
+            className="absolute left-0 top-[18%] z-20 max-w-[360px] text-left max-sm:left-1/2 max-sm:top-[8.5%] max-sm:w-[296px] max-sm:max-w-full max-sm:-translate-x-1/2 max-sm:text-center sm:left-[2%] lg:left-[4%]"
             animate="visible"
             custom={bodyFoodRevealTiming.firstHeadlineDelay}
             exit={{ opacity: 0, y: -bodyFoodRevealTiming.lift }}
@@ -167,7 +167,7 @@ export function BodyFoodReveal() {
         <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
           <motion.div
             animate="visible"
-            className="h-[67svh] w-auto sm:h-[78svh]"
+            className="h-[67svh] w-auto max-sm:h-[min(582px,69svh)] sm:h-[78svh]"
             custom={bodyFoodRevealTiming.imageDelay}
             initial={initial}
             key={`bibi-image-${imageRevealCycle}`}
@@ -205,7 +205,7 @@ export function BodyFoodReveal() {
       <AnimatePresence>
         {isInViewport && stage === 0 ? (
           <motion.div
-            className="absolute bottom-[18%] right-0 z-20 max-w-[380px] text-left sm:right-[4%] lg:right-[-2%]"
+            className="absolute bottom-[18%] right-0 z-20 max-w-[380px] text-left max-sm:bottom-[8.5%] max-sm:right-1/2 max-sm:w-[273px] max-sm:max-w-full max-sm:translate-x-1/2 max-sm:text-center sm:right-[4%] lg:right-[-2%]"
             exit={{ opacity: 0, y: bodyFoodRevealTiming.lift }}
             key={`food-headline-${animationCycle}`}
           >
@@ -261,7 +261,7 @@ export function BodyFoodReveal() {
 
 function BibiHeadline({ suffix }: { suffix: string }) {
   return (
-    <h2 className="text-4xl font-normal capitalize leading-tight text-white sm:text-5xl lg:text-[70px]">
+    <h2 className="text-4xl font-normal capitalize leading-tight text-white max-sm:text-[52px] max-sm:leading-normal sm:text-5xl lg:text-[70px]">
       <span className="text-[#fe9a00]">Bibi</span> {suffix}
     </h2>
   );
