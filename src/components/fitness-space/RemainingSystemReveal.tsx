@@ -1,6 +1,11 @@
 "use client";
 
-import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
+import {
+  AnimatePresence,
+  motion,
+  useInView,
+  useReducedMotion,
+} from "motion/react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
@@ -83,8 +88,7 @@ export function RemainingSystemReveal({
         animate={{
           left: stage === 0 ? "50%" : "9.6%",
           opacity: isInView ? 1 : 0,
-          scale:
-            stage === 0 ? 1 : remainingSystemRevealTiming.headlineScale,
+          scale: stage === 0 ? 1 : remainingSystemRevealTiming.headlineScale,
           top: stage === 0 ? "50%" : "2.7%",
           x: stage === 0 ? "-50%" : "0%",
           y: stage === 0 ? "-50%" : "0%",
@@ -173,7 +177,7 @@ function RemainingRevealPhoneMockup({
 }) {
   return (
     <div
-      className="absolute bottom-0 right-0 hidden overflow-hidden rounded-[34px] border border-white/10 bg-black shadow-[0_28px_90px_rgba(0,0,0,0.42)] md:block"
+      className="absolute bottom-0 right-0 hidden overflow-hidden md:block"
       style={{
         bottom: `${phone.bottom}px`,
         height: `${phone.height}px`,

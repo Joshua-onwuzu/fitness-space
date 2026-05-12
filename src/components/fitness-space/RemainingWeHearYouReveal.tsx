@@ -92,12 +92,16 @@ export function RemainingWeHearYouQuoteCard({
         width={2054}
       />
       <div
-        className="absolute left-1/2 top-[calc(50%-13.5px)] flex w-[76%] -translate-x-1/2 -translate-y-1/2 flex-col justify-center text-center text-[34px] font-normal capitalize leading-[38px] text-white max-md:text-[28px] max-md:leading-[32px] max-sm:w-[74%] max-sm:text-[22px] max-sm:leading-[26px]"
+        className="absolute left-1/2 top-[calc(50%-13.5px)] flex w-[76%] -translate-x-1/2 -translate-y-1/2 flex-col justify-center text-center text-[32px] font-normal leading-[38px] text-white max-md:text-[28px] max-md:leading-[32px] max-sm:w-[74%] max-sm:text-[22px] max-sm:leading-[26px]"
         style={{ maxWidth: `${card.textWidth}px` }}
       >
         {card.lines.map((line) => (
-          <p className="mb-0 leading-[inherit]" key={line}>
-            {line}
+          <p
+            className="mb-[21px] leading-[inherit] last:mb-0"
+            key={line.text}
+            style={{ color: line.color }}
+          >
+            {line.text}
           </p>
         ))}
       </div>

@@ -97,7 +97,7 @@ export function StatementSection({
           {trailing}
         </h2>
         {body ? (
-          <div className="mx-auto mt-6 max-w-[760px] space-y-1 text-sm capitalize leading-6 text-white/85 sm:text-base">
+          <div className="mx-auto mt-6 max-w-[760px] space-y-1 text-sm leading-6 text-white/85 sm:text-base">
             {body.map((line) => (
               <p key={line}>{line}</p>
             ))}
@@ -124,7 +124,7 @@ export function IntroSection({ id }: IntroSectionProps) {
         <h2 className="text-4xl font-normal capitalize leading-none text-white sm:text-5xl lg:text-[76px]">
           Introducing Fitness Space
         </h2>
-        <p className="mx-auto mt-5 max-w-[1006px] bg-[linear-gradient(135deg,#ffffff_4%,#999999_100%)] bg-clip-text text-xs capitalize leading-6 text-transparent sm:text-sm sm:leading-7">
+        <p className="mx-auto mt-5 max-w-[1006px] bg-[linear-gradient(135deg,#ffffff_4%,#999999_100%)] bg-clip-text text-xs leading-6 text-transparent sm:text-sm sm:leading-7">
           A science-backed daily system for sustainable weight loss. Built
           around your food, your life and your body. At the centre of everything
           is Bibi, our AI coach who personalises every part of your journey.

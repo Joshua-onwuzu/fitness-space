@@ -50,7 +50,7 @@ function RemainingPhoneMockup({
 }) {
   return (
     <div
-      className="absolute bottom-0 right-0 hidden overflow-hidden rounded-[34px] border border-white/10 bg-black shadow-[0_28px_90px_rgba(0,0,0,0.42)] md:block"
+      className="absolute bottom-0 right-0 hidden overflow-hidden md:block"
       style={{
         bottom: `${phone.bottom}px`,
         height: `${phone.height}px`,
@@ -112,7 +112,7 @@ export function DataCoachCtaSection() {
               Meet Bibi &mdash; It&apos;s Free
             </a>
           </div>
-          <div className="absolute bottom-[-16%] right-[7%] hidden h-[112%] w-[min(28vw,330px)] overflow-hidden rounded-[34px] border-[10px] border-black bg-black shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:block">
+          <div className="absolute bottom-[-16%] right-[7%] hidden h-[112%] w-[min(28vw,330px)] sm:block">
             <Image
               alt="Fitness Space app coaching view"
               className="h-full w-full object-cover object-top"
@@ -162,7 +162,7 @@ export function PowerfulFeaturesSection() {
                 <h3 className="text-sm font-bold capitalize leading-normal sm:text-[clamp(0.875rem,2.19svh,24px)]">
                   {feature.title}
                 </h3>
-                <p className="mt-1 max-w-[254px] text-[7px] font-normal capitalize leading-tight sm:mt-[1.8svh] sm:text-[clamp(0.5625rem,1.28svh,14px)] sm:leading-normal">
+                <p className="mt-1 max-w-[254px] text-[7px] font-normal leading-tight sm:mt-[1.8svh] sm:text-[clamp(0.5625rem,1.28svh,14px)] sm:leading-normal">
                   {feature.body}
                 </p>
               </div>
@@ -274,8 +274,7 @@ export function MealPlanFailureSection() {
         <h2 className="max-w-[1115px] text-[39px] font-normal leading-tight text-white md:text-[64px]">
           Why Every Meal Plan
           <br />
-          You Have Tried Has{" "}
-          <span className="text-[#f54900]">Failed You</span>
+          You Have Tried Has <span className="text-[#f54900]">Failed You</span>
         </h2>
         <div className="mt-[4svh] max-w-[1098px] space-y-[0.9svh] text-[clamp(0.875rem,1.46svh,16px)] font-normal leading-[1.875] text-white/50">
           <p>
@@ -287,8 +286,7 @@ export function MealPlanFailureSection() {
             Meal plans teach you nothing. When they end, you are lost.
           </p>
           <p>
-            Most are built for Western foods. Not for eba, egusi or jollof
-            rice.
+            Most are built for Western foods. Not for eba, egusi or jollof rice.
           </p>
         </div>
       </FadeInOnScroll>
@@ -318,9 +316,9 @@ export function BibiDifferentSection() {
               Bibi is different.
             </h2>
             <p className="mt-[2.5svh] max-w-[595px] text-base font-normal leading-[1.58] text-white/70 md:text-2xl">
-              Bibi works with whatever you have, At a restaurant, at a party,
-              at your mother’s house? She applies the system to your real life
-              — every single time.
+              Bibi works with whatever you have, At a restaurant, at a party, at
+              your mother’s house? She applies the system to your real life —
+              every single time.
             </p>
             <a
               className="mt-[3.7svh] inline-flex h-[50px] min-w-[273px] items-center justify-center rounded-[7px] bg-[#f54900] px-6 text-center text-sm font-semibold text-white transition hover:bg-[#ff6420]"

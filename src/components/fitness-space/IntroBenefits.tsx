@@ -112,7 +112,7 @@ type FeatureCardProps = {
 function FeatureCard({ children, className = "", index }: FeatureCardProps) {
   return (
     <motion.div
-      className={`absolute z-20 hidden min-h-[74px] w-[330px] items-center gap-4 rounded-lg bg-white px-4 text-left text-sm capitalize leading-5 text-black shadow-[0_24px_80px_rgba(0,0,0,0.4)] md:flex ${className}`}
+      className={`absolute z-20 hidden min-h-[74px] w-[330px] items-center gap-4 rounded-lg bg-white px-4 text-left text-sm leading-5 text-black shadow-[0_24px_80px_rgba(0,0,0,0.4)] md:flex ${className}`}
       custom={index}
       variants={cardVariants}
     >

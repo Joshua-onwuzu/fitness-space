@@ -38,7 +38,7 @@ function TrialFactPill({
 }) {
   return (
     <div
-      className="absolute left-1/2 flex h-[52px] max-w-[90%] -translate-x-1/2 items-center justify-center rounded-[8px] bg-white/10 px-6 text-center text-[14px] font-normal capitalize leading-normal text-white max-sm:h-auto max-sm:min-h-[48px] max-sm:px-4 max-sm:text-xs"
+      className="absolute left-1/2 flex h-[52px] max-w-[90%] -translate-x-1/2 items-center justify-center rounded-[8px] bg-white/10 px-6 text-center text-[14px] font-normal leading-normal text-white max-sm:h-auto max-sm:min-h-[48px] max-sm:px-4 max-sm:text-xs"
       style={{ bottom: `${bottom}px`, width: `${fact.width}px` }}
     >
       {fact.text}
@@ -133,7 +133,7 @@ function TestimonialCard({
         style={{ transform: `rotate(${testimonial.rotation}deg)` }}
       >
         <div className="absolute left-[40.65px] top-[134px] w-[239.008px] whitespace-pre-wrap text-left text-black">
-          <p className="mb-9 text-[24px] font-normal capitalize leading-normal">
+          <p className="mb-9 text-[24px] font-normal leading-normal">
             {testimonial.quote}
           </p>
           <p className="text-[16px] font-bold capitalize leading-normal">
@@ -228,7 +228,9 @@ function FourteenDayPayoffSection() {
           width={2054}
         />
         <h2 className="absolute left-1/2 top-[88px] w-full -translate-x-1/2 text-center text-[25px] font-normal leading-[31px] text-white md:top-[119px] md:text-[42px] md:leading-[38px]">
-          <span className="block">Most users notice changes within 14 days.</span>
+          <span className="block">
+            Most users notice changes within 14 days.
+          </span>
           <span className="block">Not starvation. The system.</span>
         </h2>
         <FinalButton className="absolute left-1/2 top-[238px] h-[50px] w-[273px] -translate-x-1/2 md:top-[229px]" />

@@ -197,8 +197,7 @@ export function X2NutritionReveal() {
 export function HealthScorePayoffReveal() {
   const { cardMotionContext, prefersReducedMotion, rootRef, stage } =
     useX2NutritionOrderReveal(healthScorePayoffCards.length);
-  const currentCard =
-    stage > 0 ? healthScorePayoffCards[stage - 1] : null;
+  const currentCard = stage > 0 ? healthScorePayoffCards[stage - 1] : null;
 
   return (
     <div
@@ -275,7 +274,7 @@ function X2NutritionOrderCard({
             <h2 className="text-xl font-semibold capitalize leading-[1.25] text-white sm:text-2xl">
               {card.text}
             </h2>
-            <p className="mt-3 text-sm font-normal capitalize leading-[1.72] text-white sm:mt-4 sm:text-base sm:leading-[1.875]">
+            <p className="mt-3 text-sm font-normal leading-[1.72] text-white sm:mt-4 sm:text-base sm:leading-[1.875]">
               {card.description}
             </p>
             <a
