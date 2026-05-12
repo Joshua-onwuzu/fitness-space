@@ -2,27 +2,51 @@
 
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import type { ReactNode } from "react";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type ScrollSectionProps = {
+  animateOnScroll?: boolean;
   children: ReactNode;
   className?: string;
   contentClassName?: string;
   id?: string;
   intensity?: number;
+  mobileNativeScroll?: boolean;
   nativeScroll?: boolean;
 };
 
 export function ScrollSection({
+  animateOnScroll = true,
   children,
   className = "",
   contentClassName = "",
   id,
   intensity = 64,
+  mobileNativeScroll = false,
   nativeScroll = false,
 }: ScrollSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [isOverflowingViewport, setIsOverflowingViewport] = useState(false);
   const prefersReducedMotion = useReducedMotion();
+  const usesMobileOverflowLayout =
+    isMobileViewport && (isOverflowingViewport || mobileNativeScroll);
+  const usesNativeScrollLayout = nativeScroll || usesMobileOverflowLayout;
+  const usesMobileInternalScroll = isMobileViewport && usesNativeScrollLayout;
+  const sectionSizingClass = usesNativeScrollLayout
+    ? usesMobileInternalScroll
+      ? "h-svh overflow-y-auto overscroll-contain"
+      : "min-h-svh overflow-visible"
+    : "h-svh overflow-hidden";
+  const contentSizingClass = usesNativeScrollLayout
+    ? usesMobileInternalScroll
+      ? "min-h-full pb-8"
+      : "min-h-svh"
+    : "h-full";
+  const mobileNativeVisibilityClass = mobileNativeScroll
+    ? "max-sm:!translate-y-0 max-sm:!opacity-100"
+    : "";
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
@@ -38,21 +62,72 @@ export function ScrollSection({
     [0.5, 1, 1, 0.5],
   );
 
+  useEffect(() => {
+    const section = sectionRef.current;
+    const content = contentRef.current;
+    if (!section || !content) {
+      return;
+    }
+
+    const mobileQuery = window.matchMedia("(max-width: 639px)");
+
+    const measureOverflow = () => {
+      const sectionStyles = window.getComputedStyle(section);
+      const paddingY =
+        Number.parseFloat(sectionStyles.paddingTop) +
+        Number.parseFloat(sectionStyles.paddingBottom);
+      const availableHeight = Math.max(window.innerHeight - paddingY, 0);
+      const contentRect = content.getBoundingClientRect();
+      const childBounds = Array.from(content.children).reduce(
+        (bounds, child) => {
+          const rect = child.getBoundingClientRect();
+          return {
+            bottom: Math.max(bounds.bottom, rect.bottom - contentRect.top),
+            top: Math.min(bounds.top, rect.top - contentRect.top),
+          };
+        },
+        { bottom: content.scrollHeight, top: 0 },
+      );
+      const visualContentHeight = childBounds.bottom - Math.min(childBounds.top, 0);
+
+      setIsMobileViewport(mobileQuery.matches);
+      setIsOverflowingViewport(
+        Math.max(content.scrollHeight, visualContentHeight) > availableHeight + 2,
+      );
+    };
+
+    measureOverflow();
+
+    const resizeObserver = new ResizeObserver(measureOverflow);
+    resizeObserver.observe(section);
+    resizeObserver.observe(content);
+    window.addEventListener("resize", measureOverflow);
+    mobileQuery.addEventListener("change", measureOverflow);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", measureOverflow);
+      mobileQuery.removeEventListener("change", measureOverflow);
+    };
+  }, []);
+
   return (
     <section
       data-section
-      data-native-scroll-section={nativeScroll ? "" : undefined}
+      data-internal-scroll-section={usesMobileInternalScroll ? "" : undefined}
+      data-native-scroll-section={usesNativeScrollLayout ? "" : undefined}
       id={id}
       ref={sectionRef}
-      className={`relative snap-start bg-black text-white ${
-        nativeScroll ? "min-h-svh overflow-visible" : "h-svh overflow-hidden"
-      } ${className}`}
+      className={`relative snap-start bg-black text-white ${sectionSizingClass} ${className}`}
     >
       <motion.div
-        className={`relative w-full ${
-          nativeScroll ? "min-h-svh" : "h-full"
-        } ${contentClassName}`}
-        style={nativeScroll || prefersReducedMotion ? undefined : { y, opacity }}
+        className={`relative w-full ${contentSizingClass} ${mobileNativeVisibilityClass} ${contentClassName}`}
+        ref={contentRef}
+        style={
+          !animateOnScroll || usesNativeScrollLayout || prefersReducedMotion
+            ? { opacity: 1, y: 0 }
+            : { y, opacity }
+        }
       >
         {children}
       </motion.div>

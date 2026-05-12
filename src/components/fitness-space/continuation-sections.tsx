@@ -72,13 +72,44 @@ function RemainingPhoneMockup({
 export function BodyFoodSection() {
   return (
     <ScrollSection
-      className="px-5 pt-16 sm:px-8 lg:px-12"
-      contentClassName="mx-auto flex max-w-[1180px] items-center justify-center"
+      className="px-5 pt-16 max-sm:px-0 max-sm:pt-0 sm:px-8 lg:px-12"
+      contentClassName="mx-auto flex max-w-[1180px] items-center justify-center max-sm:max-w-none"
       id="body-food"
       intensity={54}
+      mobileNativeScroll
     >
-      <BodyFoodReveal />
+      <div className="h-full w-full max-sm:hidden">
+        <BodyFoodReveal />
+      </div>
+      <MobileBodyFoodMock />
     </ScrollSection>
+  );
+}
+
+function MobileBodyFoodMock() {
+  return (
+    <div className="relative hidden h-[1018px] w-full overflow-hidden bg-black text-center text-white max-sm:block">
+      <h2 className="absolute left-[calc(50%+0.5px)] top-[159px] w-[296px] -translate-x-1/2 -translate-y-1/2 text-[52px] font-normal capitalize leading-normal">
+        <span className="text-[#fe9a00]">Bibi</span> Knows Your Body.
+      </h2>
+      <Image
+        alt="Bibi standing in Fitness Space gear"
+        className="absolute left-[calc(50%+0.5px)] top-[487px] h-[582px] w-[388px] -translate-x-1/2 -translate-y-1/2 object-cover"
+        height={1536}
+        priority={false}
+        src={assets.bibiStanding}
+        width={1024}
+      />
+      <h2 className="absolute left-[calc(50%+4px)] top-[786px] w-[273px] -translate-x-1/2 -translate-y-1/2 text-[52px] font-normal capitalize leading-normal">
+        <span className="text-[#fe9a00]">Bibi</span> Knows Your Food.
+      </h2>
+      <a
+        className="absolute bottom-[93.5px] left-[calc(50%+0.25px)] inline-flex -translate-x-1/2 items-center justify-center rounded-[7px] bg-white px-[14px] py-3 text-center text-sm font-semibold capitalize leading-normal text-black transition hover:bg-white/90"
+        href="#hero"
+      >
+        &nbsp;&nbsp;Meet Bibi — It&apos;s Free&nbsp;
+      </a>
+    </div>
   );
 }
 

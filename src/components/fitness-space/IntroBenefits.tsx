@@ -70,7 +70,7 @@ export function IntroBenefits() {
   return (
     <>
       <motion.div
-        className="relative mt-7 flex h-[51svh] min-h-[330px] w-full max-w-[1060px] items-center justify-center sm:mt-9 md:h-[55svh]"
+        className="relative mt-7 flex h-[51svh] min-h-[330px] w-full max-w-[1060px] items-center justify-center max-sm:hidden sm:mt-9 md:h-[55svh]"
         initial={initial}
         viewport={{ amount: 0.72, once: false }}
         whileInView="visible"
@@ -88,7 +88,7 @@ export function IntroBenefits() {
       </motion.div>
 
       <motion.div
-        className="grid w-full max-w-xl grid-cols-1 gap-2 text-left text-xs sm:grid-cols-2 md:hidden"
+        className="grid w-full max-w-xl grid-cols-1 gap-2 text-left text-xs max-sm:hidden sm:grid-cols-2 md:hidden"
         initial={initial}
         viewport={{ amount: 0.5, once: false }}
         whileInView="visible"
@@ -131,7 +131,7 @@ function FeatureCard({ children, className = "", index }: FeatureCardProps) {
 function MobileFeatureCard({ children, index }: FeatureCardProps) {
   return (
     <motion.div
-      className="flex min-h-11 items-center gap-3 rounded-lg bg-white px-3 py-2 capitalize leading-4 text-black"
+      className="flex min-h-11 items-center gap-3 rounded-lg bg-white px-3 py-2 capitalize leading-4 text-black max-sm:min-h-[74px] max-sm:w-[312px] max-sm:max-w-[calc(100vw-48px)] max-sm:px-[17px] max-sm:leading-normal"
       custom={index}
       variants={cardVariants}
     >
@@ -150,7 +150,7 @@ function MobileFeatureCard({ children, index }: FeatureCardProps) {
 function PhoneShowcase() {
   return (
     <motion.div
-      className="relative z-10 aspect-[547/820] w-[190px] sm:w-[230px] lg:w-[300px] xl:w-[340px]"
+      className="relative z-10 aspect-[547/820] w-[190px] max-sm:w-[min(397px,calc(100vw+8px))] sm:w-[230px] lg:w-[300px] xl:w-[340px]"
       variants={phoneVariants}
     >
       <div className="pointer-events-none absolute left-1/2 top-[15%] h-[56%] w-[42%] -translate-x-1/2 rounded-[28px] shadow-[2px_2px_55px_14px_rgba(242,164,18,0.72)]" />
