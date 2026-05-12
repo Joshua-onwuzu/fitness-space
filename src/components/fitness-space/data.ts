@@ -14,13 +14,16 @@ export const assets = {
   taskThumb: "/figma/task-thumb.png",
   bibiDifferent: "/figma/bibi-different.png",
   x2NutritionCard: "/figma/2x_nutrition.png",
+  x2NutritionCard1: "/figma/2x_nutrition1.png",
+  x2NutritionCard2: "/figma/2x_nutrition2.png",
   x2FrameworkPattern: "/figma/x2-framework-pattern.svg",
   x2SystemPattern: "/figma/x2-system-pattern.svg",
   remainingBibiCoachScreen: "/figma/remaining-bibi-coach-screen.png",
   remainingDailySystemScreen: "/figma/remaining-daily-system-screen.png",
   remainingCommunityScreen: "/figma/remaining-community-screen.png",
   remainingIphoneAir: "/figma/remaining-iphone-air.png",
-  remainingWeHearYouCardPattern: "/figma/remaining-we-hear-you-card-pattern.svg",
+  remainingWeHearYouCardPattern:
+    "/figma/remaining-we-hear-you-card-pattern.svg",
   finalBibi: "/figma/final-bibi.png",
   finalFooterLogo: "/figma/final-footer-logo.png",
   finalBlackPattern: "/figma/final-black-pattern.svg",
@@ -30,7 +33,8 @@ export const assets = {
 export const healthScoreActivities = [
   {
     activity: "Morning Hydration",
-    description: "500ml of water kickstarts metabolism and reduces false hunger",
+    description:
+      "500ml of water kickstarts metabolism and reduces false hunger",
     points: "5 pts",
   },
   {
@@ -45,7 +49,8 @@ export const healthScoreActivities = [
   },
   {
     activity: "Coffee Break",
-    description: "Moderate caffeine at 10am extends fat burning within your fast",
+    description:
+      "Moderate caffeine at 10am extends fat burning within your fast",
     points: "10 pts",
   },
   {
@@ -89,7 +94,7 @@ export const x2NutritionCards = [
     image: {
       alt: "2X Nutrition System scoring card placeholder",
       height: 716,
-      src: assets.x2NutritionCard,
+      src: assets.x2NutritionCard1,
       width: 1147,
     },
   },
@@ -100,7 +105,7 @@ export const x2NutritionCards = [
     image: {
       alt: "2X Nutrition System scoring card placeholder",
       height: 716,
-      src: assets.x2NutritionCard,
+      src: assets.x2NutritionCard1,
       width: 1147,
     },
   },
@@ -111,7 +116,7 @@ export const x2NutritionCards = [
     image: {
       alt: "2X Nutrition System scoring card placeholder",
       height: 716,
-      src: assets.x2NutritionCard,
+      src: assets.x2NutritionCard1,
       width: 1147,
     },
   },
@@ -119,13 +124,13 @@ export const x2NutritionCards = [
 
 export const healthScorePayoffCards = [
   {
-    text: "Build your Health Score daily",
+    text: "",
     description:
-      "Every completed activity adds points to your score, from hydration and workouts to meals, steps and fasting.",
+      "Every activity earns Health Score points — up to 100 per day. Your cumulative score determines your renewal discount.",
     image: {
       alt: "Health Score progress card placeholder",
       height: 716,
-      src: assets.x2NutritionCard,
+      src: assets.x2NutritionCard2,
       width: 1147,
     },
   },
@@ -136,7 +141,7 @@ export const healthScorePayoffCards = [
     image: {
       alt: "Health Score renewal discount card placeholder",
       height: 716,
-      src: assets.x2NutritionCard,
+      src: assets.x2NutritionCard2,
       width: 1147,
     },
   },
@@ -265,48 +270,84 @@ export const remainingWeHearYouCards = [
   {
     id: "food",
     lines: [
-      "I love food too much to diet.",
-      "You will not diet. You will eat jollof rice, eba, beans and plantain. Bibi just shows you how to balance them.",
+      {
+        text: "“I love food too much to diet.”",
+        color: "#FFB900",
+      },
+      {
+        text: "You will not diet. You will eat jollof rice, eba, beans and plantain. Bibi just shows you how to balance them.",
+        color: "#FFFFFF",
+      },
     ],
     textWidth: 630,
   },
   {
     id: "tried-everything",
     lines: [
-      "I have tried everything and nothing works.”",
-      "You have tried meal plans. Bibi is not a meal plan. She is a system built around how your body actually works — with Nigerian food, Nigerian life and Nigerian budgets.",
+      {
+        text: "“I have tried everything and nothing works.”",
+        color: "#FFB900",
+      },
+      {
+        text: "You have tried meal plans. Bibi is not a meal plan. She is a system built around how your body actually works — with Nigerian food, Nigerian life and Nigerian budgets.",
+        color: "#FFFFFF",
+      },
     ],
     textWidth: 725,
   },
   {
     id: "ai-health",
     lines: [
-      "“I don’t trust AI with my health.”",
-      "Bibi is a nutrition and habit coach — not a doctor. Human coaches are always inside the community when you need them.",
+      {
+        text: "“I don’t trust AI with my health.”",
+        color: "#FFB900",
+      },
+      {
+        text: "Bibi is a nutrition and habit coach — not a doctor. Human coaches are always inside the community when you need them.",
+        color: "#FFFFFF",
+      },
     ],
     textWidth: 630,
   },
   {
     id: "no-time",
     lines: [
-      "I do not have time to exercise.",
-      "Your daily system fits real life. Bibi gives you simple home workouts, fasting, hydration and steps one day at a time.",
+      {
+        text: "“I do not have time to exercise.”",
+        color: "#FFB900",
+      },
+      {
+        text: "Your daily system fits real life. Bibi gives you simple home workouts, fasting, hydration and steps one day at a time.",
+        color: "#FFFFFF",
+      },
     ],
     textWidth: 680,
   },
   {
     id: "special-food",
     lines: [
-      "I cannot afford special foods.",
-      "Bibi works with what you already have at home and shows you how to balance Nigerian meals without expensive ingredients.",
+      {
+        text: "“I cannot afford special foods.”",
+        color: "#FFB900",
+      },
+      {
+        text: "Bibi works with what you already have at home and shows you how to balance Nigerian meals without expensive ingredients.",
+        color: "#FFFFFF",
+      },
     ],
     textWidth: 680,
   },
   {
     id: "fall-off",
     lines: [
-      "I always fall off after a few days.",
-      "That is why Fitness Space gives you Bibi, coaches and community accountability so consistency is built into the system.",
+      {
+        text: "“I always fall off after a few days.”",
+        color: "#FFB900",
+      },
+      {
+        text: "That is why Fitness Space gives you Bibi, coaches and community accountability so consistency is built into the system.",
+        color: "#FFFFFF",
+      },
     ],
     textWidth: 680,
   },
@@ -349,7 +390,7 @@ export const finalTestimonials = [
     id: "wendy",
     name: "Wendy",
     quote:
-      "By week two my clothes were fitting differently. I had not changed what I ate just how I ate it.",
+      "By week 2 my clothes were fitting differently. I had not changed what I ate just how I ate it.",
     rotation: -7.73,
     wrapper: {
       height: 414,
@@ -364,7 +405,7 @@ export const benefitCards = [
   "Works with any Nigerian food",
   "Works even when motivation drops",
   "Personalised to your health conditions and goals",
-  "No gym. No expensive ingredients. No complicated routines.",
+  "No gym. No expensive meal plans. No completed routines",
 ] as const;
 
 export const coachingPillars = [

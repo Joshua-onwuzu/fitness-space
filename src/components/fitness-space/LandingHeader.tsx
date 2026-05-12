@@ -16,6 +16,7 @@ export function LandingHeader() {
             width={1733}
           />
         </a>
+
         <a
           className="rounded-[7px] bg-white px-3 py-2 text-xs font-semibold capitalize text-black transition hover:bg-white/90 max-sm:px-[11px] max-sm:text-sm sm:text-sm"
           href="#hero"

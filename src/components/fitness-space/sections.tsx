@@ -40,9 +40,9 @@ export function HeroSection() {
             </h1>
             <p className="mt-4 max-w-[600px] text-xs leading-5 text-white max-sm:mt-9 max-sm:w-[313px] max-sm:max-w-full max-sm:text-sm max-sm:leading-normal sm:mt-5 sm:text-sm sm:leading-6">
               <span className="sm:hidden">
-                Bibi personalises your meals, selects your workouts, guides
-                your fasting and tracks your daily habits — all based on your
-                body, your food and your goals. Real results. Starting free.
+                Bibi personalises your meals, selects your workouts, guides your
+                fasting and tracks your daily habits — all based on your body,
+                your food and your goals. Real results. Starting free.
               </span>
               <span className="hidden sm:inline">
                 Bibi personalises your meals, selects your workouts, guides your
@@ -140,7 +140,7 @@ export function IntroSection({ id }: IntroSectionProps) {
         <h2 className="text-4xl font-normal capitalize leading-none text-white max-sm:mx-auto max-sm:w-[353px] max-sm:max-w-full max-sm:text-5xl max-sm:font-medium max-sm:leading-normal sm:text-5xl lg:text-[76px]">
           Introducing Fitness Space
         </h2>
-        <p className="mx-auto mt-5 max-w-[1006px] bg-[linear-gradient(135deg,#ffffff_4%,#999999_100%)] bg-clip-text text-xs capitalize leading-6 text-transparent max-sm:w-[363px] max-sm:max-w-[calc(100vw-26px)] max-sm:text-sm max-sm:leading-7 sm:text-sm sm:leading-7">
+        <p className="mx-auto mt-5 max-w-[1006px] bg-[linear-gradient(135deg,#ffffff_4%,#999999_100%)] bg-clip-text text-xs  leading-6 text-transparent max-sm:w-[363px] max-sm:max-w-[calc(100vw-26px)] max-sm:text-sm max-sm:leading-7 sm:text-sm sm:leading-7">
           A science-backed daily system for sustainable weight loss. Built
           around your food, your life and your body. At the centre of everything
           is Bibi, our AI coach who personalises every part of your journey.
@@ -161,7 +161,7 @@ function MobileIntroMock() {
       <h2 className="absolute left-1/2 top-[111px] w-[353px] -translate-x-1/2 -translate-y-1/2 text-5xl font-medium capitalize leading-normal text-white">
         Introducing Fitness Space
       </h2>
-      <p className="absolute left-1/2 top-[277px] w-[363px] -translate-x-1/2 -translate-y-1/2 bg-[linear-gradient(100deg,#ffffff_4%,#999999_100%)] bg-clip-text text-sm capitalize leading-7 text-transparent">
+      <p className="absolute left-1/2 top-[277px] w-[363px] -translate-x-1/2 -translate-y-1/2 bg-[linear-gradient(100deg,#ffffff_4%,#999999_100%)] bg-clip-text text-sm  leading-7 text-transparent">
         A science-backed daily system for sustainable weight loss. Built around
         your food, your life and your body. At the centre of everything is Bibi,
         our AI coach who personalises every part of your journey. From the meal
