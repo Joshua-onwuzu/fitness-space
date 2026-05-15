@@ -228,18 +228,18 @@ function FourteenDayPayoffSection() {
           src={assets.finalBlackPattern}
           width={2054}
         />
-        <h2 className="absolute left-1/2 top-[88px] w-full -translate-x-1/2 text-center text-[25px] font-normal leading-[31px] text-white md:top-[119px] md:text-[42px] md:leading-[38px]">
+        <h2 className="absolute left-1/2 top-[88px] w-full -translate-x-1/2 text-center text-[25px] font-normal leading-[31px] text-white md:top-[100px] md:text-[42px] md:leading-[50px]">
           {/* Mobile text */}
           <span className="block md:hidden">
-            Most users notice changes within 14 days. Not starvation. The
-            system.
+            Most users notice changes within 14 days. Not starvation.{" "}
+            <span className="italic">Just consistency</span>
           </span>
 
           {/* Laptop/Desktop text */}
           <span className="hidden md:block">
             Most users notice changes within 14 days.
             <br />
-            Not starvation. The system.
+            Not starvation. <span className="italic">Just consistency</span>
           </span>
         </h2>
         <FinalButton className="absolute left-1/2 top-[238px] h-[50px] w-[273px] -translate-x-1/2 md:top-[229px]" />

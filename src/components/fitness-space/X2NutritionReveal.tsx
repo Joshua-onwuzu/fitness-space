@@ -281,32 +281,37 @@ function X2NutritionOrderCard({
         initial="initial"
         variants={x2CardVariants}
       >
+        {/* BACKGROUND PATTERN */}
         <Image
           alt=""
-          className="absolute -left-[48%] -top-[42%] h-[202%] w-[162%] object-cover opacity-[0.07]"
+          className="absolute left-[-30%] top-[-30%] sm:-left-[48%] sm:-top-[42%] h-[202%] w-[162%] object-cover opacity-[0.12] sm:opacity-[0.07] mix-blend-screen"
           height={1071}
           src={assets.x2SystemPattern}
           width={1752}
         />
-        <div className="relative z-10 flex h-full flex-col justify-center gap-5 px-6 py-7 sm:flex-row sm:items-center sm:justify-start sm:gap-7 sm:px-[9.8%] sm:py-0">
-          <div className="max-w-[370px] text-left">
+
+        {/* CONTENT */}
+        <div className="relative z-10 flex h-full flex-col justify-center gap-5 px-6 py-7 sm:flex-row sm:items-center sm:justify-start sm:gap-7 sm:px-[9.8%] sm:py-0 items-center text-center sm:text-left">
+          {/* FULL WIDTH ON MOBILE */}
+          <div className="w-full max-w-[370px] text-center sm:text-left">
             <h2 className="text-xl font-semibold capitalize leading-[1.25] text-white sm:text-2xl">
               {card.text}
             </h2>
+
             <p className="mt-3 text-sm font-normal leading-[1.72] text-white sm:mt-4 sm:text-base sm:leading-[1.875]">
               {card.description}
             </p>
+
             <a
-              className="mt-5 inline-flex rounded-[7px] bg-white px-[11px] py-2 text-xs font-semibold capitalize text-black transition hover:bg-white/90 sm:mt-7 sm:text-sm"
+              className="mt-5 mx-auto sm:mx-0 inline-flex rounded-[7px] bg-white px-[11px] py-2 text-xs font-semibold capitalize text-black transition hover:bg-white/90 sm:mt-7 sm:text-sm"
               href={WHATSAPP_LINK}
             >
-              &nbsp;&nbsp;Meet Bibi &mdash; It&apos;s Free&nbsp;
+              Meet Bibi — It&apos;s Free
             </a>
           </div>
-          <div className="mx-auto w-full max-w-[220px] sm:hidden">
-            <NutritionScoreCardAsset image={card.image} />
-          </div>
         </div>
+
+        {/* RIGHT PANEL (DESKTOP ONLY) */}
         <div className="absolute bottom-0 right-[-3%] top-0 hidden w-[41.5%] overflow-hidden bg-[#f54900] sm:block">
           <div className="absolute inset-0 bg-[linear-gradient(180deg,#f54900_0%,#f54900_48%,#f35d0c_100%)]" />
           <div className="absolute left-1/2 top-[48%] w-[72%] max-w-[330px] -translate-x-1/2 -translate-y-1/2">
@@ -317,7 +322,6 @@ function X2NutritionOrderCard({
     </div>
   );
 }
-
 function NutritionScoreCardAsset({
   image,
 }: {

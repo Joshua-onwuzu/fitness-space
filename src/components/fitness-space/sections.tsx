@@ -1,3 +1,4 @@
+"use client";
 import Image from "next/image";
 
 import { assets, benefitCards } from "./data";
@@ -6,7 +7,66 @@ import { IntroBenefits } from "./IntroBenefits";
 import { ScrollSection } from "./ScrollSection";
 import { WHATSAPP_LINK } from "./lib/constants";
 
+import { useEffect, useState } from "react";
+
+const rotatingTexts = [
+  "Weight Loss.",
+  "Healthy Habits.",
+  "Insulin Resistance.",
+  "Lifestyle Change.",
+];
+
 export function HeroSection() {
+  // desktop fade state
+  const [index, setIndex] = useState(0);
+  const [fade, setFade] = useState(true);
+
+  // mobile typewriter state
+  const [mobileText, setMobileText] = useState("");
+  const [mobileIndex, setMobileIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // DESKTOP: fade rotation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFade(false);
+
+      setTimeout(() => {
+        setIndex((prev) => (prev + 1) % rotatingTexts.length);
+        setFade(true);
+      }, 250);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // MOBILE: typewriter (left → right)
+  useEffect(() => {
+    const current = rotatingTexts[mobileIndex];
+    const speed = isDeleting ? 45 : 85;
+
+    const timeout = setTimeout(() => {
+      if (!isDeleting) {
+        const next = current.substring(0, mobileText.length + 1);
+        setMobileText(next);
+
+        if (next === current) {
+          setTimeout(() => setIsDeleting(true), 1000);
+        }
+      } else {
+        const next = current.substring(0, mobileText.length - 1);
+        setMobileText(next);
+
+        if (next === "") {
+          setIsDeleting(false);
+          setMobileIndex((prev) => (prev + 1) % rotatingTexts.length);
+        }
+      }
+    }, speed);
+
+    return () => clearTimeout(timeout);
+  }, [mobileText, isDeleting, mobileIndex]);
+
   return (
     <ScrollSection
       animateOnScroll={false}
@@ -16,8 +76,7 @@ export function HeroSection() {
       intensity={38}
     >
       <FadeInOnScroll className="w-full max-w-[1284px]" initialVisible>
-        <article className="relative min-h-[100svh] w-full overflow-hidden rounded-[22px] bg-[#f35d0c]">
-          {/* Background image */}
+        <article className="relative min-h-[115svh] sm:min-h-[100svh] w-full overflow-hidden rounded-[22px] bg-[#f35d0c]">
           <Image
             alt=""
             className="absolute inset-0 h-full w-full object-cover"
@@ -27,50 +86,58 @@ export function HeroSection() {
             width={2054}
           />
 
-          <div className="relative z-10 flex h-full max-w-[720px] flex-col justify-center px-7 pt-[5rem] max-sm:w-full max-sm:max-w-none max-sm:items-center max-sm:justify-start max-sm:px-[1rem] max-sm:pt-[50px] max-sm:text-center sm:px-12 lg:pl-[83px] lg:pr-[54px]">
-            <h1 className="text-[40px] font-bold leading-none text-white sm:text-5xl lg:text-[48px] max-sm:text-center leading-tight sm:leading-[1.2]">
+          <div className="relative z-10 flex h-full max-w-full flex-col justify-center px-7 pt-[5rem] max-sm:w-full max-sm:text-center max-sm:px-[1rem] max-sm:pt-[50px] sm:px-12 lg:pl-[83px] lg:pr-[54px]">
+            <h1 className="text-[40px] font-bold text-white sm:text-5xl lg:text-[48px] leading-tight">
               <span className="block">Meet Bibi.</span>
 
-              <span className="block">
-                Your AI Coach{" "}
-                <span className="hidden sm:inline">
-                  for Sustainable Weight Loss.
+              {/* DESKTOP (forced 2-line layout) */}
+              <span className="hidden sm:block leading-tight">
+                <span className="block">Your AI Coach for</span>
+
+                <span className="block">
+                  Sustainable{" "}
+                  <span className="inline-block min-w-[260px] lg:min-w-[320px]">
+                    <span
+                      className={`inline-block transition-all duration-300 ease-in-out ${
+                        fade
+                          ? "opacity-100 translate-y-0"
+                          : "opacity-0 translate-y-2"
+                      }`}
+                    >
+                      {rotatingTexts[index]}
+                    </span>
+                  </span>
                 </span>
               </span>
+              {/* MOBILE (typewriter left → right, black, smaller) */}
+              {/* MOBILE */}
+              <span className="sm:hidden block text-center">
+                Your AI Coach for Sustainable
+              </span>
 
-              <span className="block sm:hidden">for Sustainable</span>
-              <span className="block sm:hidden">Weight Loss.</span>
+              <span className="sm:hidden block text-center min-h-[42px]">
+                <span className="inline-block whitespace-nowrap border-r-2 border-black pr-1 animate-pulse text-[38px] text-black">
+                  {mobileText}
+                </span>
+              </span>
             </h1>
 
-            <p className="mt-4 max-w-[600px] text-xs leading-5 text-white max-sm:mt-9 max-sm:w-[313px] max-sm:max-w-full max-sm:text-sm sm:mt-5 sm:text-sm sm:leading-6">
-              <span className="sm:hidden">
-                Bibi personalises your meals, selects your workouts, guides your
-                fasting and tracks your daily habits — all based on your body,
-                your food and your goals. Real results. Starting free.
-              </span>
-
-              <span className="hidden sm:inline">
-                Bibi personalises your meals, selects your workouts, guides your
-                fasting and tracks your daily habits - all based on your body,
-                your food and your goals. Real results. Starting free.
-              </span>
+            <p className="mt-4 max-w-[600px] text-xs leading-5 text-white sm:text-sm">
+              Bibi personalises your meals, selects your workouts, guides your
+              fasting and tracks your daily habits — all based on your body,
+              your food and your goals. Real results. Starting free.
             </p>
 
             <a
-              className="mt-5 inline-flex w-fit rounded-[7px] bg-white px-4 py-2 text-xs font-semibold capitalize text-black transition hover:bg-white/90 max-sm:mt-8 max-sm:py-3 sm:text-sm"
+              className="mt-5 inline-flex w-fit rounded-[7px] bg-white px-4 py-2 text-xs font-semibold text-black hover:bg-white/90 max-sm:mx-auto"
               href={WHATSAPP_LINK}
             >
-              Meet Bibi &mdash; It&apos;s Free
+              Meet Bibi — It&apos;s Free
             </a>
-
-            <p className="mt-10 max-w-[480px] text-xs font-semibold text-white max-sm:mt-9 max-sm:w-[239px] sm:mt-20 sm:text-sm">
-              No meal plans. No starvation. No guesswork. Just Bibi.
-            </p>
           </div>
 
-          {/* Coach image */}
           <Image
-            alt="Bibi, the Fitness Space AI coach"
+            alt="Bibi AI coach"
             className="pointer-events-none absolute right-[-26px] z-10 w-auto object-contain max-sm:bottom-[-127px] max-sm:right-[46px] max-sm:h-[360px] sm:right-0 sm:h-[82%] h-[556px] bottom-[62px]"
             height={1448}
             priority

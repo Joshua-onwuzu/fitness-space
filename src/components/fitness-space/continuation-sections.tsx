@@ -92,25 +92,32 @@ export function BodyFoodSection() {
 function MobileBodyFoodMock() {
   return (
     <div className="relative hidden h-[1018px] w-full overflow-hidden bg-black text-center text-white max-sm:block">
-      <h2 className="absolute left-[calc(50%+0.5px)] top-[159px] w-[296px] -translate-x-1/2 -translate-y-1/2 text-[52px] font-normal capitalize leading-normal">
+      {/* TOP TEXT */}
+      <h2 className="absolute left-1/2 top-[120px] w-[296px] -translate-x-1/2 text-[44px] font-normal capitalize leading-[1.1]">
         <span className="text-[#fe9a00]">Bibi</span> Knows Your Body.
       </h2>
+
+      {/* IMAGE (moved + breathing space added) */}
       <Image
         alt="Bibi standing in Fitness Space gear"
-        className="absolute left-[calc(50%+0.5px)] top-[487px] h-[582px] w-[388px] -translate-x-1/2 -translate-y-1/2 object-cover"
+        className="absolute left-1/2 top-[520px] h-[520px] w-[360px] -translate-x-1/2 -translate-y-1/2 object-cover"
         height={1536}
         priority={false}
         src={assets.bibiStanding}
         width={1024}
       />
-      <h2 className="absolute left-[calc(50%+4px)] top-[786px] w-[273px] -translate-x-1/2 -translate-y-1/2 text-[52px] font-normal capitalize leading-normal">
+
+      {/* BOTTOM TEXT */}
+      <h2 className="absolute left-1/2 top-[820px] w-[273px] -translate-x-1/2 text-[44px] font-normal capitalize leading-[1.1]">
         <span className="text-[#fe9a00]">Bibi</span> Knows Your Food.
       </h2>
+
+      {/* BUTTON */}
       <a
-        className="absolute bottom-[93.5px] left-[calc(50%+0.25px)] inline-flex -translate-x-1/2 items-center justify-center rounded-[7px] bg-white px-[14px] py-3 text-center text-sm font-semibold capitalize leading-normal text-black transition hover:bg-white/90"
+        className="absolute bottom-[25px] sm:bottom-[80px] left-1/2 inline-flex -translate-x-1/2 items-center justify-center rounded-[7px] bg-white px-[14px] py-3 text-sm font-semibold capitalize text-black transition hover:bg-white/90"
         href={WHATSAPP_LINK}
       >
-        &nbsp;&nbsp;Meet Bibi — It&apos;s Free&nbsp;
+        Meet Bibi — It&apos;s Free
       </a>
     </div>
   );
@@ -165,16 +172,63 @@ export function DataCoachCtaSection() {
 export function PowerfulFeaturesSection() {
   const [visibleCount, setVisibleCount] = useState(2);
   const [lastScrollY, setLastScrollY] = useState(0);
+
+  // =========================
+  // MOBILE AUTO + PAUSE LOGIC
+  // =========================
+  useEffect(() => {
+    const isMobile = window.matchMedia("(max-width: 768px)").matches;
+    if (!isMobile) return;
+
+    let interval: NodeJS.Timeout;
+    let resumeTimeout: NodeJS.Timeout;
+
+    const startAuto = () => {
+      interval = setInterval(() => {
+        setVisibleCount((prev) => {
+          if (prev >= powerfulFeatures.length) return 2;
+          return prev + 1;
+        });
+      }, 2500);
+    };
+
+    const stopAuto = () => {
+      if (interval) clearInterval(interval);
+    };
+
+    const pause = () => {
+      stopAuto();
+
+      clearTimeout(resumeTimeout);
+      resumeTimeout = setTimeout(() => {
+        startAuto();
+      }, 4000);
+    };
+
+    startAuto();
+
+    window.addEventListener("scroll", pause);
+    window.addEventListener("touchstart", pause);
+
+    return () => {
+      stopAuto();
+      clearTimeout(resumeTimeout);
+      window.removeEventListener("scroll", pause);
+      window.removeEventListener("touchstart", pause);
+    };
+  }, []);
+
+  // =========================
+  // YOUR ORIGINAL SCROLL LOGIC (UNCHANGED)
+  // =========================
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
-      // SCROLL UP → show more cards
       if (currentScrollY < lastScrollY) {
         setVisibleCount((prev) => Math.min(prev + 1, powerfulFeatures.length));
       }
 
-      // SCROLL DOWN → hide back to 2 minimum
       if (currentScrollY > lastScrollY) {
         setVisibleCount((prev) => Math.max(2, prev - 1));
       }
@@ -185,6 +239,7 @@ export function PowerfulFeaturesSection() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
+
   return (
     <ScrollSection
       className="px-5 sm:px-8 lg:px-12"
@@ -196,8 +251,9 @@ export function PowerfulFeaturesSection() {
         <h2 className="whitespace-nowrap text-center text-[clamp(2rem,4.57svh,50px)] font-normal capitalize leading-normal text-white max-sm:whitespace-normal">
           Six Powerful Features. One Smart Coach.
         </h2>
+
+        {/* ================= DESKTOP (UNCHANGED) ================= */}
         <div className="relative mt-[4svh] hidden h-[717px] w-full md:grid md:grid-cols-3 md:grid-rows-2">
-          {/* Grid lines */}
           <span className="pointer-events-none absolute bottom-0 left-1/3 top-0 w-px bg-white/10" />
           <span className="pointer-events-none absolute bottom-0 left-2/3 top-0 w-px bg-white/10" />
           <span className="pointer-events-none absolute left-0 right-0 top-1/2 h-px bg-white/10" />
@@ -207,7 +263,7 @@ export function PowerfulFeaturesSection() {
               key={feature.number}
               className="group relative flex flex-col justify-end px-12 pb-14 pt-[5.5rem] transition-colors duration-300"
             >
-              <p className="absolute right-10 top-6 text-[64px] font-bold leading-none text-white/[0.04] transition-colors duration-300 group-hover:text-white/[0.08]">
+              <p className="absolute right-10 top-6 text-[64px] font-bold leading-none text-white/[0.04]">
                 {feature.number}
               </p>
 
@@ -221,15 +277,17 @@ export function PowerfulFeaturesSection() {
             </article>
           ))}
         </div>
+
+        {/* ================= MOBILE (ANIMATED + AUTO) ================= */}
         <div className="mt-10 flex flex-col md:hidden">
           {powerfulFeatures.slice(0, visibleCount).map((feature) => (
             <article
               key={feature.number}
               className="
-        group relative overflow-hidden bg-white/[0.03] px-6 py-10
-        border-x border-b border-white/10
-        transition-all duration-500 ease-out
-      "
+                group relative overflow-hidden bg-white/[0.03] px-6 py-10
+                border-x border-b border-white/10
+                transition-all duration-500 ease-out
+              "
             >
               <p className="absolute right-6 top-6 text-[56px] font-bold leading-none text-white/[0.04]">
                 {feature.number}
