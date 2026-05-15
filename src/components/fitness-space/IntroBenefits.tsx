@@ -57,10 +57,10 @@ const mobileCards = [
 ] as const;
 
 const desktopCards = [
-  { label: benefitCards[0], className: "left-0 top-[24%]" },
-  { label: benefitCards[1], className: "bottom-[18%] left-[4%]" },
-  { label: benefitCards[2], className: "right-[2%] top-[23%]" },
-  { label: benefitCards[3], className: "bottom-[25%] right-0" },
+  { label: benefitCards[0], className: "left-[96px] top-[11%]" },
+  { label: benefitCards[1], className: "bottom-[21%] left-[6%]" },
+  { label: benefitCards[2], className: "right-[9%] top-[12%]" },
+  { label: benefitCards[3], className: "bottom-[23%] right-[37px]" },
 ] as const;
 
 export function IntroBenefits() {

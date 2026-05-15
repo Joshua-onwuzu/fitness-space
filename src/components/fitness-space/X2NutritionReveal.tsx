@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 import { assets, healthScorePayoffCards, x2NutritionCards } from "./data";
+import { WHATSAPP_LINK } from "./lib/constants";
 
 type SectionStepEvent = CustomEvent<{
   direction: -1 | 1;
@@ -165,7 +166,7 @@ export function X2NutritionReveal() {
             opacity: stage === 0 ? 1 : 0.18,
             scale: stage === 0 ? 1 : 0.965,
           }}
-          className="relative z-10 flex h-full w-full flex-col items-center px-6 pt-[10%] text-center sm:px-12"
+          className="relative z-10 flex h-full w-full flex-col items-center px-6 pt-[6%] text-center sm:px-12"
           transition={{
             duration: prefersReducedMotion
               ? 0
@@ -175,9 +176,15 @@ export function X2NutritionReveal() {
           <p className="rounded-full border border-white px-8 py-[0.6rem] text-xs font-normal uppercase leading-none text-white sm:text-base">
             THE X2 NUTRITION SYSTEM
           </p>
-          <h2 className="mt-[7%] max-w-[1007px] text-[clamp(2.6rem,8.2svh,90px)] font-medium capitalize leading-[1.08] text-white">
-            The Framework Behind Every Bibi Meal
-          </h2>
+          <motion.h2
+            className=" mt-[31%] lg:mt-[1%] max-w-[1007px] text-[2.5rem]  sm:text-[2.6rem] lg:text-[85px] font-medium capitalize leading-[1.1] text-white"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.5 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          >
+            The Framework Behind <br /> Every Bibi Meal
+          </motion.h2>
         </motion.div>
       </article>
 
@@ -225,9 +232,21 @@ export function HealthScorePayoffReveal() {
           <p className="absolute left-1/2 top-[10.56%] inline-flex h-[37.5px] min-w-[147px] -translate-x-1/2 items-center justify-center rounded-full border border-white px-[32.25px] text-xs font-normal uppercase leading-none text-white sm:text-base">
             HEALTH SCORE
           </p>
-          <h2 className="absolute left-1/2 top-[43.68%] w-[min(90%,1120px)] -translate-x-1/2 -translate-y-1/2 text-[43px] font-medium leading-normal text-white md:text-[90px]">
-            <span className="block">The More You Show Up,</span>
-            <span className="block">The Less You Pay.</span>
+          <h2 className="absolute left-1/2 top-[43.68%] w-[min(90%,1120px)] -translate-x-1/2 -translate-y-1/2 text-[43px] font-medium leading-normal text-white md:text-[90px] lg:leading-[1.2]">
+            {/* Mobile */}
+            <span className="block md:hidden">
+              The More You
+              <br />
+              Show Up,The
+              <br />
+              Less You Pay.
+            </span>
+
+            {/* Desktop */}
+            <span className="hidden md:block">
+              <span className="block">The More You Show Up,</span>
+              <span className="block">The Less You Pay.</span>
+            </span>
           </h2>
         </motion.div>
       </article>
@@ -279,7 +298,7 @@ function X2NutritionOrderCard({
             </p>
             <a
               className="mt-5 inline-flex rounded-[7px] bg-white px-[11px] py-2 text-xs font-semibold capitalize text-black transition hover:bg-white/90 sm:mt-7 sm:text-sm"
-              href="#hero"
+              href={WHATSAPP_LINK}
             >
               &nbsp;&nbsp;Meet Bibi &mdash; It&apos;s Free&nbsp;
             </a>

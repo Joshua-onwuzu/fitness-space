@@ -93,7 +93,24 @@ export function RemainingSystemReveal({
           x: stage === 0 ? "-50%" : "0%",
           y: stage === 0 ? "-50%" : "0%",
         }}
-        className="absolute z-20 whitespace-nowrap text-[clamp(2.25rem,5.84svh,64px)] font-normal leading-normal text-white will-change-transform max-md:whitespace-normal"
+        className="
+    absolute z-20
+    font-normal text-white will-change-transform
+
+    text-[32px] md:text-[64px]
+
+    leading-tight
+
+    text-center md:text-left
+
+    max-md:left-0
+    max-md:right-0
+    max-md:w-full
+    max-md:px-3
+
+    md:whitespace-nowrap
+    whitespace-normal
+  "
         initial={{
           left: "50%",
           opacity: 0,
@@ -139,19 +156,45 @@ export function RemainingSystemReveal({
               ease: remainingSystemEase,
             }}
           >
-            <h2 className="absolute left-[9.6%] top-[8.2%] whitespace-nowrap text-[clamp(2.45rem,5.84svh,64px)] font-semibold leading-normal text-white max-md:whitespace-normal">
+            <h2
+              className="
+    absolute left-[9.6%] top-[8.2%]
+    whitespace-nowrap text-[32px]
+    lg:text-[clamp(2.45rem,5.84svh,64px)]
+    font-semibold lg:leading-normal text-white
+
+    max-md:left-0
+    max-md:right-0
+    max-md:w-full
+    max-md:text-center
+    max-md:px-4
+    max-md:whitespace-nowrap
+  "
+            >
               {panel.title}
             </h2>
 
             <div
-              className="absolute left-[9.6%] z-10 flex max-w-[520px] flex-col items-start"
+              className="
+    absolute left-[9.6%] z-10 flex max-w-[520px] flex-col items-start
+
+    max-md:left-0
+    max-md:right-0
+    max-md:w-full
+    max-md:px-4
+    max-md:items-center
+    max-md:text-center
+  "
               style={{
                 gap: `${panel.featureGap}px`,
                 top: `${panel.featureTop}px`,
               }}
             >
               {panel.features.map((feature) => (
-                <div className="text-left" key={feature.title}>
+                <div
+                  className="text-left max-md:text-center"
+                  key={feature.title}
+                >
                   <h3 className="text-lg font-bold leading-[30px] text-white">
                     {feature.title}
                   </h3>
@@ -187,10 +230,10 @@ function RemainingRevealPhoneMockup({
     >
       <Image
         alt={phone.alt}
-        className="h-full w-full object-cover object-top"
+        className="h-full w-full object-contain object-top"
         height={1295}
         src={phone.src}
-        width={596}
+        width={257}
       />
     </div>
   );

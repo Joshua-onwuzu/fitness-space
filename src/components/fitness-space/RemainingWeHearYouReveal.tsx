@@ -36,7 +36,7 @@ export function RemainingWeHearYouReveal() {
         }}
       >
         <div className="absolute inset-0 bg-[linear-gradient(270deg,#f35d0c_6%,#f54900_94%)]" />
-        <h2 className="relative z-10 text-center text-[40px] font-normal leading-normal text-white sm:text-[clamp(2.4rem,5.84svh,64px)]">
+        <h2 className="relative z-10 text-center font-normal leading-normal text-white  text-[clamp(40px,5vw,64px)] lg:text-[64px]">
           We Hear You
         </h2>
       </motion.article>
@@ -92,7 +92,20 @@ export function RemainingWeHearYouQuoteCard({
         width={2054}
       />
       <div
-        className="absolute left-1/2 top-[calc(50%-13.5px)] flex w-[76%] -translate-x-1/2 -translate-y-1/2 flex-col justify-center text-center text-[32px] font-normal leading-[38px] text-white max-md:text-[28px] max-md:leading-[32px] max-sm:w-[74%] max-sm:text-[22px] max-sm:leading-[26px]"
+        className="
+    absolute left-1/2 top-[calc(50%-13.5px)]
+    flex w-[76%]
+    -translate-x-1/2 -translate-y-1/2
+    flex-col justify-center text-center
+    text-[32px] font-normal leading-[38px] text-white
+
+    max-md:w-[92%]
+    max-md:text-[28px]
+    max-md:leading-[32px]
+
+    max-sm:text-[22px]
+    max-sm:leading-[26px]
+  "
         style={{ maxWidth: `${card.textWidth}px` }}
       >
         {card.lines.map((line) => (
