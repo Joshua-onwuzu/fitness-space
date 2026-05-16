@@ -1,6 +1,11 @@
 "use client";
 
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from "motion/react";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -88,11 +93,13 @@ export function ScrollSection({
         },
         { bottom: content.scrollHeight, top: 0 },
       );
-      const visualContentHeight = childBounds.bottom - Math.min(childBounds.top, 0);
+      const visualContentHeight =
+        childBounds.bottom - Math.min(childBounds.top, 0);
 
       setIsMobileViewport(mobileQuery.matches);
       setIsOverflowingViewport(
-        Math.max(content.scrollHeight, visualContentHeight) > availableHeight + 2,
+        Math.max(content.scrollHeight, visualContentHeight) >
+          availableHeight + 2,
       );
     };
 

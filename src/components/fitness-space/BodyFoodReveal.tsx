@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 import { assets, coachingCardPairs } from "./data";
+import { WHATSAPP_LINK } from "./lib/constants";
 
 type SectionStepEvent = CustomEvent<{
   direction: -1 | 1;
@@ -55,10 +56,7 @@ function getDailyImageScale() {
   const isMedium = window.matchMedia("(min-width: 768px)").matches;
   const isSmall = window.matchMedia("(min-width: 640px)").matches;
   const bodyHeight = viewportHeight * (isSmall ? 0.78 : 0.67);
-  const dailyHeight = Math.min(
-    viewportHeight * (isMedium ? 0.43 : 0.34),
-    420,
-  );
+  const dailyHeight = Math.min(viewportHeight * (isMedium ? 0.43 : 0.34), 420);
 
   return dailyHeight / bodyHeight;
 }
@@ -181,9 +179,7 @@ export function BodyFoodReveal() {
                   ? { duration: 0 }
                   : {
                       delay:
-                        stage === 0
-                          ? 0
-                          : bodyFoodRevealTiming.dailyShrinkDelay,
+                        stage === 0 ? 0 : bodyFoodRevealTiming.dailyShrinkDelay,
                       duration: bodyFoodRevealTiming.dailyShrinkDuration,
                       ease: [0.22, 1, 0.36, 1],
                     }
@@ -221,7 +217,7 @@ export function BodyFoodReveal() {
               animate="visible"
               className="mt-5 inline-flex rounded-[7px] bg-white px-4 py-2 text-xs font-semibold capitalize text-black transition hover:bg-white/90 sm:text-sm"
               custom={bodyFoodRevealTiming.ctaDelay}
-              href="#daily-system"
+              href={WHATSAPP_LINK}
               initial={initial}
               variants={revealVariants}
             >
@@ -237,7 +233,9 @@ export function BodyFoodReveal() {
             className="relative z-20 grid w-full grid-cols-[minmax(0,1fr)_minmax(88px,20vw)_minmax(0,1fr)] items-center gap-x-1 sm:grid-cols-[minmax(0,1fr)_minmax(130px,22vw)_minmax(0,1fr)] md:gap-x-6"
             exit={{ opacity: 0, y: stage === 1 ? -18 : 18 }}
             key={`coaching-pair-${stage}-${animationCycle}`}
-            transition={{ duration: bodyFoodRevealTiming.dailyPairExitDuration }}
+            transition={{
+              duration: bodyFoodRevealTiming.dailyPairExitDuration,
+            }}
           >
             <CoachingCardAsset
               align="left"

@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { assets, finalTestimonials, finalTrialFacts } from "./data";
 import { ScrollSection } from "./ScrollSection";
+import { WHATSAPP_LINK } from "./lib/constants";
 
 function FinalFrame({
   children,
@@ -38,7 +39,7 @@ function TrialFactPill({
 }) {
   return (
     <div
-      className="absolute left-1/2 flex h-[52px] max-w-[90%] -translate-x-1/2 items-center justify-center rounded-[8px] bg-white/10 px-6 text-center text-[14px] font-normal leading-normal text-white max-sm:h-auto max-sm:min-h-[48px] max-sm:px-4 max-sm:text-xs"
+      className="absolute left-1/2 flex h-[52px] max-w-[90%] -translate-x-1/2 items-center justify-center rounded-[8px] bg-white/10 px-6 text-center text-[14px] font-normal leading-normal text-white max-sm:h-auto max-sm:min-h-[48px] max-sm:px-4 max-sm:text-xs border border-white/10"
       style={{ bottom: `${bottom}px`, width: `${fact.width}px` }}
     >
       {fact.text}
@@ -60,7 +61,7 @@ function FinalButton({
           ? "bg-[#f54900] text-white hover:bg-[#ff6420]"
           : "bg-white text-black hover:bg-white/90"
       } ${className}`}
-      href="#hero"
+      href={WHATSAPP_LINK}
     >
       &nbsp;&nbsp;Meet Bibi — It&apos;s Free&nbsp;
     </a>
@@ -83,26 +84,26 @@ function StartFreeTrialSection() {
 
   return (
     <FinalFrame id="start-free-trial">
-      <h2 className="absolute left-1/2 top-[106px] w-full -translate-x-1/2 text-center text-[40px] font-normal capitalize leading-tight text-white md:top-[97px] md:text-[64px] md:leading-normal">
+      <h2 className="absolute left-1/2 top-[50px] lg:top-[106px] w-full -translate-x-1/2 text-center text-[42px] font-semibold lg:font-normal capitalize leading-tight text-white md:top-[70px] md:text-[64px] md:leading-normal">
         Start Free for 14 Days
       </h2>
-      <p className="absolute left-1/2 top-[236px] w-[min(82.9%,1064px)] -translate-x-1/2 text-center text-[12px] font-normal capitalize leading-normal text-white md:top-[188px] md:text-[16px]">
+      <p className="absolute left-1/2 top-[175px] lg:top-[190px] w-[min(82.9%,1064px)] -translate-x-1/2 text-center text-[16px] font-normal capitalize leading-normal text-white md:top-[160px] md:text-[16px]">
         Meet Bibi. Explore the full system. Start seeing results. Completely
         free for 14 days. No payment required.
       </p>
       <div className="hidden md:block">
         {finalTrialFacts.map((fact, index) => (
           <TrialFactPill
-            bottom={bottoms[index] ?? 89}
+            bottom={bottoms[index] ?? 165}
             fact={fact}
             key={fact.text}
           />
         ))}
       </div>
-      <div className="absolute bottom-[70px] left-1/2 flex w-full max-w-[430px] -translate-x-1/2 flex-col items-center gap-4 px-5 md:hidden">
+      <div className="absolute bottom-[40px] left-1/2 flex w-full max-w-[430px] -translate-x-1/2 flex-col items-center gap-4 px-5 md:hidden ">
         {finalTrialFacts.map((fact) => (
           <div
-            className="flex min-h-[48px] w-full items-center justify-center rounded-[8px] bg-white/10 px-4 text-center text-xs font-normal capitalize leading-normal text-white"
+            className="flex min-h-[48px] w-full items-center justify-center rounded-[8px] bg-white/10 px-4 text-center text-xs font-normal capitalize leading-normal text-white border border-white/10 rounded-[8px]"
             key={fact.text}
           >
             {fact.text}
@@ -132,7 +133,7 @@ function TestimonialCard({
         className="relative h-[375.668px] w-[312.204px] overflow-hidden rounded-[20px] bg-white text-black"
         style={{ transform: `rotate(${testimonial.rotation}deg)` }}
       >
-        <div className="absolute left-[40.65px] top-[134px] w-[239.008px] whitespace-pre-wrap text-left text-black">
+        <div className="absolute left-[40.65px] top-[100px] w-[239.008px] whitespace-pre-wrap text-left text-black">
           <p className="mb-9 text-[24px] font-normal leading-normal">
             {testimonial.quote}
           </p>
@@ -142,13 +143,13 @@ function TestimonialCard({
         </div>
         <span
           aria-hidden="true"
-          className="absolute left-[30.58px] top-[72.58px] -translate-x-1/2 -translate-y-1/2 rotate-[1.31deg] text-center text-[128px] font-semibold capitalize leading-none text-black/20"
+          className="absolute left-[41px] top-[72.58px] -translate-x-1/2 -translate-y-1/2 rotate-[1.31deg] text-center text-[128px] font-semibold capitalize leading-none text-black/20"
         >
           “
         </span>
         <span
           aria-hidden="true"
-          className="absolute bottom-[76.42px] right-[21.99px] translate-x-1/2 translate-y-1/2 rotate-180 text-center text-[128px] font-semibold capitalize leading-none text-black/20"
+          className="absolute bottom-[76.42px] right-[41px] translate-x-1/2 translate-y-1/2 rotate-180 text-center text-[128px] font-semibold capitalize leading-none text-black/20"
         >
           “
         </span>
@@ -227,16 +228,24 @@ function FourteenDayPayoffSection() {
           src={assets.finalBlackPattern}
           width={2054}
         />
-        <h2 className="absolute left-1/2 top-[88px] w-full -translate-x-1/2 text-center text-[25px] font-normal leading-[31px] text-white md:top-[119px] md:text-[42px] md:leading-[38px]">
-          <span className="block">
-            Most users notice changes within 14 days.
+        <h2 className="absolute left-1/2 top-[88px] w-full -translate-x-1/2 text-center text-[25px] font-normal leading-[31px] text-white md:top-[100px] md:text-[42px] md:leading-[50px]">
+          {/* Mobile text */}
+          <span className="block md:hidden">
+            Most users notice changes within 14 days. Not starvation.{" "}
+            <span className="italic">Just consistency</span>
           </span>
-          <span className="block">Not starvation. The system.</span>
+
+          {/* Laptop/Desktop text */}
+          <span className="hidden md:block">
+            Most users notice changes within 14 days.
+            <br />
+            Not starvation. <span className="italic">Just consistency</span>
+          </span>
         </h2>
         <FinalButton className="absolute left-1/2 top-[238px] h-[50px] w-[273px] -translate-x-1/2 md:top-[229px]" />
         <Image
           alt="Bibi fitness coach"
-          className="absolute bottom-[-25px] left-1/2 z-10 h-[434px] w-[325px] -translate-x-1/2 object-cover max-md:h-[360px] max-md:w-[270px]"
+          className="absolute bottom-[16px] left-1/2 z-10 h-[434px] w-[325px] translate-y-1/3 -translate-x-1/2 object-cover max-md:h-[360px] max-md:w-[270px]"
           height={1448}
           src={assets.finalBibi}
           width={1086}
@@ -281,7 +290,7 @@ function FinalFooterCtaSection() {
             src={assets.finalFooterLogo}
             width={1733}
           />
-          <p className="absolute bottom-[35px] right-[48px] text-center text-[14px] font-bold capitalize leading-[99.915%] text-white max-md:right-5 max-md:text-[10px]">
+          <p className="hidden md:block absolute bottom-[35px] right-[48px] text-center text-[14px] font-bold capitalize leading-[99.915%] text-white max-md:right-5 max-md:text-[10px]">
             © 2026 All rights reserved. ·&nbsp;
             <span>Privacy</span>
             &nbsp;·&nbsp;
@@ -299,6 +308,16 @@ function FinalFooterCtaSection() {
         <p className="absolute left-1/2 top-[650px] -translate-x-[45%] whitespace-nowrap text-center text-[clamp(8rem,21.8svh,280px)] font-bold capitalize leading-[99.915%] text-white/10">
           Bibi. Bibi. Bibi.
         </p>
+        <div className="md:hidden flex flex-col items-center gap-3 mt-6 text-center text-white">
+          <p className="text-[80px] font-bold capitalize leading-[90%] text-white/10">
+            Bibi. Bibi. Bibi.
+          </p>
+
+          <p className="text-[10px] font-bold capitalize leading-[99.915%] text-white">
+            © 2026 All rights reserved. · <span>Privacy</span> ·{" "}
+            <span>Terms</span>
+          </p>
+        </div>
       </article>
     </ScrollSection>
   );

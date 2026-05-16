@@ -1,11 +1,12 @@
 import Image from "next/image";
 
 import { assets } from "./data";
+import { WHATSAPP_LINK } from "./lib/constants";
 
 export function LandingHeader() {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-3 py-2 max-sm:absolute max-sm:top-[82px] max-sm:px-[25px] max-sm:py-0 sm:px-6 lg:px-10">
-      <div className="mx-auto flex max-w-[1284px] items-center justify-between gap-4">
+    <header className="fixed top-0 left-1/2 -translate-x-1/2 z-50 w-full lg:w-[1179.5px] px-3 py-4 max-sm:absolute max-sm:px-[25px] sm:px-6 lg:px-10">
+      <div className="mx-auto flex w-full items-center justify-between gap-4">
         <a aria-label="Fitness Space home" className="block" href="#hero">
           <Image
             alt="Fitness Space"
@@ -19,9 +20,9 @@ export function LandingHeader() {
 
         <a
           className="rounded-[7px] bg-white px-3 py-2 text-xs font-semibold capitalize text-black transition hover:bg-white/90 max-sm:px-[11px] max-sm:text-sm sm:text-sm"
-          href="#hero"
+          href={WHATSAPP_LINK}
         >
-          Meet Bibi &mdash; It&apos;s Free
+          Meet Bibi — It&apos;s Free
         </a>
       </div>
     </header>
