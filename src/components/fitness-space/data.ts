@@ -28,6 +28,7 @@ export const assets = {
   finalFooterLogo: "/figma/final-footer-logo.png",
   finalBlackPattern: "/figma/final-black-pattern.svg",
   finalOrangePattern: "/figma/final-orange-pattern.svg",
+  whatsappIcon: "/figma/whatsapp.png",
 } as const;
 
 export const healthScoreActivities = [

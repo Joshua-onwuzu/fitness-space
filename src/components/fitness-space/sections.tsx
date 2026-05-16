@@ -86,11 +86,12 @@ export function HeroSection() {
             width={2054}
           />
 
-          <div className="relative z-10 flex h-full max-w-full flex-col justify-center px-7 pt-[5rem] max-sm:w-full max-sm:text-center max-sm:px-[1rem] max-sm:pt-[50px] sm:px-12 lg:pl-[83px] lg:pr-[54px]">
+          {/* CONTENT */}
+          <div className="relative z-10 flex h-full max-w-full flex-col justify-center px-7 pt-[5rem] max-sm:w-full max-sm:text-center max-sm:px-[1rem] max-sm:pt-[50px] sm:px-12 sm:pt-[9rem] lg:pl-[83px] lg:pr-[54px] lg:pt-[9rem]">
             <h1 className="text-[40px] font-bold text-white sm:text-5xl lg:text-[48px] leading-tight">
               <span className="block">Meet Bibi.</span>
 
-              {/* DESKTOP (forced 2-line layout) */}
+              {/* DESKTOP */}
               <span className="hidden sm:block leading-tight">
                 <span className="block">Your AI Coach for</span>
 
@@ -98,7 +99,7 @@ export function HeroSection() {
                   Sustainable{" "}
                   <span className="inline-block min-w-[260px] lg:min-w-[320px]">
                     <span
-                      className={`inline-block transition-all duration-300 ease-in-out ${
+                      className={`text-black inline-block transition-all duration-300 ease-in-out ${
                         fade
                           ? "opacity-100 translate-y-0"
                           : "opacity-0 translate-y-2"
@@ -109,15 +110,17 @@ export function HeroSection() {
                   </span>
                 </span>
               </span>
-              {/* MOBILE (typewriter left → right, black, smaller) */}
+
               {/* MOBILE */}
               <span className="sm:hidden block text-center">
                 Your AI Coach for Sustainable
               </span>
 
-              <span className="sm:hidden block text-center min-h-[42px]">
-                <span className="inline-block whitespace-nowrap border-r-2 border-black pr-1 animate-pulse text-[38px] text-black">
-                  {mobileText}
+              <span className="sm:hidden flex w-full justify-center">
+                <span className="min-h-[42px] flex items-center">
+                  <span className="whitespace-nowrap border-r-2 border-black pr-1 animate-pulse text-[38px] text-black">
+                    {mobileText}
+                  </span>
                 </span>
               </span>
             </h1>
@@ -129,11 +132,24 @@ export function HeroSection() {
             </p>
 
             <a
-              className="mt-5 inline-flex w-fit rounded-[7px] bg-white px-4 py-2 text-xs font-semibold text-black hover:bg-white/90 max-sm:mx-auto"
+              className="mt-5 inline-flex w-fit items-center gap-2 rounded-[7px] bg-white px-4 py-2 text-xs font-semibold text-black hover:bg-white/90 max-sm:mx-auto"
               href={WHATSAPP_LINK}
             >
+              <Image
+                src={assets.whatsappIcon}
+                alt="WhatsApp"
+                className="h-8 w-8"
+                height={16}
+                priority
+                width={16}
+              />
               Meet Bibi — It&apos;s Free
             </a>
+
+            {/* TEXT BELOW BUTTON */}
+            <h2 className="mt-5 sm:mt-14 lg:mt-20 text-base font-semibold leading-[1.4] text-white sm:text-xl">
+              No meal plans. No starvation. No guesswork. Just Bibi.
+            </h2>
           </div>
 
           <Image
