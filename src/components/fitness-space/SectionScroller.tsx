@@ -20,6 +20,7 @@ const NATIVE_BOUNDARY_RELEASE_MS = 1400;
 const NATIVE_SECTION_BOUNDARY_EPSILON_PX = 2;
 const NATIVE_SECTION_END_BUFFER_PX = 32;
 const NATIVE_SECTION_NEAR_BOUNDARY_PX = 72;
+const POST_LOCK_WHEEL_SUPPRESS_MAX_MS = 320;
 
 type SectionStepDetail = {
   direction: -1 | 1;
@@ -27,6 +28,16 @@ type SectionStepDetail = {
   lockMs?: number;
   sameDirectionSilenceMs?: number;
   silenceMs?: number;
+};
+
+type WheelMomentumState = {
+  direction: -1 | 1;
+  lastAt: number;
+};
+
+type PostLockWheelSuppressState = WheelMomentumState & {
+  resetTimer: ReturnType<typeof setTimeout> | null;
+  startedAt: number;
 };
 
 export function SectionScroller({ children }: SectionScrollerProps) {
@@ -49,7 +60,10 @@ export function SectionScroller({ children }: SectionScrollerProps) {
   const lastInputAtRef = useRef(0);
   const nativeWheelResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const nativeWheelScrollRef = useRef(false);
+  const postLockWheelSuppressRef =
+    useRef<PostLockWheelSuppressState | null>(null);
   const stepUnlockRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lockedWheelMomentumRef = useRef<WheelMomentumState | null>(null);
   const sameDirectionSuppressRef = useRef<{
     direction: -1 | 1;
     maxMs: number;
@@ -86,6 +100,24 @@ export function SectionScroller({ children }: SectionScrollerProps) {
     const getViewportScrollTop = () =>
       getScrollContainer()?.scrollTop ?? window.scrollY;
 
+    const getViewportMaxScrollTop = () => {
+      const scrollContainer = getScrollContainer();
+      if (scrollContainer) {
+        return Math.max(
+          scrollContainer.scrollHeight - scrollContainer.clientHeight,
+          0,
+        );
+      }
+
+      return Math.max(
+        Math.max(
+          document.documentElement.scrollHeight,
+          document.body.scrollHeight,
+        ) - getViewportHeight(),
+        0,
+      );
+    };
+
     const getMobileLayoutOffset = () =>
       isMobileLayout() ? MOBILE_LAYOUT_PADDING_PX : 0;
 
@@ -97,6 +129,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       behavior: ScrollBehavior = "smooth",
     ) => {
       const scrollContainer = getScrollContainer();
+
       if (scrollContainer) {
         scrollContainer.scrollTo({ behavior, top });
         return;
@@ -167,12 +200,15 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
       const sectionTop = getSectionScrollTop(section);
       const sectionBottom = sectionTop + section.offsetHeight;
-      const maxScrollY =
+      const rawMaxScrollY =
         Math.max(
           sectionBottom - getViewportHeight() + getMobileLayoutOffset(),
           sectionTop,
         ) +
         NATIVE_SECTION_END_BUFFER_PX;
+      const viewportMaxScrollTop = getViewportMaxScrollTop();
+      const maxScrollY = Math.min(rawMaxScrollY, viewportMaxScrollTop);
+      const minScrollY = Math.min(sectionTop, viewportMaxScrollTop);
 
       if (direction === 1) {
         return (
@@ -183,7 +219,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
       return (
         getViewportScrollTop() >
-        sectionTop + NATIVE_SECTION_BOUNDARY_EPSILON_PX
+        minScrollY + NATIVE_SECTION_BOUNDARY_EPSILON_PX
       );
     };
 
@@ -219,18 +255,25 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
       const sectionTop = getSectionScrollTop(section);
       const sectionBottom = sectionTop + section.offsetHeight;
-      const maxScrollY =
+      const rawMaxScrollY =
         Math.max(
           sectionBottom - getViewportHeight() + getMobileLayoutOffset(),
           sectionTop,
         ) +
         NATIVE_SECTION_END_BUFFER_PX;
-      const target = direction === 1 ? maxScrollY : sectionTop;
+      const viewportMaxScrollTop = getViewportMaxScrollTop();
+      const maxScrollY = Math.min(rawMaxScrollY, viewportMaxScrollTop);
+      const minScrollY = Math.min(sectionTop, viewportMaxScrollTop);
+      const target = direction === 1 ? maxScrollY : minScrollY;
 
       return {
         distance: Math.abs(target - getViewportScrollTop()),
         isInternal: false,
+        maxScrollY,
+        minScrollY,
+        rawMaxScrollY,
         target,
+        viewportMaxScrollTop,
       };
     };
 
@@ -318,6 +361,14 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       sameDirectionSuppressRef.current = null;
     };
 
+    const clearPostLockWheelSuppress = () => {
+      if (postLockWheelSuppressRef.current?.resetTimer) {
+        clearTimeout(postLockWheelSuppressRef.current.resetTimer);
+      }
+
+      postLockWheelSuppressRef.current = null;
+    };
+
     const resetInteractionState = () => {
       lockedRef.current = false;
       touchStartYRef.current = null;
@@ -326,6 +377,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       touchBoundaryReleaseRef.current = null;
       touchSteppedRef.current = false;
       touchUsedNativeScrollRef.current = false;
+      lockedWheelMomentumRef.current = null;
       nativeWheelScrollRef.current = false;
       wheelDeltaRef.current = 0;
 
@@ -350,6 +402,106 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       }
 
       clearSameDirectionSuppress();
+      clearPostLockWheelSuppress();
+    };
+
+    const schedulePostLockWheelSuppressClear = () => {
+      const suppression = postLockWheelSuppressRef.current;
+      if (!suppression) {
+        return;
+      }
+
+      if (suppression.resetTimer) {
+        clearTimeout(suppression.resetTimer);
+      }
+
+      const now = performance.now();
+      const wheelAgeMs = now - suppression.lastAt;
+      const suppressAgeMs = now - suppression.startedAt;
+
+      if (suppressAgeMs >= POST_LOCK_WHEEL_SUPPRESS_MAX_MS) {
+        clearPostLockWheelSuppress();
+        return;
+      }
+
+      const clearDelay = Math.max(
+        Math.min(
+          INPUT_SILENCE_MS - wheelAgeMs,
+          POST_LOCK_WHEEL_SUPPRESS_MAX_MS - suppressAgeMs,
+        ),
+        0,
+      );
+
+      suppression.resetTimer = setTimeout(() => {
+        if (postLockWheelSuppressRef.current !== suppression) {
+          return;
+        }
+
+        const now = performance.now();
+        if (now - suppression.startedAt >= POST_LOCK_WHEEL_SUPPRESS_MAX_MS) {
+          clearPostLockWheelSuppress();
+          return;
+        }
+
+        if (now - suppression.lastAt >= INPUT_SILENCE_MS) {
+          clearPostLockWheelSuppress();
+          return;
+        }
+
+        schedulePostLockWheelSuppressClear();
+      }, clearDelay);
+    };
+
+    const startPostLockWheelSuppress = () => {
+      const momentum = lockedWheelMomentumRef.current;
+      lockedWheelMomentumRef.current = null;
+
+      if (!momentum) {
+        return;
+      }
+
+      const wheelAgeMs = performance.now() - momentum.lastAt;
+      if (wheelAgeMs >= INPUT_SILENCE_MS) {
+        return;
+      }
+
+      clearPostLockWheelSuppress();
+      postLockWheelSuppressRef.current = {
+        direction: momentum.direction,
+        lastAt: momentum.lastAt,
+        resetTimer: null,
+        startedAt: performance.now(),
+      };
+      schedulePostLockWheelSuppressClear();
+    };
+
+    const shouldSuppressPostLockWheel = (direction: -1 | 1) => {
+      const suppression = postLockWheelSuppressRef.current;
+      if (!suppression) {
+        return false;
+      }
+
+      if (suppression.direction !== direction) {
+        clearPostLockWheelSuppress();
+        return false;
+      }
+
+      if (performance.now() - suppression.lastAt >= INPUT_SILENCE_MS) {
+        clearPostLockWheelSuppress();
+        return false;
+      }
+
+      if (
+        performance.now() - suppression.startedAt >=
+        POST_LOCK_WHEEL_SUPPRESS_MAX_MS
+      ) {
+        clearPostLockWheelSuppress();
+        return false;
+      }
+
+      suppression.lastAt = performance.now();
+      schedulePostLockWheelSuppressClear();
+      return true;
     };
 
     const scheduleSameDirectionSuppressClear = () => {
@@ -420,6 +572,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
             scrollViewportTo(targetScrollTop, "auto");
           }
 
+          startPostLockWheelSuppress();
           lockedRef.current = false;
           wheelDeltaRef.current = 0;
           return;
@@ -439,8 +592,11 @@ export function SectionScroller({ children }: SectionScrollerProps) {
         return;
       }
 
-      section.scrollTop =
+      const targetScrollTop =
         direction === -1 ? section.scrollHeight - section.clientHeight : 0;
+
+      section.scrollTop =
+        targetScrollTop;
     };
 
     const unlockNativeBoundaryWhenSettled = (
@@ -474,6 +630,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
             }
           }
 
+          startPostLockWheelSuppress();
           lockedRef.current = false;
           wheelDeltaRef.current = 0;
           return;
@@ -499,10 +656,12 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       }
 
       lockedRef.current = true;
+      lockedWheelMomentumRef.current = null;
       markInput();
       wheelDeltaRef.current = 0;
 
       const behavior = prefersReducedMotion ? "auto" : "smooth";
+
       if (state.isInternal) {
         section.scrollTo({ behavior, top: state.target });
       } else {
@@ -522,11 +681,14 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
       resetInternalScrollPosition(target, direction);
       lockedRef.current = true;
+      lockedWheelMomentumRef.current = null;
       markInput();
       wheelDeltaRef.current = 0;
+      const targetScrollTop = getSectionScrollTop(target);
+      const behavior = prefersReducedMotion ? "auto" : "smooth";
       scrollViewportTo(
-        getSectionScrollTop(target),
-        prefersReducedMotion ? "auto" : "smooth",
+        targetScrollTop,
+        behavior,
       );
       unlockWhenSettled(index);
     };
@@ -545,11 +707,13 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       });
 
       const shouldContinueToNextSection = section.dispatchEvent(stepEvent);
+
       if (shouldContinueToNextSection) {
         return false;
       }
 
       lockedRef.current = true;
+      lockedWheelMomentumRef.current = null;
       wheelDeltaRef.current = 0;
 
       if (stepUnlockRef.current) {
@@ -578,6 +742,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
           performance.now() - lastInputAtRef.current >= inputSilenceMs;
 
         if (inputIsSilent) {
+          startPostLockWheelSuppress();
           lockedRef.current = false;
           wheelDeltaRef.current = 0;
           return;
@@ -644,6 +809,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
       if (nextIndex !== currentIndex) {
         scrollToIndex(nextIndex, direction);
+        return;
       }
     };
 
@@ -654,11 +820,13 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
       const direction = event.deltaY > 0 ? 1 : -1;
       const currentSection = getSections()[getCurrentIndex()];
+      const canNativeScroll = canScrollNativeSection(currentSection, direction);
+      const nearNativeBoundary = isNearNativeBoundary(currentSection, direction);
 
       if (
         !lockedRef.current &&
-        canScrollNativeSection(currentSection, direction) &&
-        !isNearNativeBoundary(currentSection, direction)
+        canNativeScroll &&
+        !nearNativeBoundary
       ) {
         const wheelDeltaContinuesDirection =
           wheelDeltaRef.current === 0 ||
@@ -683,15 +851,29 @@ export function SectionScroller({ children }: SectionScrollerProps) {
         return;
       }
 
+      event.preventDefault();
+
+      if (lockedRef.current) {
+        wheelDeltaRef.current = 0;
+        lockedWheelMomentumRef.current = {
+          direction,
+          lastAt: performance.now(),
+        };
+        return;
+      }
+
       if (nativeWheelScrollRef.current) {
-        event.preventDefault();
         wheelDeltaRef.current = 0;
         markInput();
         markNativeWheelScroll();
         return;
       }
 
-      event.preventDefault();
+      if (shouldSuppressPostLockWheel(direction)) {
+        wheelDeltaRef.current = 0;
+        return;
+      }
+
       markInput();
 
       const suppression = sameDirectionSuppressRef.current;
@@ -714,10 +896,6 @@ export function SectionScroller({ children }: SectionScrollerProps) {
           scheduleSameDirectionSuppressClear();
           return;
         }
-      }
-
-      if (lockedRef.current) {
-        return;
       }
 
       wheelDeltaRef.current += event.deltaY;

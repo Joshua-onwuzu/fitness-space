@@ -662,7 +662,7 @@ function FinalFooterCtaSection() {
       intensity={42}
       nativeScroll
     >
-      <article className="relative min-h-[960px] w-full max-w-[1284px] overflow-visible bg-black text-white max-md:min-h-[900px]">
+      <article className="relative w-full max-w-[1284px] overflow-visible bg-black text-white">
         <div className="absolute left-1/2 top-0 h-[625px] w-[min(100%,1185px)] -translate-x-1/2 overflow-hidden rounded-[22px] bg-[#f25602]">
           <div className="absolute left-1/2 top-0 h-[625px] w-[1284px] -translate-x-1/2 rounded-[10px] bg-[#f25602]" />
           <Image
