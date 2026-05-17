@@ -97,6 +97,8 @@ const mobileCardSectionTiming = {
   stepLockMs: 620,
 } as const;
 
+const mobileCoachingCards = coachingCardPairs.flat();
+
 const mobilePowerfulFeatureLayout = [
   {
     bodyTop: "253px",
@@ -276,7 +278,7 @@ export function MobileCardSection() {
 
 function MobileBodyFoodCardsReveal() {
   const rootRef = useRef<HTMLDivElement>(null);
-  const cards = coachingCardPairs[0];
+  const cards = mobileCoachingCards;
   const [stage, setStage] = useState(0);
   const [previousStage, setPreviousStage] = useState<number | null>(
     cards.length > 1 ? cards.length - 1 : null,
@@ -587,110 +589,107 @@ function MobileX2FrameworkMock() {
 
 export function DailySystemPointsSection() {
   return (
-    <div>
-      <ScrollSection
-        className="px-0 py-8 sm:px-8 lg:px-12"
-        contentClassName="mx-auto w-full max-w-[1440px]"
-        id="daily-system-points"
-        intensity={46}
-        mobileNativeScroll
-      >
-        <article className="relative mx-auto flex h-[1108px] w-full max-w-[410px] flex-col items-center bg-black text-white md:h-auto md:max-w-none md:pt-[7.4svh]">
-          <SectionPill className="mt-[64px] !h-[42.3px] !w-[247.76px] !px-0 !py-0 !text-[19px] sm:mt-0 sm:!h-[37px] sm:!w-auto sm:!px-8 sm:!py-5 sm:!text-base">
-            YOUR DAILY SYSTEM
-          </SectionPill>
+    <ScrollSection
+      className="px-0 py-8 sm:px-8 lg:px-12"
+      contentClassName="mx-auto flex w-full max-w-[1440px] flex-col items-center"
+      id="daily-system-points"
+      intensity={46}
+      mobileNativeScroll
+      nativeScroll
+    >
+      <article className="relative mx-auto flex h-[1108px] w-full max-w-[410px] flex-col items-center bg-black text-white md:h-auto md:max-w-none md:pt-[7.4svh]">
+        <SectionPill className="mt-[64px] !h-[42.3px] !w-[247.76px] !px-0 !py-0 !text-[19px] sm:mt-0 sm:!h-[37px] sm:!w-auto sm:!px-8 sm:!py-5 sm:!text-base">
+          YOUR DAILY SYSTEM
+        </SectionPill>
 
-          <h2 className="mb-0 mt-[45px] w-[364px] text-center text-[32px] font-bold leading-[40px] text-white md:my-5 md:mt-[2.5svh] md:w-auto md:text-[50px] md:leading-tight">
-            <span className="block md:inline">Every Activity.</span>
-            <span className="block md:inline">Every Point. Every Day.</span>
-          </h2>
+        <h2 className="mb-0 mt-[45px] w-[364px] text-center text-[32px] font-bold leading-[40px] text-white md:my-5 md:mt-[2.5svh] md:w-auto md:text-[50px] md:leading-tight">
+          <span className="block md:inline">Every Activity.</span>
+          <span className="block md:inline">Every Point. Every Day.</span>
+        </h2>
 
-          <p className="mb-0 mt-[14px] w-[325px] text-center text-[16px] font-normal leading-[18px] text-white/50 md:mb-4 md:mt-[2svh] md:w-auto md:text-sm md:leading-normal">
-            Everything you do in Fitness Space earns Health Score points. Every
-            point compounds into real results — and real discounts.
-          </p>
+        <p className="mb-0 mt-[14px] w-[325px] text-center text-[16px] font-normal leading-[18px] text-white/50 md:mb-4 md:mt-[2svh] md:w-auto md:text-sm md:leading-normal">
+          Everything you do in Fitness Space earns Health Score points. Every
+          point compounds into real results — and real discounts.
+        </p>
 
-          <div className="mt-[3.9svh] hidden w-full max-w-[816px] md:block">
-            <div className="grid grid-cols-[159px_minmax(0,591px)_66px]">
-              <div className="flex py-4 min-h-[min(5.2svh,60px)] items-center border-b border-white/10 text-[24px] font-bold leading-none text-white/50">
+        <div className="mt-[3.9svh] hidden w-full max-w-[816px] md:block">
+          <div className="grid grid-cols-[159px_minmax(0,591px)_66px]">
+            <div className="flex py-4 min-h-[min(5.2svh,60px)] items-center border-b border-white/10 text-[24px] font-bold leading-none text-white/50">
+              Activity
+            </div>
+
+            <div className="flex py-4 min-h-[min(5.2svh,60px)] items-center border-b border-l border-white/10 pl-[59px] text-[24px] font-bold leading-none text-white/50">
+              What it does
+            </div>
+
+            <div className="flex py-4 min-h-[min(5.2svh,60px)] items-center border-b border-l border-white/10 pl-[15px] text-[24px] font-bold leading-none text-white/50">
+              Points
+            </div>
+
+            {healthScoreActivities.map((row) => (
+              <div className="contents" key={row.activity}>
+                <div className="flex py-4 min-h-[min(5.2svh,60px)] items-center border-b border-white/10 pr-5 text-sm font-normal leading-normal text-white/70">
+                  {row.activity}
+                </div>
+
+                <div className="flex py-4 min-h-[min(5.2svh,60px)] items-center border-b border-l border-white/10 pl-[59px] pr-8 text-sm font-normal leading-normal text-white/70">
+                  {row.description}
+                </div>
+
+                <div className="flex py-4 min-h-[min(5.2svh,60px)] items-center border-b border-l border-white/10 pl-[15px] text-sm font-normal leading-normal text-white/70">
+                  {row.points}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div
+          aria-label="Daily system points table"
+          className="relative mt-[32px] h-[711px] w-full overflow-x-auto overflow-y-hidden overscroll-x-contain md:hidden [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          <div className="w-[535px] min-w-[535px]">
+            <div className="grid grid-cols-[120px_351px_64px]">
+              <div className="flex min-h-[63px] items-center border-b border-white/10 px-4 text-[24px] font-bold leading-none text-white/50">
                 Activity
               </div>
-
-              <div className="flex py-4 min-h-[min(5.2svh,60px)] items-center border-b border-l border-white/10 pl-[59px] text-[24px] font-bold leading-none text-white/50">
+              <div className="flex min-h-[63px] items-center border-b border-l border-white/10 px-5 text-[24px] font-bold leading-none text-white/50">
                 What it does
               </div>
-
-              <div className="flex py-4 min-h-[min(5.2svh,60px)] items-center border-b border-l border-white/10 pl-[15px] text-[24px] font-bold leading-none text-white/50">
+              <div className="flex min-h-[63px] items-center border-b border-l border-white/10 pl-3 text-[24px] font-bold leading-none text-white/50">
                 Points
               </div>
 
               {healthScoreActivities.map((row) => (
                 <div className="contents" key={row.activity}>
-                  <div className="flex py-4 min-h-[min(5.2svh,60px)] items-center border-b border-white/10 pr-5 text-sm font-normal leading-normal text-white/70">
+                  <div className="flex min-h-[81px] items-center border-b border-white/10 px-4 text-[14px] font-normal leading-[18px] text-white/70">
                     {row.activity}
                   </div>
 
-                  <div className="flex py-4 min-h-[min(5.2svh,60px)] items-center border-b border-l border-white/10 pl-[59px] pr-8 text-sm font-normal leading-normal text-white/70">
+                  <div className="flex min-h-[81px] items-center border-b border-l border-white/10 px-5 text-[14px] font-normal leading-[18px] text-white/70">
                     {row.description}
                   </div>
 
-                  <div className="flex py-4 min-h-[min(5.2svh,60px)] items-center border-b border-l border-white/10 pl-[15px] text-sm font-normal leading-normal text-white/70">
+                  <div className="flex min-h-[81px] items-center border-b border-l border-white/10 pl-3 text-[14px] font-normal leading-[18px] text-white/70">
                     {row.points}
                   </div>
                 </div>
               ))}
             </div>
           </div>
+        </div>
 
-          <div
-            aria-label="Daily system points table"
-            className="relative mt-[32px] h-[711px] w-full overflow-x-auto overflow-y-hidden overscroll-x-contain md:hidden [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          >
-            <div className="w-[535px] min-w-[535px]">
-              <div className="grid grid-cols-[120px_351px_64px]">
-                <div className="flex min-h-[63px] items-center border-b border-white/10 px-4 text-[24px] font-bold leading-none text-white/50">
-                  Activity
-                </div>
-                <div className="flex min-h-[63px] items-center border-b border-l border-white/10 px-5 text-[24px] font-bold leading-none text-white/50">
-                  What it does
-                </div>
-                <div className="flex min-h-[63px] items-center border-b border-l border-white/10 pl-3 text-[24px] font-bold leading-none text-white/50">
-                  Points
-                </div>
-
-                {healthScoreActivities.map((row) => (
-                  <div className="contents" key={row.activity}>
-                    <div className="flex min-h-[81px] items-center border-b border-white/10 px-4 text-[14px] font-normal leading-[18px] text-white/70">
-                      {row.activity}
-                    </div>
-
-                    <div className="flex min-h-[81px] items-center border-b border-l border-white/10 px-5 text-[14px] font-normal leading-[18px] text-white/70">
-                      {row.description}
-                    </div>
-
-                    <div className="flex min-h-[81px] items-center border-b border-l border-white/10 pl-3 text-[14px] font-normal leading-[18px] text-white/70">
-                      {row.points}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <p className="absolute left-1/2 top-[1019px] w-[341px] -translate-x-1/2 text-center text-[16px] font-normal leading-[30px] text-white md:hidden">
-            Complete everything. Earn 100 Health Score points. Every point moves
-            you closer to a bigger discount at renewal.
-          </p>
-        </article>
-      </ScrollSection>
-      <div className="hidden w-full justify-center md:flex">
-        <p className="mt-[4svh] max-w-[836px] text-center text-lg font-normal leading-[1.65] text-white md:text-2xl">
-          Complete everything. Earn 100 Health Score points.
-          <br />
-          Every point moves you closer to a bigger discount at renewal.
+        <p className="absolute left-1/2 top-[1019px] w-[341px] -translate-x-1/2 text-center text-[16px] font-normal leading-[30px] text-white md:hidden">
+          Complete everything. Earn 100 Health Score points. Every point moves
+          you closer to a bigger discount at renewal.
         </p>
-      </div>
-    </div>
+      </article>
+      <p className="mt-[4svh] hidden max-w-[836px] text-center text-lg font-normal leading-[1.65] text-white md:block md:text-2xl">
+        Complete everything. Earn 100 Health Score points.
+        <br />
+        Every point moves you closer to a bigger discount at renewal.
+      </p>
+    </ScrollSection>
   );
 }
 
