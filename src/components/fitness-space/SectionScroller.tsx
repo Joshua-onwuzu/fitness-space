@@ -14,7 +14,9 @@ const INTERNAL_STEP_LOCK_MS = 1300;
 const MOBILE_LAYOUT_PADDING_PX = 0;
 const WHEEL_THRESHOLD = 36;
 const TOUCH_THRESHOLD = 48;
+const TOUCH_MOVE_STEP_THRESHOLD = 36;
 const FAST_NATIVE_BOUNDARY_WHEEL_THRESHOLD = 160;
+const NATIVE_BOUNDARY_RELEASE_MS = 1400;
 const NATIVE_SECTION_BOUNDARY_EPSILON_PX = 2;
 const NATIVE_SECTION_END_BUFFER_PX = 32;
 const NATIVE_SECTION_NEAR_BOUNDARY_PX = 72;
@@ -37,6 +39,12 @@ export function SectionScroller({ children }: SectionScrollerProps) {
     down: boolean;
     up: boolean;
   } | null>(null);
+  const touchBoundaryReleaseRef = useRef<{
+    direction: -1 | 1;
+    expiresAt: number;
+    section: HTMLElement;
+  } | null>(null);
+  const touchSteppedRef = useRef(false);
   const touchUsedNativeScrollRef = useRef(false);
   const lastInputAtRef = useRef(0);
   const nativeWheelResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -64,13 +72,38 @@ export function SectionScroller({ children }: SectionScrollerProps) {
           window.getComputedStyle(section).display !== "none",
       );
 
+    const isMobileLayout = () =>
+      window.matchMedia("(max-width: 639px)").matches;
+
+    const getScrollContainer = () =>
+      isMobileLayout() ? containerRef.current : null;
+
+    const getViewportHeight = () =>
+      getScrollContainer()?.clientHeight ??
+      window.visualViewport?.height ??
+      window.innerHeight;
+
+    const getViewportScrollTop = () =>
+      getScrollContainer()?.scrollTop ?? window.scrollY;
+
     const getMobileLayoutOffset = () =>
-      window.matchMedia("(max-width: 639px)").matches
-        ? MOBILE_LAYOUT_PADDING_PX
-        : 0;
+      isMobileLayout() ? MOBILE_LAYOUT_PADDING_PX : 0;
 
     const getSectionScrollTop = (section: HTMLElement) =>
       Math.max(section.offsetTop - getMobileLayoutOffset(), 0);
+
+    const scrollViewportTo = (
+      top: number,
+      behavior: ScrollBehavior = "smooth",
+    ) => {
+      const scrollContainer = getScrollContainer();
+      if (scrollContainer) {
+        scrollContainer.scrollTo({ behavior, top });
+        return;
+      }
+
+      window.scrollTo({ behavior, top });
+    };
 
     const getCurrentIndex = () => {
       const sections = getSections();
@@ -79,9 +112,9 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       }
 
       const thresholdY =
-        window.scrollY +
+        getViewportScrollTop() +
         getMobileLayoutOffset() +
-        Math.min(window.innerHeight * 0.45, 280);
+        Math.min(getViewportHeight() * 0.45, 280);
       const containingIndex = sections.findIndex(
         (section) =>
           thresholdY >= section.offsetTop &&
@@ -94,10 +127,10 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
       return sections.reduce((closestIndex, section, index) => {
         const closestDistance = Math.abs(
-          window.scrollY - getSectionScrollTop(sections[closestIndex]),
+          getViewportScrollTop() - getSectionScrollTop(sections[closestIndex]),
         );
         const sectionDistance = Math.abs(
-          window.scrollY - getSectionScrollTop(section),
+          getViewportScrollTop() - getSectionScrollTop(section),
         );
         return sectionDistance < closestDistance ? index : closestIndex;
       }, 0);
@@ -113,7 +146,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
       const isNativeScrollSection =
         section.hasAttribute("data-native-scroll-section") ||
-        section.offsetHeight > window.innerHeight + 2;
+        section.offsetHeight > getViewportHeight() + 2;
 
       if (!isNativeScrollSection) {
         return false;
@@ -136,20 +169,20 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       const sectionBottom = sectionTop + section.offsetHeight;
       const maxScrollY =
         Math.max(
-          sectionBottom - window.innerHeight + getMobileLayoutOffset(),
+          sectionBottom - getViewportHeight() + getMobileLayoutOffset(),
           sectionTop,
         ) +
         NATIVE_SECTION_END_BUFFER_PX;
 
       if (direction === 1) {
         return (
-          window.scrollY <
+          getViewportScrollTop() <
           maxScrollY - NATIVE_SECTION_BOUNDARY_EPSILON_PX
         );
       }
 
       return (
-        window.scrollY >
+        getViewportScrollTop() >
         sectionTop + NATIVE_SECTION_BOUNDARY_EPSILON_PX
       );
     };
@@ -164,7 +197,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
       const isNativeScrollSection =
         section.hasAttribute("data-native-scroll-section") ||
-        section.offsetHeight > window.innerHeight + 2;
+        section.offsetHeight > getViewportHeight() + 2;
 
       if (!isNativeScrollSection) {
         return null;
@@ -188,14 +221,14 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       const sectionBottom = sectionTop + section.offsetHeight;
       const maxScrollY =
         Math.max(
-          sectionBottom - window.innerHeight + getMobileLayoutOffset(),
+          sectionBottom - getViewportHeight() + getMobileLayoutOffset(),
           sectionTop,
         ) +
         NATIVE_SECTION_END_BUFFER_PX;
       const target = direction === 1 ? maxScrollY : sectionTop;
 
       return {
-        distance: Math.abs(target - window.scrollY),
+        distance: Math.abs(target - getViewportScrollTop()),
         isInternal: false,
         target,
       };
@@ -211,6 +244,44 @@ export function SectionScroller({ children }: SectionScrollerProps) {
           state &&
           state.distance <= NATIVE_SECTION_NEAR_BOUNDARY_PX,
       );
+    };
+
+    const markNativeBoundaryRelease = (
+      section: HTMLElement | undefined,
+      direction: -1 | 1,
+    ) => {
+      if (!section?.hasAttribute("data-native-scroll-section")) {
+        return;
+      }
+
+      touchBoundaryReleaseRef.current = {
+        direction,
+        expiresAt: performance.now() + NATIVE_BOUNDARY_RELEASE_MS,
+        section,
+      };
+    };
+
+    const hasNativeBoundaryRelease = (
+      section: HTMLElement | undefined,
+      direction: -1 | 1,
+    ) => {
+      const release = touchBoundaryReleaseRef.current;
+      if (!release) {
+        return false;
+      }
+
+      if (release.expiresAt < performance.now()) {
+        touchBoundaryReleaseRef.current = null;
+        return false;
+      }
+
+      const matches =
+        release.section === section && release.direction === direction;
+      if (!matches && release.direction !== direction) {
+        touchBoundaryReleaseRef.current = null;
+      }
+
+      return matches;
     };
 
     const markInput = () => {
@@ -252,6 +323,8 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       touchStartYRef.current = null;
       touchSectionRef.current = null;
       touchStartBoundaryRef.current = null;
+      touchBoundaryReleaseRef.current = null;
+      touchSteppedRef.current = false;
       touchUsedNativeScrollRef.current = false;
       nativeWheelScrollRef.current = false;
       wheelDeltaRef.current = 0;
@@ -337,13 +410,14 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
         const now = performance.now();
         const targetScrollTop = getSectionScrollTop(target);
-        const isAtTarget = Math.abs(window.scrollY - targetScrollTop) <= 2;
+        const isAtTarget =
+          Math.abs(getViewportScrollTop() - targetScrollTop) <= 2;
         const inputIsSilent = now - lastInputAtRef.current >= INPUT_SILENCE_MS;
         const timedOut = now - startedAt >= MAX_SCROLL_LOCK_MS;
 
         if ((isAtTarget && inputIsSilent) || timedOut) {
           if (timedOut && !isAtTarget) {
-            window.scrollTo({ behavior: "auto", top: targetScrollTop });
+            scrollViewportTo(targetScrollTop, "auto");
           }
 
           lockedRef.current = false;
@@ -382,7 +456,9 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
       const check = () => {
         const now = performance.now();
-        const currentScrollTop = isInternal ? section.scrollTop : window.scrollY;
+        const currentScrollTop = isInternal
+          ? section.scrollTop
+          : getViewportScrollTop();
         const isAtTarget =
           Math.abs(currentScrollTop - targetScrollTop) <=
           NATIVE_SECTION_BOUNDARY_EPSILON_PX;
@@ -394,7 +470,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
             if (isInternal) {
               section.scrollTo({ behavior: "auto", top: targetScrollTop });
             } else {
-              window.scrollTo({ behavior: "auto", top: targetScrollTop });
+              scrollViewportTo(targetScrollTop, "auto");
             }
           }
 
@@ -430,7 +506,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       if (state.isInternal) {
         section.scrollTo({ behavior, top: state.target });
       } else {
-        window.scrollTo({ behavior, top: state.target });
+        scrollViewportTo(state.target, behavior);
       }
 
       unlockNativeBoundaryWhenSettled(section, state.target, state.isInternal);
@@ -448,10 +524,10 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       lockedRef.current = true;
       markInput();
       wheelDeltaRef.current = 0;
-      window.scrollTo({
-        behavior: prefersReducedMotion ? "auto" : "smooth",
-        top: getSectionScrollTop(target),
-      });
+      scrollViewportTo(
+        getSectionScrollTop(target),
+        prefersReducedMotion ? "auto" : "smooth",
+      );
       unlockWhenSettled(index);
     };
 
@@ -537,11 +613,15 @@ export function SectionScroller({ children }: SectionScrollerProps) {
         currentSection,
         direction,
       );
+      const currentSectionNearNativeBoundary = isNearNativeBoundary(
+        currentSection,
+        direction,
+      );
 
       if (
         currentSectionIsNative &&
         currentSectionCanScrollNative &&
-        !isNearNativeBoundary(currentSection, direction)
+        !currentSectionNearNativeBoundary
       ) {
         scrollNativeSectionToBoundary(currentSection, direction);
         return;
@@ -549,7 +629,6 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
       const shouldTrySectionStep =
         !currentSectionIsNative ||
-        !currentSectionCanScrollNative ||
         Boolean(currentSection?.hasAttribute("data-boundary-step-section"));
       const sectionStepped =
         shouldTrySectionStep && stepWithinSection(currentSection, direction);
@@ -653,16 +732,34 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
     const onTouchStart = (event: TouchEvent) => {
       markInput();
+      touchSteppedRef.current = false;
       touchUsedNativeScrollRef.current = false;
       touchStartYRef.current = event.touches[0]?.clientY ?? null;
-      touchSectionRef.current =
+      const touchedSection =
         event.target instanceof Element
           ? event.target.closest<HTMLElement>("[data-section]")
           : null;
-      touchStartBoundaryRef.current = touchSectionRef.current
+      touchSectionRef.current = touchedSection;
+
+      const downNear = touchedSection
+        ? isNearNativeBoundary(touchedSection, 1)
+        : false;
+      const downRelease =
+        touchedSection && !downNear
+          ? hasNativeBoundaryRelease(touchedSection, 1)
+          : false;
+      const upNear = touchedSection
+        ? isNearNativeBoundary(touchedSection, -1)
+        : false;
+      const upRelease =
+        touchedSection && !upNear
+          ? hasNativeBoundaryRelease(touchedSection, -1)
+          : false;
+
+      touchStartBoundaryRef.current = touchedSection
         ? {
-            down: isNearNativeBoundary(touchSectionRef.current, 1),
-            up: isNearNativeBoundary(touchSectionRef.current, -1),
+            down: downNear || downRelease,
+            up: upNear || upRelease,
           }
         : null;
     };
@@ -684,22 +781,52 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       }
 
       const direction = touchStartYRef.current - currentY > 0 ? 1 : -1;
+      const delta = touchStartYRef.current - currentY;
       const currentSection =
         touchSectionRef.current ?? getSections()[getCurrentIndex()];
-      if (
-        canScrollNativeSection(currentSection, direction) &&
-        !isNearNativeBoundary(currentSection, direction)
-      ) {
+      const canNativeScroll = canScrollNativeSection(currentSection, direction);
+      const nearNativeBoundary = isNearNativeBoundary(
+        currentSection,
+        direction,
+      );
+
+      if (canNativeScroll && !nearNativeBoundary) {
         touchUsedNativeScrollRef.current = true;
         markInput();
         return;
       }
 
-      const delta = touchStartYRef.current - currentY;
       if (Math.abs(delta) > 8) {
         event.preventDefault();
         markInput();
       }
+
+      if (
+        Math.abs(delta) < TOUCH_MOVE_STEP_THRESHOLD ||
+        touchSteppedRef.current
+      ) {
+        return;
+      }
+
+      if (touchUsedNativeScrollRef.current) {
+        markNativeBoundaryRelease(currentSection, direction);
+        return;
+      }
+
+      const isNativeSection = currentSection?.hasAttribute(
+        "data-native-scroll-section",
+      );
+      const startedAtBoundary =
+        direction === 1
+          ? touchStartBoundaryRef.current?.down
+          : touchStartBoundaryRef.current?.up;
+
+      if (isNativeSection && !startedAtBoundary && !nearNativeBoundary) {
+        return;
+      }
+
+      touchSteppedRef.current = true;
+      moveBy(direction);
     };
 
     const onTouchEnd = (event: TouchEvent) => {
@@ -723,17 +850,28 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
       const delta = startY - endY;
       if (Math.abs(delta) >= TOUCH_THRESHOLD) {
+        if (touchSteppedRef.current) {
+          return;
+        }
+
         const direction = delta > 0 ? 1 : -1;
-        const currentSection = touchedSection ?? getSections()[getCurrentIndex()];
+        const currentSection =
+          touchedSection ?? getSections()[getCurrentIndex()];
+        const canNativeScroll = canScrollNativeSection(
+          currentSection,
+          direction,
+        );
+        const nearNativeBoundary = isNearNativeBoundary(
+          currentSection,
+          direction,
+        );
 
         if (usedNativeScroll) {
-          if (
-            canScrollNativeSection(currentSection, direction) &&
-            !isNearNativeBoundary(currentSection, direction)
-          ) {
+          if (canNativeScroll && !nearNativeBoundary) {
             scrollNativeSectionToBoundary(currentSection, direction);
           }
 
+          markNativeBoundaryRelease(currentSection, direction);
           return;
         }
 
@@ -746,14 +884,19 @@ export function SectionScroller({ children }: SectionScrollerProps) {
         );
         const startedAtBoundary =
           direction === 1 ? startBoundary?.down : startBoundary?.up;
-        if (isNativeSection && !startedAtBoundary) {
+        const hasRelease =
+          isNativeSection && !startedAtBoundary
+            ? hasNativeBoundaryRelease(currentSection, direction)
+            : false;
+        if (
+          isNativeSection &&
+          !startedAtBoundary &&
+          !hasRelease
+        ) {
           return;
         }
 
-        if (
-          canScrollNativeSection(currentSection, direction) &&
-          !isNearNativeBoundary(currentSection, direction)
-        ) {
+        if (canNativeScroll && !nearNativeBoundary) {
           return;
         }
 
@@ -832,18 +975,48 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       moveBy(targetIndex > currentIndex ? 1 : -1);
     };
 
-    window.addEventListener("wheel", onWheel, { passive: false });
-    window.addEventListener("touchstart", onTouchStart, { passive: true });
-    window.addEventListener("touchmove", onTouchMove, { passive: false });
-    window.addEventListener("touchend", onTouchEnd, { passive: true });
+    const scrollEventTarget = containerRef.current ?? window;
+    const captureListenerOptions = { capture: true };
+    const wheelListener = onWheel as EventListener;
+    const touchStartListener = onTouchStart as EventListener;
+    const touchMoveListener = onTouchMove as EventListener;
+    const touchEndListener = onTouchEnd as EventListener;
+
+    scrollEventTarget.addEventListener("wheel", wheelListener, {
+      passive: false,
+    });
+    scrollEventTarget.addEventListener("touchstart", touchStartListener, {
+      capture: true,
+      passive: true,
+    });
+    scrollEventTarget.addEventListener("touchmove", touchMoveListener, {
+      capture: true,
+      passive: false,
+    });
+    scrollEventTarget.addEventListener("touchend", touchEndListener, {
+      capture: true,
+      passive: true,
+    });
     window.addEventListener("keydown", onKeyDown);
     document.addEventListener("click", onAnchorClick);
 
     return () => {
-      window.removeEventListener("wheel", onWheel);
-      window.removeEventListener("touchstart", onTouchStart);
-      window.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("touchend", onTouchEnd);
+      scrollEventTarget.removeEventListener("wheel", wheelListener);
+      scrollEventTarget.removeEventListener(
+        "touchstart",
+        touchStartListener,
+        captureListenerOptions,
+      );
+      scrollEventTarget.removeEventListener(
+        "touchmove",
+        touchMoveListener,
+        captureListenerOptions,
+      );
+      scrollEventTarget.removeEventListener(
+        "touchend",
+        touchEndListener,
+        captureListenerOptions,
+      );
       window.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("click", onAnchorClick);
       resetInteractionState();

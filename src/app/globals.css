@@ -47,13 +47,27 @@ img {
 }
 
 @media (max-width: 639px) {
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+  }
+
   .fitness-mobile-layout {
+    height: 100vh;
+    height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
     padding-left: 16px;
     padding-right: 16px;
+    scroll-snap-type: y mandatory;
+    -webkit-overflow-scrolling: touch;
   }
 
   .fitness-mobile-layout [data-section] {
-    min-height: 100svh;
+    min-height: 100vh;
+    min-height: 100dvh;
     scroll-margin-top: 0;
   }
 
@@ -63,17 +77,23 @@ img {
 
   .fitness-mobile-layout [data-native-scroll-section] {
     height: auto;
-    min-height: 100svh;
+    min-height: 100vh;
+    min-height: 100dvh;
   }
 
   .fitness-mobile-layout [data-native-scroll-section] > .fitness-section-content {
     height: auto;
-    min-height: 100svh;
+    min-height: 100vh;
+    min-height: 100dvh;
   }
 
   .fitness-mobile-layout [data-internal-scroll-section] {
-    height: 100svh;
-    min-height: 100svh;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   .fitness-mobile-layout
