@@ -11,9 +11,13 @@ type SectionScrollerProps = {
 const MAX_SCROLL_LOCK_MS = 1800;
 const INPUT_SILENCE_MS = 180;
 const INTERNAL_STEP_LOCK_MS = 1300;
+const MOBILE_LAYOUT_PADDING_PX = 0;
 const WHEEL_THRESHOLD = 36;
 const TOUCH_THRESHOLD = 48;
+const FAST_NATIVE_BOUNDARY_WHEEL_THRESHOLD = 160;
+const NATIVE_SECTION_BOUNDARY_EPSILON_PX = 2;
 const NATIVE_SECTION_END_BUFFER_PX = 32;
+const NATIVE_SECTION_NEAR_BOUNDARY_PX = 72;
 
 type SectionStepDetail = {
   direction: -1 | 1;
@@ -28,6 +32,11 @@ export function SectionScroller({ children }: SectionScrollerProps) {
   const lockedRef = useRef(false);
   const settleFrameRef = useRef<number | null>(null);
   const touchStartYRef = useRef<number | null>(null);
+  const touchSectionRef = useRef<HTMLElement | null>(null);
+  const touchStartBoundaryRef = useRef<{
+    down: boolean;
+    up: boolean;
+  } | null>(null);
   const touchUsedNativeScrollRef = useRef(false);
   const lastInputAtRef = useRef(0);
   const nativeWheelResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -55,13 +64,24 @@ export function SectionScroller({ children }: SectionScrollerProps) {
           window.getComputedStyle(section).display !== "none",
       );
 
+    const getMobileLayoutOffset = () =>
+      window.matchMedia("(max-width: 639px)").matches
+        ? MOBILE_LAYOUT_PADDING_PX
+        : 0;
+
+    const getSectionScrollTop = (section: HTMLElement) =>
+      Math.max(section.offsetTop - getMobileLayoutOffset(), 0);
+
     const getCurrentIndex = () => {
       const sections = getSections();
       if (!sections.length) {
         return 0;
       }
 
-      const thresholdY = window.scrollY + Math.min(window.innerHeight * 0.45, 280);
+      const thresholdY =
+        window.scrollY +
+        getMobileLayoutOffset() +
+        Math.min(window.innerHeight * 0.45, 280);
       const containingIndex = sections.findIndex(
         (section) =>
           thresholdY >= section.offsetTop &&
@@ -74,9 +94,11 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
       return sections.reduce((closestIndex, section, index) => {
         const closestDistance = Math.abs(
-          window.scrollY - sections[closestIndex].offsetTop,
+          window.scrollY - getSectionScrollTop(sections[closestIndex]),
         );
-        const sectionDistance = Math.abs(window.scrollY - section.offsetTop);
+        const sectionDistance = Math.abs(
+          window.scrollY - getSectionScrollTop(section),
+        );
         return sectionDistance < closestDistance ? index : closestIndex;
       }, 0);
     };
@@ -101,31 +123,95 @@ export function SectionScroller({ children }: SectionScrollerProps) {
         const maxScrollTop = section.scrollHeight - section.clientHeight;
 
         if (direction === 1) {
-          return section.scrollTop < maxScrollTop - 2;
+          return (
+            section.scrollTop <
+            maxScrollTop - NATIVE_SECTION_BOUNDARY_EPSILON_PX
+          );
         }
 
-        return section.scrollTop > 2;
+        return section.scrollTop > NATIVE_SECTION_BOUNDARY_EPSILON_PX;
       }
 
-      const sectionTop = section.offsetTop;
+      const sectionTop = getSectionScrollTop(section);
       const sectionBottom = sectionTop + section.offsetHeight;
       const maxScrollY =
-        Math.max(sectionBottom - window.innerHeight, sectionTop) +
+        Math.max(
+          sectionBottom - window.innerHeight + getMobileLayoutOffset(),
+          sectionTop,
+        ) +
         NATIVE_SECTION_END_BUFFER_PX;
 
       if (direction === 1) {
-        return window.scrollY < maxScrollY - 2;
+        return (
+          window.scrollY <
+          maxScrollY - NATIVE_SECTION_BOUNDARY_EPSILON_PX
+        );
       }
 
-      return window.scrollY > sectionTop + 2;
+      return (
+        window.scrollY >
+        sectionTop + NATIVE_SECTION_BOUNDARY_EPSILON_PX
+      );
     };
 
-    const isAtNativeBoundary = (
+    const getNativeBoundaryState = (
       section: HTMLElement | undefined,
       direction: -1 | 1,
-    ) => section?.hasAttribute("data-native-scroll-section")
-      ? !canScrollNativeSection(section, direction)
-      : false;
+    ) => {
+      if (!section) {
+        return null;
+      }
+
+      const isNativeScrollSection =
+        section.hasAttribute("data-native-scroll-section") ||
+        section.offsetHeight > window.innerHeight + 2;
+
+      if (!isNativeScrollSection) {
+        return null;
+      }
+
+      if (section.hasAttribute("data-internal-scroll-section")) {
+        const maxScrollTop = Math.max(
+          section.scrollHeight - section.clientHeight,
+          0,
+        );
+        const target = direction === 1 ? maxScrollTop : 0;
+
+        return {
+          distance: Math.abs(target - section.scrollTop),
+          isInternal: true,
+          target,
+        };
+      }
+
+      const sectionTop = getSectionScrollTop(section);
+      const sectionBottom = sectionTop + section.offsetHeight;
+      const maxScrollY =
+        Math.max(
+          sectionBottom - window.innerHeight + getMobileLayoutOffset(),
+          sectionTop,
+        ) +
+        NATIVE_SECTION_END_BUFFER_PX;
+      const target = direction === 1 ? maxScrollY : sectionTop;
+
+      return {
+        distance: Math.abs(target - window.scrollY),
+        isInternal: false,
+        target,
+      };
+    };
+
+    const isNearNativeBoundary = (
+      section: HTMLElement | undefined,
+      direction: -1 | 1,
+    ) => {
+      const state = getNativeBoundaryState(section, direction);
+      return Boolean(
+        section?.hasAttribute("data-native-scroll-section") &&
+          state &&
+          state.distance <= NATIVE_SECTION_NEAR_BOUNDARY_PX,
+      );
+    };
 
     const markInput = () => {
       lastInputAtRef.current = performance.now();
@@ -164,6 +250,8 @@ export function SectionScroller({ children }: SectionScrollerProps) {
     const resetInteractionState = () => {
       lockedRef.current = false;
       touchStartYRef.current = null;
+      touchSectionRef.current = null;
+      touchStartBoundaryRef.current = null;
       touchUsedNativeScrollRef.current = false;
       nativeWheelScrollRef.current = false;
       wheelDeltaRef.current = 0;
@@ -212,6 +300,27 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       }, clearDelay);
     };
 
+    const shouldSuppressSameDirection = (direction: -1 | 1) => {
+      const suppression = sameDirectionSuppressRef.current;
+      if (!suppression) {
+        return false;
+      }
+
+      if (suppression.direction !== direction) {
+        clearSameDirectionSuppress();
+        return false;
+      }
+
+      const elapsed = performance.now() - suppression.startedAt;
+      if (elapsed >= suppression.maxMs) {
+        clearSameDirectionSuppress();
+        return false;
+      }
+
+      scheduleSameDirectionSuppressClear();
+      return true;
+    };
+
     const unlockWhenSettled = (index: number) => {
       if (settleFrameRef.current) {
         cancelAnimationFrame(settleFrameRef.current);
@@ -227,13 +336,14 @@ export function SectionScroller({ children }: SectionScrollerProps) {
         }
 
         const now = performance.now();
-        const isAtTarget = Math.abs(window.scrollY - target.offsetTop) <= 2;
+        const targetScrollTop = getSectionScrollTop(target);
+        const isAtTarget = Math.abs(window.scrollY - targetScrollTop) <= 2;
         const inputIsSilent = now - lastInputAtRef.current >= INPUT_SILENCE_MS;
         const timedOut = now - startedAt >= MAX_SCROLL_LOCK_MS;
 
         if ((isAtTarget && inputIsSilent) || timedOut) {
           if (timedOut && !isAtTarget) {
-            window.scrollTo({ behavior: "auto", top: target.offsetTop });
+            window.scrollTo({ behavior: "auto", top: targetScrollTop });
           }
 
           lockedRef.current = false;
@@ -259,6 +369,74 @@ export function SectionScroller({ children }: SectionScrollerProps) {
         direction === -1 ? section.scrollHeight - section.clientHeight : 0;
     };
 
+    const unlockNativeBoundaryWhenSettled = (
+      section: HTMLElement,
+      targetScrollTop: number,
+      isInternal: boolean,
+    ) => {
+      if (settleFrameRef.current) {
+        cancelAnimationFrame(settleFrameRef.current);
+      }
+
+      const startedAt = performance.now();
+
+      const check = () => {
+        const now = performance.now();
+        const currentScrollTop = isInternal ? section.scrollTop : window.scrollY;
+        const isAtTarget =
+          Math.abs(currentScrollTop - targetScrollTop) <=
+          NATIVE_SECTION_BOUNDARY_EPSILON_PX;
+        const inputIsSilent = now - lastInputAtRef.current >= INPUT_SILENCE_MS;
+        const timedOut = now - startedAt >= MAX_SCROLL_LOCK_MS;
+
+        if ((isAtTarget && inputIsSilent) || timedOut) {
+          if (timedOut && !isAtTarget) {
+            if (isInternal) {
+              section.scrollTo({ behavior: "auto", top: targetScrollTop });
+            } else {
+              window.scrollTo({ behavior: "auto", top: targetScrollTop });
+            }
+          }
+
+          lockedRef.current = false;
+          wheelDeltaRef.current = 0;
+          return;
+        }
+
+        settleFrameRef.current = requestAnimationFrame(check);
+      };
+
+      settleFrameRef.current = requestAnimationFrame(check);
+    };
+
+    const scrollNativeSectionToBoundary = (
+      section: HTMLElement | undefined,
+      direction: -1 | 1,
+    ) => {
+      const state = getNativeBoundaryState(section, direction);
+      if (
+        !section ||
+        !state ||
+        state.distance <= NATIVE_SECTION_BOUNDARY_EPSILON_PX
+      ) {
+        return false;
+      }
+
+      lockedRef.current = true;
+      markInput();
+      wheelDeltaRef.current = 0;
+
+      const behavior = prefersReducedMotion ? "auto" : "smooth";
+      if (state.isInternal) {
+        section.scrollTo({ behavior, top: state.target });
+      } else {
+        window.scrollTo({ behavior, top: state.target });
+      }
+
+      unlockNativeBoundaryWhenSettled(section, state.target, state.isInternal);
+      return true;
+    };
+
     const scrollToIndex = (index: number, direction: -1 | 1) => {
       const sections = getSections();
       const target = sections[index];
@@ -272,7 +450,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       wheelDeltaRef.current = 0;
       window.scrollTo({
         behavior: prefersReducedMotion ? "auto" : "smooth",
-        top: target.offsetTop,
+        top: getSectionScrollTop(target),
       });
       unlockWhenSettled(index);
     };
@@ -345,13 +523,38 @@ export function SectionScroller({ children }: SectionScrollerProps) {
         return;
       }
 
+      if (shouldSuppressSameDirection(direction)) {
+        return;
+      }
+
       const sections = getSections();
       const currentIndex = getCurrentIndex();
       const currentSection = sections[currentIndex];
+      const currentSectionIsNative = Boolean(
+        currentSection?.hasAttribute("data-native-scroll-section"),
+      );
+      const currentSectionCanScrollNative = canScrollNativeSection(
+        currentSection,
+        direction,
+      );
+
       if (
-        !isAtNativeBoundary(currentSection, direction) &&
-        stepWithinSection(currentSection, direction)
+        currentSectionIsNative &&
+        currentSectionCanScrollNative &&
+        !isNearNativeBoundary(currentSection, direction)
       ) {
+        scrollNativeSectionToBoundary(currentSection, direction);
+        return;
+      }
+
+      const shouldTrySectionStep =
+        !currentSectionIsNative ||
+        !currentSectionCanScrollNative ||
+        Boolean(currentSection?.hasAttribute("data-boundary-step-section"));
+      const sectionStepped =
+        shouldTrySectionStep && stepWithinSection(currentSection, direction);
+
+      if (sectionStepped) {
         return;
       }
 
@@ -373,8 +576,29 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       const direction = event.deltaY > 0 ? 1 : -1;
       const currentSection = getSections()[getCurrentIndex()];
 
-      if (!lockedRef.current && canScrollNativeSection(currentSection, direction)) {
-        wheelDeltaRef.current = 0;
+      if (
+        !lockedRef.current &&
+        canScrollNativeSection(currentSection, direction) &&
+        !isNearNativeBoundary(currentSection, direction)
+      ) {
+        const wheelDeltaContinuesDirection =
+          wheelDeltaRef.current === 0 ||
+          (wheelDeltaRef.current > 0 ? 1 : -1) === direction;
+
+        wheelDeltaRef.current = wheelDeltaContinuesDirection
+          ? wheelDeltaRef.current + event.deltaY
+          : event.deltaY;
+        resetWheelDeltaSoon();
+
+        if (
+          Math.abs(wheelDeltaRef.current) >=
+          FAST_NATIVE_BOUNDARY_WHEEL_THRESHOLD
+        ) {
+          event.preventDefault();
+          scrollNativeSectionToBoundary(currentSection, direction);
+          return;
+        }
+
         markInput();
         markNativeWheelScroll();
         return;
@@ -431,6 +655,16 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       markInput();
       touchUsedNativeScrollRef.current = false;
       touchStartYRef.current = event.touches[0]?.clientY ?? null;
+      touchSectionRef.current =
+        event.target instanceof Element
+          ? event.target.closest<HTMLElement>("[data-section]")
+          : null;
+      touchStartBoundaryRef.current = touchSectionRef.current
+        ? {
+            down: isNearNativeBoundary(touchSectionRef.current, 1),
+            up: isNearNativeBoundary(touchSectionRef.current, -1),
+          }
+        : null;
     };
 
     const onTouchMove = (event: TouchEvent) => {
@@ -450,14 +684,19 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       }
 
       const direction = touchStartYRef.current - currentY > 0 ? 1 : -1;
-      const currentSection = getSections()[getCurrentIndex()];
-      if (canScrollNativeSection(currentSection, direction)) {
+      const currentSection =
+        touchSectionRef.current ?? getSections()[getCurrentIndex()];
+      if (
+        canScrollNativeSection(currentSection, direction) &&
+        !isNearNativeBoundary(currentSection, direction)
+      ) {
         touchUsedNativeScrollRef.current = true;
         markInput();
         return;
       }
 
-      if (Math.abs(touchStartYRef.current - currentY) > 8) {
+      const delta = touchStartYRef.current - currentY;
+      if (Math.abs(delta) > 8) {
         event.preventDefault();
         markInput();
       }
@@ -465,8 +704,12 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
     const onTouchEnd = (event: TouchEvent) => {
       const startY = touchStartYRef.current;
+      const touchedSection = touchSectionRef.current;
+      const startBoundary = touchStartBoundaryRef.current;
       const usedNativeScroll = touchUsedNativeScrollRef.current;
       touchStartYRef.current = null;
+      touchSectionRef.current = null;
+      touchStartBoundaryRef.current = null;
       touchUsedNativeScrollRef.current = false;
 
       if (startY === null) {
@@ -480,7 +723,17 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
       const delta = startY - endY;
       if (Math.abs(delta) >= TOUCH_THRESHOLD) {
+        const direction = delta > 0 ? 1 : -1;
+        const currentSection = touchedSection ?? getSections()[getCurrentIndex()];
+
         if (usedNativeScroll) {
+          if (
+            canScrollNativeSection(currentSection, direction) &&
+            !isNearNativeBoundary(currentSection, direction)
+          ) {
+            scrollNativeSectionToBoundary(currentSection, direction);
+          }
+
           return;
         }
 
@@ -488,9 +741,19 @@ export function SectionScroller({ children }: SectionScrollerProps) {
           return;
         }
 
-        const direction = delta > 0 ? 1 : -1;
-        const currentSection = getSections()[getCurrentIndex()];
-        if (canScrollNativeSection(currentSection, direction)) {
+        const isNativeSection = currentSection?.hasAttribute(
+          "data-native-scroll-section",
+        );
+        const startedAtBoundary =
+          direction === 1 ? startBoundary?.down : startBoundary?.up;
+        if (isNativeSection && !startedAtBoundary) {
+          return;
+        }
+
+        if (
+          canScrollNativeSection(currentSection, direction) &&
+          !isNearNativeBoundary(currentSection, direction)
+        ) {
           return;
         }
 
@@ -510,8 +773,13 @@ export function SectionScroller({ children }: SectionScrollerProps) {
         (event.key === " " && !event.shiftKey)
       ) {
         const currentSection = getSections()[getCurrentIndex()];
-        if (!lockedRef.current && canScrollNativeSection(currentSection, 1)) {
-          markInput();
+        if (
+          !lockedRef.current &&
+          canScrollNativeSection(currentSection, 1) &&
+          !isNearNativeBoundary(currentSection, 1)
+        ) {
+          event.preventDefault();
+          scrollNativeSectionToBoundary(currentSection, 1);
           return;
         }
 
@@ -526,8 +794,13 @@ export function SectionScroller({ children }: SectionScrollerProps) {
         (event.key === " " && event.shiftKey)
       ) {
         const currentSection = getSections()[getCurrentIndex()];
-        if (!lockedRef.current && canScrollNativeSection(currentSection, -1)) {
-          markInput();
+        if (
+          !lockedRef.current &&
+          canScrollNativeSection(currentSection, -1) &&
+          !isNearNativeBoundary(currentSection, -1)
+        ) {
+          event.preventDefault();
+          scrollNativeSectionToBoundary(currentSection, -1);
           return;
         }
 
@@ -578,7 +851,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
   }, [prefersReducedMotion]);
 
   return (
-    <div ref={containerRef} className="snap-y snap-mandatory">
+    <div ref={containerRef} className="fitness-mobile-layout snap-y snap-mandatory">
       {children}
     </div>
   );

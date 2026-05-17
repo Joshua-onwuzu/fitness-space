@@ -9,9 +9,11 @@ import { WHATSAPP_LINK } from "./lib/constants";
 
 type SectionStepEvent = CustomEvent<{
   direction: -1 | 1;
+  lockMs?: number;
+  silenceMs?: number;
 }>;
 
-type CoachingCardImage = (typeof coachingCardPairs)[number][number];
+export type CoachingCardImage = (typeof coachingCardPairs)[number][number];
 
 export const bodyFoodRevealTiming = {
   imageDelay: 0,
@@ -265,25 +267,40 @@ function BibiHeadline({ suffix }: { suffix: string }) {
   );
 }
 
-function CoachingCardAsset({
+type CoachingCardAssetProps = {
+  align?: "left" | "right";
+  card: CoachingCardImage;
+  className?: string;
+  delay?: number;
+  duration?: number;
+  imageClassName?: string;
+  initialY?: number;
+};
+
+export function CoachingCardAsset({
   align,
   card,
-  delay,
-  duration,
-}: {
-  align: "left" | "right";
-  card: CoachingCardImage;
-  delay: number;
-  duration: number;
-}) {
+  className = "",
+  delay = 0,
+  duration = bodyFoodRevealTiming.dailyCardDuration,
+  imageClassName,
+  initialY = bodyFoodRevealTiming.dailyCardLift,
+}: CoachingCardAssetProps) {
+  const alignmentClass =
+    align === "left"
+      ? "justify-self-end"
+      : align === "right"
+        ? "justify-self-start"
+        : "";
+
   return (
     <motion.div
       animate={{ opacity: 1, y: 0 }}
-      className={align === "left" ? "justify-self-end" : "justify-self-start"}
+      className={`${alignmentClass} ${className}`.trim()}
       exit={{ opacity: 0, y: align === "left" ? -18 : 18 }}
       initial={{
         opacity: 0,
-        y: bodyFoodRevealTiming.dailyCardLift,
+        y: initialY,
       }}
       transition={{
         delay,
@@ -292,7 +309,10 @@ function CoachingCardAsset({
     >
       <Image
         alt={`${card.title} coaching card`}
-        className="h-auto w-[43vw] max-w-[200px] drop-shadow-[0_28px_70px_rgba(0,0,0,0.38)] sm:max-w-[280px] md:w-[31vw] md:max-w-[390px]"
+        className={
+          imageClassName ??
+          "h-auto w-[43vw] max-w-[200px] drop-shadow-[0_28px_70px_rgba(0,0,0,0.38)] sm:max-w-[280px] md:w-[31vw] md:max-w-[390px]"
+        }
         height={card.height}
         priority={false}
         src={card.src}

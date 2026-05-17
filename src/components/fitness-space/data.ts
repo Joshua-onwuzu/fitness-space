@@ -391,7 +391,7 @@ export const finalTestimonials = [
     id: "wendy",
     name: "Wendy",
     quote:
-      "By week 2 my clothes were fitting differently. I had not changed what I ate just how I ate it.",
+      "By week two my clothes were fitting differently. I had not changed what I ate just how I ate it.",
     rotation: -7.73,
     wrapper: {
       height: 414,

@@ -18,6 +18,7 @@ type ScrollSectionProps = {
   intensity?: number;
   mobileNativeScroll?: boolean;
   nativeScroll?: boolean;
+  stepAtNativeBoundary?: boolean;
 };
 
 export function ScrollSection({
@@ -29,6 +30,7 @@ export function ScrollSection({
   intensity = 64,
   mobileNativeScroll = false,
   nativeScroll = false,
+  stepAtNativeBoundary = false,
 }: ScrollSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -39,6 +41,8 @@ export function ScrollSection({
     isMobileViewport && (isOverflowingViewport || mobileNativeScroll);
   const usesNativeScrollLayout = nativeScroll || usesMobileOverflowLayout;
   const usesMobileInternalScroll = isMobileViewport && usesNativeScrollLayout;
+  const centersShortMobileContent =
+    isMobileViewport && mobileNativeScroll && !isOverflowingViewport;
   const sectionSizingClass = usesNativeScrollLayout
     ? usesMobileInternalScroll
       ? "h-svh overflow-y-auto overscroll-contain"
@@ -51,6 +55,9 @@ export function ScrollSection({
     : "h-full";
   const mobileNativeVisibilityClass = mobileNativeScroll
     ? "max-sm:!translate-y-0 max-sm:!opacity-100"
+    : "";
+  const shortMobileContentCenterClass = centersShortMobileContent
+    ? "max-sm:!items-center max-sm:!justify-center"
     : "";
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -121,6 +128,7 @@ export function ScrollSection({
   return (
     <section
       data-section
+      data-boundary-step-section={stepAtNativeBoundary ? "" : undefined}
       data-internal-scroll-section={usesMobileInternalScroll ? "" : undefined}
       data-native-scroll-section={usesNativeScrollLayout ? "" : undefined}
       id={id}
@@ -128,7 +136,7 @@ export function ScrollSection({
       className={`relative snap-start bg-black text-white ${sectionSizingClass} ${className}`}
     >
       <motion.div
-        className={`relative w-full ${contentSizingClass} ${mobileNativeVisibilityClass} ${contentClassName}`}
+        className={`fitness-section-content relative w-full ${contentSizingClass} ${mobileNativeVisibilityClass} ${contentClassName} ${shortMobileContentCenterClass}`}
         ref={contentRef}
         style={
           !animateOnScroll || usesNativeScrollLayout || prefersReducedMotion

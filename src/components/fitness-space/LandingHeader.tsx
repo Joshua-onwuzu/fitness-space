@@ -3,9 +3,21 @@ import Image from "next/image";
 import { assets } from "./data";
 import { WHATSAPP_LINK } from "./lib/constants";
 
-export function LandingHeader() {
+type LandingHeaderProps = {
+  className?: string;
+  mobileFlow?: boolean;
+};
+
+export function LandingHeader({
+  className = "",
+  mobileFlow = false,
+}: LandingHeaderProps) {
+  const positionClass = mobileFlow
+    ? "relative z-50 w-full py-4"
+    : "absolute left-1/2 top-0 z-50 w-full -translate-x-1/2 px-[25px] py-4 sm:fixed sm:px-6 lg:w-[1179.5px] lg:px-10";
+
   return (
-    <header className="fixed top-0 left-1/2 -translate-x-1/2 z-50 w-full lg:w-[1179.5px] px-3 py-4 max-sm:absolute max-sm:px-[25px] sm:px-6 lg:px-10">
+    <header className={`${positionClass} ${className}`}>
       <div className="mx-auto flex w-full items-center justify-between gap-4">
         <a aria-label="Fitness Space home" className="block" href="#hero">
           <Image

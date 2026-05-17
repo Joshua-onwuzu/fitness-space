@@ -4,6 +4,7 @@ import Image from "next/image";
 import { assets, benefitCards } from "./data";
 import { FadeInOnScroll } from "./FadeInOnScroll";
 import { IntroBenefits } from "./IntroBenefits";
+import { LandingHeader } from "./LandingHeader";
 import { ScrollSection } from "./ScrollSection";
 import { WHATSAPP_LINK } from "./lib/constants";
 
@@ -21,11 +22,6 @@ export function HeroSection() {
   const [index, setIndex] = useState(0);
   const [fade, setFade] = useState(true);
 
-  // mobile typewriter state
-  const [mobileText, setMobileText] = useState("");
-  const [mobileIndex, setMobileIndex] = useState(0);
-  const [isDeleting, setIsDeleting] = useState(false);
-
   // DESKTOP: fade rotation
   useEffect(() => {
     const interval = setInterval(() => {
@@ -40,43 +36,21 @@ export function HeroSection() {
     return () => clearInterval(interval);
   }, []);
 
-  // MOBILE: typewriter (left → right)
-  useEffect(() => {
-    const current = rotatingTexts[mobileIndex];
-    const speed = isDeleting ? 45 : 85;
-
-    const timeout = setTimeout(() => {
-      if (!isDeleting) {
-        const next = current.substring(0, mobileText.length + 1);
-        setMobileText(next);
-
-        if (next === current) {
-          setTimeout(() => setIsDeleting(true), 1000);
-        }
-      } else {
-        const next = current.substring(0, mobileText.length - 1);
-        setMobileText(next);
-
-        if (next === "") {
-          setIsDeleting(false);
-          setMobileIndex((prev) => (prev + 1) % rotatingTexts.length);
-        }
-      }
-    }, speed);
-
-    return () => clearTimeout(timeout);
-  }, [mobileText, isDeleting, mobileIndex]);
-
   return (
     <ScrollSection
       animateOnScroll={false}
-      className="px-3 pb-6 pt-[71px] sm:pt-[149px] sm:px-6 lg:px-10"
-      contentClassName="flex items-center justify-center max-sm:block"
+      className="px-0 py-0 sm:px-6 sm:pb-6 sm:pt-[149px] lg:px-10"
+      contentClassName="flex flex-col items-center justify-start sm:justify-center"
       id="hero"
       intensity={38}
+      mobileNativeScroll
     >
-      <FadeInOnScroll className="w-full max-w-[1284px]" initialVisible>
-        <article className="relative min-h-[115svh] sm:min-h-[100svh] w-full overflow-hidden rounded-[22px] bg-[#f35d0c]">
+      <FadeInOnScroll
+        className="flex w-full max-w-[1284px] flex-col items-center justify-start sm:justify-center"
+        initialVisible
+      >
+        <LandingHeader className="sm:hidden" mobileFlow />
+        <article className="relative hidden min-h-[100svh] w-full overflow-hidden rounded-[22px] bg-[#f35d0c] sm:block">
           <Image
             alt=""
             className="absolute inset-0 h-full w-full object-cover"
@@ -90,9 +64,7 @@ export function HeroSection() {
           <div className="relative z-10 flex h-full max-w-full flex-col justify-center px-7 pt-[5rem] max-sm:w-full max-sm:text-center max-sm:px-[1rem] max-sm:pt-[50px] sm:px-12 sm:pt-[9rem] lg:pl-[83px] lg:pr-[54px] lg:pt-[9rem]">
             <h1 className="text-[40px] font-bold text-white sm:text-5xl lg:text-[48px] leading-tight">
               <span className="block">Meet Bibi.</span>
-
-              {/* DESKTOP */}
-              <span className="hidden sm:block leading-tight">
+              <span className="block leading-tight">
                 <span className="block">Your AI Coach for</span>
 
                 <span className="block">
@@ -107,19 +79,6 @@ export function HeroSection() {
                     >
                       {rotatingTexts[index]}
                     </span>
-                  </span>
-                </span>
-              </span>
-
-              {/* MOBILE */}
-              <span className="sm:hidden block text-center">
-                Your AI Coach for Sustainable
-              </span>
-
-              <span className="sm:hidden flex w-full justify-center">
-                <span className="min-h-[42px] flex items-center">
-                  <span className="whitespace-nowrap border-r-2 border-black pr-1 animate-pulse text-[38px] text-black">
-                    {mobileText}
                   </span>
                 </span>
               </span>
@@ -154,12 +113,52 @@ export function HeroSection() {
 
           <Image
             alt="Bibi AI coach"
-            className="pointer-events-none absolute right-[-26px] z-10 w-auto object-contain max-sm:bottom-[-127px] max-sm:right-[46px] max-sm:h-[360px] sm:right-0 sm:h-[82%] h-[556px] bottom-[62px]"
+            className="pointer-events-none absolute bottom-[62px] right-0 z-10 h-[82%] w-auto object-contain"
             height={1448}
             priority
             src={assets.coach}
             width={1086}
           />
+        </article>
+
+        <article className="relative h-[798px] w-full max-w-[390px] overflow-hidden rounded-[22px] bg-[#f54900] text-white sm:hidden">
+          <div className="absolute left-1/2 top-0 h-[798px] w-[1284px] -translate-x-1/2 rounded-[10px] bg-[linear-gradient(269.9205066135185deg,#f35d0c_5.875%,#f54900_93.728%)]" />
+          <Image
+            alt=""
+            className="absolute left-[-714px] top-[-180px] h-[1000px] w-[1636px] max-w-none object-cover"
+            height={1256}
+            priority
+            src={assets.heroPattern}
+            width={2054}
+          />
+          <Image
+            alt="Bibi AI coach"
+            className="pointer-events-none absolute bottom-[-127px] right-[46px] h-[360px] w-[269px] max-w-none object-cover"
+            height={1448}
+            priority
+            src={assets.coach}
+            width={1086}
+          />
+          <h1 className="absolute left-1/2 top-[164px] w-[321px] -translate-x-1/2 -translate-y-1/2 whitespace-pre-wrap text-center text-[42px] font-bold capitalize leading-[99.915%] text-white">
+            <span className="mb-0 block">Meet Bibi.</span>
+            <span className="block">Your AI Coach</span>
+            <span className="block">For Sustainable</span>
+            <span className="block">Weight Loss.</span>
+          </h1>
+          <p className="absolute left-[198.5px] top-[327px] w-[313px] -translate-x-1/2 -translate-y-1/2 text-center text-[14px] font-normal leading-normal text-white">
+            Bibi personalises your meals, selects your workouts, guides your
+            fasting and tracks your daily habits — all based on your body, your
+            food and your goals. Real results. Starting free.
+          </p>
+          <a
+            className="absolute left-[calc(50%+0.25px)] top-[calc(50%+20.25px)] inline-flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[7px] bg-white px-[14px] py-[12px] text-center text-[14px] font-semibold leading-normal text-black transition hover:bg-white/90"
+            href={WHATSAPP_LINK}
+          >
+            &nbsp;&nbsp;Meet Bibi — It&apos;s Free&nbsp;
+          </a>
+          <p className="absolute left-1/2 top-[497px] w-[239px] -translate-x-1/2 -translate-y-1/2 text-center text-[14px] font-semibold leading-normal text-white">
+            No meal plans. No starvation. No guesswork. Just Bibi.
+          </p>
         </article>
       </FadeInOnScroll>
     </ScrollSection>

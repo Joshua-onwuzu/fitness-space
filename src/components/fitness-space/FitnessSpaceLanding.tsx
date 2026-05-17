@@ -7,6 +7,8 @@ import {
   DailySystemPointsSection,
   HealthScorePayoffSection,
   MealPlanFailureSection,
+  MobileCardSection,
+  MobilePostHealthScoreSections,
   PowerfulFeaturesSection,
   RemainingSystemSections,
   X2FrameworkSection,
@@ -16,7 +18,7 @@ import { HeroSection, IntroSection, StatementSection } from "./sections";
 export function FitnessSpaceLanding() {
   return (
     <main className="bg-black text-white">
-      <LandingHeader />
+      <LandingHeader className="hidden sm:block" />
       <SectionScroller>
         <HeroSection />
         <StatementSection
@@ -38,6 +40,7 @@ export function FitnessSpaceLanding() {
         />
         <IntroSection id="intro" />
         <BodyFoodSection />
+        <MobileCardSection />
         <DataCoachCtaSection />
         <PowerfulFeaturesSection />
         <X2FrameworkSection />
@@ -45,6 +48,7 @@ export function FitnessSpaceLanding() {
         <MealPlanFailureSection />
         <BibiDifferentSection />
         <HealthScorePayoffSection />
+        <MobilePostHealthScoreSections />
         <RemainingSystemSections />
       </SectionScroller>
     </main>

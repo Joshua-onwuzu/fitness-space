@@ -24,8 +24,17 @@ body {
   overscroll-behavior: none;
 }
 
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
 html::-webkit-scrollbar,
 body::-webkit-scrollbar {
+  display: none;
+}
+
+*::-webkit-scrollbar {
   display: none;
 }
 
@@ -35,4 +44,41 @@ body::-webkit-scrollbar {
 
 img {
   display: block;
+}
+
+@media (max-width: 639px) {
+  .fitness-mobile-layout {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .fitness-mobile-layout [data-section] {
+    min-height: 100svh;
+    scroll-margin-top: 0;
+  }
+
+  .fitness-mobile-layout [data-section] > .fitness-section-content {
+    height: 100%;
+  }
+
+  .fitness-mobile-layout [data-native-scroll-section] {
+    height: auto;
+    min-height: 100svh;
+  }
+
+  .fitness-mobile-layout [data-native-scroll-section] > .fitness-section-content {
+    height: auto;
+    min-height: 100svh;
+  }
+
+  .fitness-mobile-layout [data-internal-scroll-section] {
+    height: 100svh;
+    min-height: 100svh;
+  }
+
+  .fitness-mobile-layout
+    [data-internal-scroll-section]
+    > .fitness-section-content {
+    min-height: 100%;
+  }
 }
