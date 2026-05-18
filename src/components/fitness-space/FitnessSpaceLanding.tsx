@@ -23,14 +23,13 @@ export function FitnessSpaceLanding() {
         <HeroSection />
         <StatementSection
           body={[
-            "Not for your jollof rice. Not for your eba. Not for your budget or your schedule.",
-            "You started strong and fell off. Not because you are the problem.",
+            "Not for your jollof rice. Not for your eba. Not for your budget or your schedule. You started strong and fell off. Not because you are the problem.",
           ]}
           firstLine="Every Diet You Have Tried"
           highlight="Someone Else"
           id="diet"
           secondLine="Was Built For"
-          trailing="."
+          trailing=""
         />
         <StatementSection
           firstLine="Because The System Was"

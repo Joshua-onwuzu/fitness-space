@@ -14,7 +14,7 @@ const rotatingTexts = [
   "Weight Loss.",
   "Healthy Habits.",
   "Insulin Resistance.",
-  "Lifestyle Change.",
+  "Lifestyle Changes.",
 ];
 
 export function HeroSection() {
@@ -61,7 +61,7 @@ export function HeroSection() {
           />
 
           {/* CONTENT */}
-          <div className="relative z-10 flex h-full max-w-full flex-col justify-center px-7 pt-[5rem] max-sm:w-full max-sm:text-center max-sm:px-[1rem] max-sm:pt-[50px] sm:px-12 sm:pt-[9rem] lg:pl-[83px] lg:pr-[54px] lg:pt-[9rem]">
+          <div className="relative z-10 flex h-full max-w-full flex-col justify-center lg:justify-start lg:translate-y-4 px-7 pt-[5rem] sm:px-12 lg:pl-[83px] lg:pr-[54px] lg:pt-[8rem]">
             <h1 className="text-[40px] font-bold text-white sm:text-5xl lg:text-[48px] leading-tight">
               <span className="block">Meet Bibi.</span>
               <span className="block leading-tight">
@@ -139,22 +139,38 @@ export function HeroSection() {
             src={assets.coach}
             width={1086}
           />
-          <h1 className="absolute left-1/2 top-[164px] w-[321px] -translate-x-1/2 -translate-y-1/2 whitespace-pre-wrap text-center text-[42px] font-bold capitalize leading-[99.915%] text-white">
+          <h1 className="absolute left-1/2 top-[164px] w-[321px] -translate-x-1/2 -translate-y-1/2 text-center text-[42px] font-bold capitalize leading-[111.915%] text-white ">
             <span className="mb-0 block">Meet Bibi.</span>
-            <span className="block">Your AI Coach</span>
-            <span className="block">For Sustainable</span>
-            <span className="block">Weight Loss.</span>
+            <span className="sm:hidden block text-center">
+              Your AI Coach for Sustainable
+            </span>
+
+            <span className="sm:hidden flex w-full justify-center">
+              <span className="min-h-[42px] flex items-center">
+                <span className="whitespace-nowrap  text-[38px] text-black">
+                  {rotatingTexts[index]}
+                </span>
+              </span>
+            </span>
           </h1>
-          <p className="absolute left-[198.5px] top-[327px] w-[313px] -translate-x-1/2 -translate-y-1/2 text-center text-[14px] font-normal leading-normal text-white">
+          <p className="absolute left-1/2 top-[327px] w-[90%] max-w-[313px] -translate-x-1/2 -translate-y-1/2 text-center text-[14px] font-normal leading-normal text-white">
             Bibi personalises your meals, selects your workouts, guides your
             fasting and tracks your daily habits — all based on your body, your
             food and your goals. Real results. Starting free.
           </p>
           <a
-            className="absolute left-[calc(50%+0.25px)] top-[calc(50%+20.25px)] inline-flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[7px] bg-white px-[14px] py-[12px] text-center text-[14px] font-semibold leading-normal text-black transition hover:bg-white/90"
+            className="absolute left-1/2 top-[calc(50%+20.25px)] flex w-[260px] -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-2 rounded-[7px] bg-white px-4 py-3 text-[14px] font-semibold text-black transition hover:bg-white/90"
             href={WHATSAPP_LINK}
           >
-            &nbsp;&nbsp;Meet Bibi — It&apos;s Free&nbsp;
+            <Image
+              src={assets.whatsappIcon}
+              alt="WhatsApp"
+              className="h-8 w-8"
+              height={16}
+              priority
+              width={16}
+            />
+            Meet Bibi — It&apos;s Free
           </a>
           <p className="absolute left-1/2 top-[497px] w-[239px] -translate-x-1/2 -translate-y-1/2 text-center text-[14px] font-semibold leading-normal text-white">
             No meal plans. No starvation. No guesswork. Just Bibi.
@@ -196,18 +212,33 @@ export function StatementSection({
             {eyebrow}
           </p>
         ) : null}
-        <h2 className="text-4xl font-normal capitalize leading-tight sm:leading-[1.2] text-white max-sm:w-[287px] max-sm:max-w-full max-sm:text-[42px] max-sm:font-medium max-sm:leading-normal sm:text-5xl lg:text-[64px]">
-          {firstLine}
-          <br />
-          {secondLine} <span className="text-[#f35d0c]">{highlight}</span>
-          {trailing}
+        <h2 className="text-4xl font-normal leading-tight sm:leading-[1.2] text-white max-sm:w-[277px] max-sm:text-[42px] max-sm:font-medium max-sm:leading-normal sm:text-5xl lg:text-[64px]">
+          <span className="max-sm:block sm:inline">{firstLine}</span>
+
+          <span className="max-sm:block sm:inline">
+            {secondLine} <span className="text-[#f35d0c]">{highlight}</span>
+          </span>
+
+          {trailing ? (
+            <span className="max-sm:block sm:inline">{trailing}</span>
+          ) : null}
         </h2>
         {body ? (
-          <div className="mx-auto mt-6 max-w-[760px] space-y-1 text-sm capitalize leading-6 text-white/85 max-sm:w-[268px] max-sm:max-w-full max-sm:leading-normal sm:text-base">
-            {body.map((line) => (
-              <p key={line}>{line}</p>
-            ))}
-          </div>
+          <>
+            {/* 📱 MOBILE: stacked lines (your design) */}
+            <div className="sm:hidden mx-auto mt-6 max-w-[251px] space-y-1 text-sm leading-[1.5] text-white text-center">
+              {body.map((line, i) => (
+                <p key={i} className="block">
+                  {line}
+                </p>
+              ))}
+            </div>
+
+            {/* 💻 DESKTOP: normal paragraph */}
+            <div className="hidden sm:block mx-auto mt-6 max-w-[500px] text-sm leading-6 text-white">
+              {body.filter((line) => line !== "").join(" ")}
+            </div>
+          </>
         ) : null}
       </FadeInOnScroll>
     </ScrollSection>
