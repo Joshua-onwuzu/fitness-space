@@ -474,12 +474,12 @@ export function PowerfulFeaturesSection() {
       intensity={50}
       mobileNativeScroll
     >
-      <div className="flex h-full w-full flex-col items-center pt-[91px] md:pt-[11.5svh]">
+      <div className="flex h-full w-full flex-col items-center pt-[91px] md:pt-[7svh] lg:pt-[0svh]">
         <h2 className="w-[331px] text-center text-[32px] font-normal capitalize leading-[38px] text-white md:w-auto md:whitespace-nowrap md:text-[clamp(2rem,4.57svh,50px)] md:leading-normal">
           Six Powerful Features. One Smart Coach.
         </h2>
 
-        {/* ================= DESKTOP (UNCHANGED) ================= */}
+        {/* ================= DESKTOP ================= */}
         <div className="relative mt-[4svh] hidden h-[717px] w-full md:grid md:grid-cols-3 md:grid-rows-2">
           <span className="pointer-events-none absolute bottom-0 left-1/3 top-0 w-px bg-white/10" />
           <span className="pointer-events-none absolute bottom-0 left-2/3 top-0 w-px bg-white/10" />
@@ -499,7 +499,9 @@ export function PowerfulFeaturesSection() {
                   {feature.title}
                 </h3>
 
-                <p className="mt-5 text-[14px] leading-7">{feature.body}</p>
+                <p className="mt-5 text-[14px] leading-7 font-normal">
+                  {feature.body}
+                </p>
               </div>
             </article>
           ))}
@@ -515,7 +517,10 @@ export function PowerfulFeaturesSection() {
             }
 
             return (
-              <article className="absolute inset-0 text-white" key={feature.number}>
+              <article
+                className="absolute inset-0 text-white"
+                key={feature.number}
+              >
                 <p
                   className="absolute right-[67px] text-[72px] font-bold leading-none text-white/[0.04]"
                   style={{ top: layout.numberTop }}
@@ -524,7 +529,7 @@ export function PowerfulFeaturesSection() {
                 </p>
 
                 <h3
-                  className="absolute left-[68px] whitespace-nowrap text-[24px] font-bold leading-[30px]"
+                  className="absolute left-[68px] whitespace-nowrap text-[24px] font-bold leading-[30px] font-normal"
                   style={{ top: layout.titleTop, width: layout.titleWidth }}
                 >
                   {feature.title}
@@ -698,38 +703,52 @@ export function DailySystemPointsSection() {
 export function MealPlanFailureSection() {
   return (
     <ScrollSection
-      className="px-0 py-10 sm:px-8 lg:px-12"
+      className="px-5 py-12 sm:px-8 lg:px-12"
       contentClassName="mx-auto flex max-w-[1284px] items-center justify-center"
       id="meal-plan-failure"
       intensity={42}
-      mobileNativeScroll
     >
-      <FadeInOnScroll className="relative flex h-[695px] w-full max-w-[389px] flex-col items-center bg-black text-center text-white md:h-full md:max-w-none md:justify-center">
-        <h2 className="mt-[100px] w-[338px] text-[40px] font-normal leading-[40px] text-white md:mt-0 md:max-w-[1115px] md:w-auto md:text-[64px] md:leading-tight">
+      <FadeInOnScroll className="flex w-full flex-col items-center justify-center text-center text-white">
+        {/* DESKTOP */}
+        <h2 className="hidden md:block max-w-[1115px] text-[64px] font-normal leading-tight">
           Why Every Meal Plan
           <br />
           You Have Tried Has <span className="text-[#f54900]">Failed You</span>
         </h2>
-        <div className="mt-[13px] w-[338px] md:mt-[4svh] md:max-w-[1098px] md:space-y-[0.9svh] md:text-[clamp(0.875rem,1.46svh,16px)] md:leading-[1.875] text-white/50">
-          {/* MOBILE ONLY - single paragraph */}
-          <p className="block text-[18px] font-normal leading-[25px] md:hidden">
-            Food prices in Nigeria change weekly. Your meal plan does not. The
-            ingredients it needs are not always in your market. You travel. You
-            attend owambes. You visit family. The plan breaks. Meal plans teach
-            you nothing. When they end, you are lost. Most are built for Western
-            foods. Not for eba, egusi or jollof rice.
-          </p>
 
-          {/* DESKTOP VERSION - unchanged */}
-          <div className="hidden md:block space-y-[0.9svh]">
+        {/* MOBILE */}
+        <h2 className="md:hidden w-[349px] text-center text-[32px] font-medium leading-[1.5] tracking-tight text-white">
+          <span className="block"> Why Every Meal Plan You Have Tried Has</span>
+          <span className="block">
+            <span className="text-[#f54900]">Failed You</span>
+          </span>
+        </h2>
+
+        {/* TEXT CONTENT */}
+        <div className="mt-8 max-w-[1098px] text-white">
+          {/* MOBILE */}
+          <div className="md:hidden w-[275px] space-y-4 text-center text-[14px] leading-[1.5] text-white">
+            <p>
+              Food prices in Nigeria change weekly. Your meal plan does not. The
+              ingredients it needs are not always in your market.You travel. You
+              attend owambes. You visit family. The plan breaks. Meal plans
+              teach you nothing. When they end, you are lost.Most are built for
+              Western foods. Not for eba, egusi or jollof rice.
+            </p>
+          </div>
+
+          {/* DESKTOP */}
+          <div className="hidden md:block space-y-5 text-[16px] leading-[0.875] text-white">
             <p>
               Food prices in Nigeria change weekly. Your meal plan does not. The
               ingredients it needs are not always in your market.
             </p>
+
             <p>
               You travel. You attend owambes. You visit family. The plan breaks.
               Meal plans teach you nothing. When they end, you are lost.
             </p>
+
             <p>
               Most are built for Western foods. Not for eba, egusi or jollof
               rice.
@@ -778,17 +797,19 @@ export function BibiDifferentSection() {
             </a>
           </div>
         </div>
-        <div className="relative z-10 md:hidden">
-          <h2 className="absolute left-[36px] top-[121px] w-[328px] text-left text-[48px] font-bold leading-[53px] text-white">
+        <div className="relative z-10 flex flex-col items-center text-center md:hidden">
+          <h2 className="mt-[121px] w-[328px] text-[42px] font-bold leading-[53px] text-white">
             Bibi is different
           </h2>
-          <p className="absolute left-[36px] top-[186px] w-[328px] text-left text-[14px] font-normal leading-[23px] text-white/70">
-            Bibi works with whatever you have, At a restaurant, at a party, at
+
+          <p className="mt-5 w-[328px] text-[14px] font-normal leading-[23px] text-white">
+            Bibi works with whatever you have. At a restaurant, at a party, at
             your mother’s house? She applies the system to your real life —
             every single time.
           </p>
+
           <a
-            className="absolute left-[64px] top-[300px] inline-flex h-[50px] w-[273px] items-center justify-center rounded-[7px] bg-[#f54900] text-center text-sm font-semibold text-white transition hover:bg-[#ff6420]"
+            className="mt-10 flex h-[50px] w-[273px] items-center justify-center rounded-[7px] bg-[#f54900] text-sm font-semibold text-white transition hover:bg-[#ff6420]"
             href={WHATSAPP_LINK}
           >
             Meet Bibi — It’s Free
