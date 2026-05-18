@@ -10,7 +10,10 @@ import { WHATSAPP_LINK } from "./lib/constants";
 type SectionStepEvent = CustomEvent<{
   direction: -1 | 1;
   lockMs?: number;
+  sameDirectionMaxMs?: number;
+  sameDirectionSilenceMs?: number;
   silenceMs?: number;
+  suppressDirectionChanges?: boolean;
 }>;
 
 export type CoachingCardImage = (typeof coachingCardPairs)[number][number];
@@ -25,11 +28,15 @@ export const bodyFoodRevealTiming = {
   hiddenScale: 0.98,
   dailyCardDelay: 0,
   dailyShrinkDelay: 0,
-  dailyCardDuration: 0.52,
+  dailyCardDuration: 0.26,
   dailyNextCardDuration: 0,
-  dailyPairExitDuration: 0.16,
+  dailyPairExitDuration: 0.12,
   dailyCardLift: 18,
-  dailyShrinkDuration: 0.9,
+  dailyShrinkDuration: 0.36,
+  firstStepLockMs: 380,
+  sameDirectionMaxMs: 1200,
+  sameDirectionSilenceMs: 80,
+  stepLockMs: 160,
 } as const;
 
 const revealVariants = {
@@ -80,6 +87,7 @@ export function BodyFoodReveal() {
     stage === 1
       ? bodyFoodRevealTiming.dailyCardDuration
       : bodyFoodRevealTiming.dailyNextCardDuration;
+  const imageTargetScale = stage === 0 ? 1 : dailyImageScale;
 
   useEffect(() => {
     stageRef.current = stage;
@@ -87,13 +95,17 @@ export function BodyFoodReveal() {
 
   useEffect(() => {
     const updateScale = () => {
-      setDailyImageScale(getDailyImageScale());
+      const nextScale = getDailyImageScale();
+      setDailyImageScale(nextScale);
+    };
+    const onResize = () => {
+      updateScale();
     };
 
     updateScale();
-    window.addEventListener("resize", updateScale);
+    window.addEventListener("resize", onResize);
     return () => {
-      window.removeEventListener("resize", updateScale);
+      window.removeEventListener("resize", onResize);
     };
   }, []);
 
@@ -104,7 +116,8 @@ export function BodyFoodReveal() {
     }
 
     const onSectionStep = (event: Event) => {
-      const direction = (event as SectionStepEvent).detail.direction;
+      const stepEvent = event as SectionStepEvent;
+      const direction = stepEvent.detail.direction;
       const currentStage = stageRef.current;
       const nextStage = Math.min(
         Math.max(currentStage + direction, 0),
@@ -116,6 +129,16 @@ export function BodyFoodReveal() {
       }
 
       event.preventDefault();
+      stepEvent.detail.lockMs =
+        currentStage === 0 || nextStage === 0
+          ? bodyFoodRevealTiming.firstStepLockMs
+          : bodyFoodRevealTiming.stepLockMs;
+      stepEvent.detail.silenceMs = 0;
+      stepEvent.detail.sameDirectionMaxMs =
+        bodyFoodRevealTiming.sameDirectionMaxMs;
+      stepEvent.detail.sameDirectionSilenceMs =
+        bodyFoodRevealTiming.sameDirectionSilenceMs;
+      stepEvent.detail.suppressDirectionChanges = true;
       stageRef.current = nextStage;
       setStage(nextStage);
       setAnimationCycle((cycle) => cycle + 1);
@@ -174,7 +197,7 @@ export function BodyFoodReveal() {
             variants={revealVariants}
           >
             <motion.div
-              animate={{ scale: stage === 0 ? 1 : dailyImageScale }}
+              animate={{ scale: imageTargetScale }}
               className="h-full w-auto"
               transition={
                 prefersReducedMotion

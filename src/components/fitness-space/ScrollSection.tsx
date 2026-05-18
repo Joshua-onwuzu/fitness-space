@@ -14,6 +14,7 @@ type ScrollSectionProps = {
   children: ReactNode;
   className?: string;
   contentClassName?: string;
+  desktopStepSection?: boolean;
   id?: string;
   intensity?: number;
   mobileNativeScroll?: boolean;
@@ -26,6 +27,7 @@ export function ScrollSection({
   children,
   className = "",
   contentClassName = "",
+  desktopStepSection = false,
   id,
   intensity = 64,
   mobileNativeScroll = false,
@@ -129,6 +131,7 @@ export function ScrollSection({
     <section
       data-section
       data-boundary-step-section={stepAtNativeBoundary ? "" : undefined}
+      data-desktop-step-section={desktopStepSection ? "" : undefined}
       data-internal-scroll-section={usesMobileInternalScroll ? "" : undefined}
       data-native-scroll-section={usesNativeScrollLayout ? "" : undefined}
       id={id}

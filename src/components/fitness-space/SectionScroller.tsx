@@ -11,11 +11,22 @@ type SectionScrollerProps = {
 const MAX_SCROLL_LOCK_MS = 1800;
 const INPUT_SILENCE_MS = 180;
 const INTERNAL_STEP_LOCK_MS = 1300;
+const DESKTOP_SECTION_SCROLL_MS = 240;
+const DESKTOP_POST_LOCK_WHEEL_SUPPRESS_SILENCE_MS = 88;
+const DESKTOP_POST_LOCK_WHEEL_SUPPRESS_MAX_MS = 720;
+const DESKTOP_STEP_HANDOFF_WHEEL_SUPPRESS_SILENCE_MS = 80;
+const DESKTOP_STEP_HANDOFF_WHEEL_SUPPRESS_MAX_MS = 1200;
+const DESKTOP_POST_LOCK_NEW_GESTURE_DELTA_RISE = 12;
+const DESKTOP_POST_LOCK_NEW_GESTURE_MIN_MS = 140;
 const MOBILE_LAYOUT_PADDING_PX = 0;
-const WHEEL_THRESHOLD = 36;
+const WHEEL_THRESHOLD = 32;
+const DESKTOP_SAME_DIRECTION_CHANGE_RELEASE_MIN_MS = 96;
+const DESKTOP_SAME_DIRECTION_CHANGE_RELEASE_DELTA = WHEEL_THRESHOLD;
+const DESKTOP_SAME_DIRECTION_REPEAT_RELEASE_MIN_MS = 140;
+const DESKTOP_SAME_DIRECTION_REPEAT_RELEASE_DELTA = WHEEL_THRESHOLD;
+const DESKTOP_SAME_DIRECTION_REPEAT_RELEASE_DELTA_RISE = 12;
 const TOUCH_THRESHOLD = 48;
 const TOUCH_MOVE_STEP_THRESHOLD = 36;
-const FAST_NATIVE_BOUNDARY_WHEEL_THRESHOLD = 160;
 const NATIVE_BOUNDARY_RELEASE_MS = 1400;
 const NATIVE_SECTION_BOUNDARY_EPSILON_PX = 2;
 const NATIVE_SECTION_END_BUFFER_PX = 32;
@@ -28,21 +39,29 @@ type SectionStepDetail = {
   lockMs?: number;
   sameDirectionSilenceMs?: number;
   silenceMs?: number;
+  suppressDirectionChanges?: boolean;
 };
 
 type WheelMomentumState = {
   direction: -1 | 1;
+  lastDeltaAbs: number;
   lastAt: number;
 };
 
 type PostLockWheelSuppressState = WheelMomentumState & {
+  maxMs: number;
+  reason: string | null;
   resetTimer: ReturnType<typeof setTimeout> | null;
+  sectionId: string | null;
   startedAt: number;
+  silenceMs: number;
 };
 
 export function SectionScroller({ children }: SectionScrollerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const lockedRef = useRef(false);
+  const scrollAnimationFrameRef = useRef<number | null>(null);
+  const restoreInstantScrollBehaviorRef = useRef<(() => void) | null>(null);
   const settleFrameRef = useRef<number | null>(null);
   const touchStartYRef = useRef<number | null>(null);
   const touchSectionRef = useRef<HTMLElement | null>(null);
@@ -58,18 +77,19 @@ export function SectionScroller({ children }: SectionScrollerProps) {
   const touchSteppedRef = useRef(false);
   const touchUsedNativeScrollRef = useRef(false);
   const lastInputAtRef = useRef(0);
-  const nativeWheelResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const nativeWheelScrollRef = useRef(false);
   const postLockWheelSuppressRef =
     useRef<PostLockWheelSuppressState | null>(null);
   const stepUnlockRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lockedWheelMomentumRef = useRef<WheelMomentumState | null>(null);
   const sameDirectionSuppressRef = useRef<{
     direction: -1 | 1;
+    lastDeltaAbs: number;
     maxMs: number;
     resetTimer: ReturnType<typeof setTimeout> | null;
+    sectionId: string | null;
     silenceMs: number;
     startedAt: number;
+    suppressDirectionChanges: boolean;
   } | null>(null);
   const wheelDeltaRef = useRef(0);
   const wheelResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -88,6 +108,17 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
     const isMobileLayout = () =>
       window.matchMedia("(max-width: 639px)").matches;
+
+    const isDesktopLayout = () => !isMobileLayout();
+
+    const isNativeScrollSection = (
+      section: HTMLElement | undefined,
+    ) =>
+      Boolean(
+        section &&
+          (section.hasAttribute("data-native-scroll-section") ||
+            section.offsetHeight > getViewportHeight() + 2),
+      );
 
     const getScrollContainer = () =>
       isMobileLayout() ? containerRef.current : null;
@@ -124,6 +155,39 @@ export function SectionScroller({ children }: SectionScrollerProps) {
     const getSectionScrollTop = (section: HTMLElement) =>
       Math.max(section.offsetTop - getMobileLayoutOffset(), 0);
 
+    const clearForcedInstantScrollBehavior = () => {
+      restoreInstantScrollBehaviorRef.current?.();
+    };
+
+    const forceWindowInstantScrollBehavior = () => {
+      clearForcedInstantScrollBehavior();
+
+      const root = document.documentElement;
+      const body = document.body;
+      const previousRootInline = root.style.scrollBehavior;
+      const previousBodyInline = body.style.scrollBehavior;
+
+      root.style.scrollBehavior = "auto";
+      body.style.scrollBehavior = "auto";
+
+      const restore = () => {
+        root.style.scrollBehavior = previousRootInline;
+        body.style.scrollBehavior = previousBodyInline;
+
+        if (restoreInstantScrollBehaviorRef.current === restore) {
+          restoreInstantScrollBehaviorRef.current = null;
+        }
+      };
+
+      restoreInstantScrollBehaviorRef.current = restore;
+
+      return { restore };
+    };
+
+    const scrollWindowToInstant = (top: number) => {
+      window.scrollTo(0, top);
+    };
+
     const scrollViewportTo = (
       top: number,
       behavior: ScrollBehavior = "smooth",
@@ -132,6 +196,52 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
       if (scrollContainer) {
         scrollContainer.scrollTo({ behavior, top });
+        return;
+      }
+
+      if (
+        behavior === "smooth" &&
+        isDesktopLayout() &&
+        !prefersReducedMotion
+      ) {
+        if (scrollAnimationFrameRef.current) {
+          cancelAnimationFrame(scrollAnimationFrameRef.current);
+          scrollAnimationFrameRef.current = null;
+        }
+
+        const instantScrollBehavior = forceWindowInstantScrollBehavior();
+        const startedAt = performance.now();
+        const startTop = window.scrollY;
+        const distance = top - startTop;
+
+        const animate = (now: number) => {
+          const progress = Math.min(
+            (now - startedAt) / DESKTOP_SECTION_SCROLL_MS,
+            1,
+          );
+          const easedProgress = 1 - Math.pow(1 - progress, 3);
+
+          scrollWindowToInstant(startTop + distance * easedProgress);
+
+          if (progress < 1) {
+            scrollAnimationFrameRef.current =
+              requestAnimationFrame(animate);
+            return;
+          }
+
+          scrollWindowToInstant(top);
+          instantScrollBehavior.restore();
+          scrollAnimationFrameRef.current = null;
+        };
+
+        scrollAnimationFrameRef.current = requestAnimationFrame(animate);
+        return;
+      }
+
+      if (behavior === "auto" && isDesktopLayout()) {
+        const instantScrollBehavior = forceWindowInstantScrollBehavior();
+        scrollWindowToInstant(top);
+        instantScrollBehavior.restore();
         return;
       }
 
@@ -177,11 +287,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
         return false;
       }
 
-      const isNativeScrollSection =
-        section.hasAttribute("data-native-scroll-section") ||
-        section.offsetHeight > getViewportHeight() + 2;
-
-      if (!isNativeScrollSection) {
+      if (!isNativeScrollSection(section)) {
         return false;
       }
 
@@ -231,11 +337,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
         return null;
       }
 
-      const isNativeScrollSection =
-        section.hasAttribute("data-native-scroll-section") ||
-        section.offsetHeight > getViewportHeight() + 2;
-
-      if (!isNativeScrollSection) {
+      if (!isNativeScrollSection(section)) {
         return null;
       }
 
@@ -283,7 +385,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
     ) => {
       const state = getNativeBoundaryState(section, direction);
       return Boolean(
-        section?.hasAttribute("data-native-scroll-section") &&
+        isNativeScrollSection(section) &&
           state &&
           state.distance <= NATIVE_SECTION_NEAR_BOUNDARY_PX,
       );
@@ -293,7 +395,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       section: HTMLElement | undefined,
       direction: -1 | 1,
     ) => {
-      if (!section?.hasAttribute("data-native-scroll-section")) {
+      if (!section || !isNativeScrollSection(section)) {
         return;
       }
 
@@ -341,18 +443,6 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       }, INPUT_SILENCE_MS);
     };
 
-    const markNativeWheelScroll = () => {
-      nativeWheelScrollRef.current = true;
-
-      if (nativeWheelResetRef.current) {
-        clearTimeout(nativeWheelResetRef.current);
-      }
-
-      nativeWheelResetRef.current = setTimeout(() => {
-        nativeWheelScrollRef.current = false;
-      }, INPUT_SILENCE_MS);
-    };
-
     const clearSameDirectionSuppress = () => {
       if (sameDirectionSuppressRef.current?.resetTimer) {
         clearTimeout(sameDirectionSuppressRef.current.resetTimer);
@@ -378,13 +468,18 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       touchSteppedRef.current = false;
       touchUsedNativeScrollRef.current = false;
       lockedWheelMomentumRef.current = null;
-      nativeWheelScrollRef.current = false;
       wheelDeltaRef.current = 0;
 
       if (settleFrameRef.current) {
         cancelAnimationFrame(settleFrameRef.current);
         settleFrameRef.current = null;
       }
+
+      if (scrollAnimationFrameRef.current) {
+        cancelAnimationFrame(scrollAnimationFrameRef.current);
+        scrollAnimationFrameRef.current = null;
+      }
+      clearForcedInstantScrollBehavior();
 
       if (wheelResetRef.current) {
         clearTimeout(wheelResetRef.current);
@@ -394,11 +489,6 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       if (stepUnlockRef.current) {
         clearTimeout(stepUnlockRef.current);
         stepUnlockRef.current = null;
-      }
-
-      if (nativeWheelResetRef.current) {
-        clearTimeout(nativeWheelResetRef.current);
-        nativeWheelResetRef.current = null;
       }
 
       clearSameDirectionSuppress();
@@ -416,18 +506,20 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       }
 
       const now = performance.now();
+      const silenceMs = suppression.silenceMs;
+      const suppressMaxMs = suppression.maxMs;
       const wheelAgeMs = now - suppression.lastAt;
       const suppressAgeMs = now - suppression.startedAt;
 
-      if (suppressAgeMs >= POST_LOCK_WHEEL_SUPPRESS_MAX_MS) {
+      if (suppressAgeMs >= suppressMaxMs) {
         clearPostLockWheelSuppress();
         return;
       }
 
       const clearDelay = Math.max(
         Math.min(
-          INPUT_SILENCE_MS - wheelAgeMs,
-          POST_LOCK_WHEEL_SUPPRESS_MAX_MS - suppressAgeMs,
+          silenceMs - wheelAgeMs,
+          suppressMaxMs - suppressAgeMs,
         ),
         0,
       );
@@ -438,12 +530,15 @@ export function SectionScroller({ children }: SectionScrollerProps) {
         }
 
         const now = performance.now();
-        if (now - suppression.startedAt >= POST_LOCK_WHEEL_SUPPRESS_MAX_MS) {
+        const silenceMs = suppression.silenceMs;
+        const suppressMaxMs = suppression.maxMs;
+
+        if (now - suppression.startedAt >= suppressMaxMs) {
           clearPostLockWheelSuppress();
           return;
         }
 
-        if (now - suppression.lastAt >= INPUT_SILENCE_MS) {
+        if (now - suppression.lastAt >= silenceMs) {
           clearPostLockWheelSuppress();
           return;
         }
@@ -452,7 +547,14 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       }, clearDelay);
     };
 
-    const startPostLockWheelSuppress = () => {
+    const startPostLockWheelSuppress = (
+      options: {
+        maxMs?: number;
+        reason?: string;
+        section?: HTMLElement | null;
+        silenceMs?: number;
+      } = {},
+    ) => {
       const momentum = lockedWheelMomentumRef.current;
       lockedWheelMomentumRef.current = null;
 
@@ -460,46 +562,84 @@ export function SectionScroller({ children }: SectionScrollerProps) {
         return;
       }
 
+      if (isDesktopLayout() && sameDirectionSuppressRef.current) {
+        return;
+      }
+
       const wheelAgeMs = performance.now() - momentum.lastAt;
-      if (wheelAgeMs >= INPUT_SILENCE_MS) {
+      const defaultSilenceMs = isDesktopLayout()
+        ? DESKTOP_POST_LOCK_WHEEL_SUPPRESS_SILENCE_MS
+        : INPUT_SILENCE_MS;
+      const defaultMaxMs = isDesktopLayout()
+        ? DESKTOP_POST_LOCK_WHEEL_SUPPRESS_MAX_MS
+        : POST_LOCK_WHEEL_SUPPRESS_MAX_MS;
+      const silenceMs = options.silenceMs ?? defaultSilenceMs;
+      const maxMs = options.maxMs ?? defaultMaxMs;
+      const staleWheelMs = silenceMs;
+      if (wheelAgeMs >= staleWheelMs) {
         return;
       }
 
       clearPostLockWheelSuppress();
       postLockWheelSuppressRef.current = {
         direction: momentum.direction,
+        lastDeltaAbs: momentum.lastDeltaAbs,
         lastAt: momentum.lastAt,
+        maxMs,
+        reason: options.reason ?? null,
         resetTimer: null,
+        sectionId: options.section?.id || null,
         startedAt: performance.now(),
+        silenceMs,
       };
+
       schedulePostLockWheelSuppressClear();
     };
 
-    const shouldSuppressPostLockWheel = (direction: -1 | 1) => {
+    const shouldSuppressPostLockWheel = (
+      direction: -1 | 1,
+      deltaY: number,
+    ) => {
       const suppression = postLockWheelSuppressRef.current;
       if (!suppression) {
         return false;
       }
+
+      const now = performance.now();
+      const deltaAbs = Math.abs(deltaY);
+      const silenceMs = suppression.silenceMs;
+      const suppressMaxMs = suppression.maxMs;
 
       if (suppression.direction !== direction) {
         clearPostLockWheelSuppress();
         return false;
       }
 
-      if (performance.now() - suppression.lastAt >= INPUT_SILENCE_MS) {
+      if (now - suppression.lastAt >= silenceMs) {
         clearPostLockWheelSuppress();
         return false;
       }
 
-      if (
-        performance.now() - suppression.startedAt >=
-        POST_LOCK_WHEEL_SUPPRESS_MAX_MS
-      ) {
+      if (now - suppression.startedAt >= suppressMaxMs) {
         clearPostLockWheelSuppress();
         return false;
       }
 
-      suppression.lastAt = performance.now();
+      if (isDesktopLayout()) {
+        const elapsedMs = now - suppression.startedAt;
+        const deltaRise = deltaAbs - suppression.lastDeltaAbs;
+
+        if (
+          elapsedMs >= DESKTOP_POST_LOCK_NEW_GESTURE_MIN_MS &&
+          deltaRise >= DESKTOP_POST_LOCK_NEW_GESTURE_DELTA_RISE
+        ) {
+          clearPostLockWheelSuppress();
+          return false;
+        }
+      }
+
+      suppression.lastDeltaAbs = deltaAbs;
+      suppression.lastAt = now;
       schedulePostLockWheelSuppressClear();
       return true;
     };
@@ -525,19 +665,95 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       }, clearDelay);
     };
 
-    const shouldSuppressSameDirection = (direction: -1 | 1) => {
+    const activateSameDirectionSuppressAfterLock = () => {
+      const suppression = sameDirectionSuppressRef.current;
+      if (!suppression) {
+        return;
+      }
+
+      const lockedMomentum = lockedWheelMomentumRef.current;
+      suppression.lastDeltaAbs =
+        lockedMomentum?.direction === suppression.direction
+          ? lockedMomentum.lastDeltaAbs
+          : 0;
+      suppression.startedAt = performance.now();
+      scheduleSameDirectionSuppressClear();
+    };
+
+    const shouldReleaseSameDirectionForDirectionChange = (
+      suppression: NonNullable<typeof sameDirectionSuppressRef.current>,
+      direction: -1 | 1,
+      deltaY: number | null,
+      elapsed: number,
+    ) => {
+      if (
+        suppression.direction === direction ||
+        !suppression.suppressDirectionChanges ||
+        deltaY === null
+      ) {
+        return false;
+      }
+
+      return (
+        elapsed >= DESKTOP_SAME_DIRECTION_CHANGE_RELEASE_MIN_MS &&
+        Math.abs(deltaY) >= DESKTOP_SAME_DIRECTION_CHANGE_RELEASE_DELTA
+      );
+    };
+
+    const shouldReleaseSameDirectionForRepeatGesture = (
+      suppression: NonNullable<typeof sameDirectionSuppressRef.current>,
+      direction: -1 | 1,
+      deltaY: number | null,
+      elapsed: number,
+    ) => {
+      if (suppression.direction !== direction || deltaY === null) {
+        return false;
+      }
+
+      const deltaAbs = Math.abs(deltaY);
+      const deltaRise = deltaAbs - suppression.lastDeltaAbs;
+
+      return (
+        elapsed >= DESKTOP_SAME_DIRECTION_REPEAT_RELEASE_MIN_MS &&
+        deltaAbs >= DESKTOP_SAME_DIRECTION_REPEAT_RELEASE_DELTA &&
+        deltaRise >= DESKTOP_SAME_DIRECTION_REPEAT_RELEASE_DELTA_RISE
+      );
+    };
+
+    const shouldSuppressSameDirection = (
+      direction: -1 | 1,
+      deltaY: number | null = null,
+    ) => {
       const suppression = sameDirectionSuppressRef.current;
       if (!suppression) {
         return false;
       }
 
-      if (suppression.direction !== direction) {
+      const elapsed = performance.now() - suppression.startedAt;
+      if (elapsed >= suppression.maxMs) {
         clearSameDirectionSuppress();
         return false;
       }
 
-      const elapsed = performance.now() - suppression.startedAt;
-      if (elapsed >= suppression.maxMs) {
+      if (suppression.direction !== direction) {
+        if (
+          shouldReleaseSameDirectionForDirectionChange(
+            suppression,
+            direction,
+            deltaY,
+            elapsed,
+          ) &&
+          deltaY !== null
+        ) {
+          clearSameDirectionSuppress();
+          return false;
+        }
+
+        if (suppression.suppressDirectionChanges) {
+          scheduleSameDirectionSuppressClear();
+          return true;
+        }
+
         clearSameDirectionSuppress();
         return false;
       }
@@ -564,7 +780,9 @@ export function SectionScroller({ children }: SectionScrollerProps) {
         const targetScrollTop = getSectionScrollTop(target);
         const isAtTarget =
           Math.abs(getViewportScrollTop() - targetScrollTop) <= 2;
-        const inputIsSilent = now - lastInputAtRef.current >= INPUT_SILENCE_MS;
+        const inputIsSilent =
+          isDesktopLayout() ||
+          now - lastInputAtRef.current >= INPUT_SILENCE_MS;
         const timedOut = now - startedAt >= MAX_SCROLL_LOCK_MS;
 
         if ((isAtTarget && inputIsSilent) || timedOut) {
@@ -572,7 +790,21 @@ export function SectionScroller({ children }: SectionScrollerProps) {
             scrollViewportTo(targetScrollTop, "auto");
           }
 
-          startPostLockWheelSuppress();
+          if (
+            isDesktopLayout() &&
+            target.hasAttribute("data-desktop-step-section")
+          ) {
+            startPostLockWheelSuppress({
+              maxMs: DESKTOP_STEP_HANDOFF_WHEEL_SUPPRESS_MAX_MS,
+              reason: "desktop-step-section-handoff",
+              section: target,
+              silenceMs: DESKTOP_STEP_HANDOFF_WHEEL_SUPPRESS_SILENCE_MS,
+            });
+          } else {
+            startPostLockWheelSuppress({
+              section: target,
+            });
+          }
           lockedRef.current = false;
           wheelDeltaRef.current = 0;
           return;
@@ -618,7 +850,9 @@ export function SectionScroller({ children }: SectionScrollerProps) {
         const isAtTarget =
           Math.abs(currentScrollTop - targetScrollTop) <=
           NATIVE_SECTION_BOUNDARY_EPSILON_PX;
-        const inputIsSilent = now - lastInputAtRef.current >= INPUT_SILENCE_MS;
+        const inputIsSilent =
+          isDesktopLayout() ||
+          now - lastInputAtRef.current >= INPUT_SILENCE_MS;
         const timedOut = now - startedAt >= MAX_SCROLL_LOCK_MS;
 
         if ((isAtTarget && inputIsSilent) || timedOut) {
@@ -630,7 +864,12 @@ export function SectionScroller({ children }: SectionScrollerProps) {
             }
           }
 
-          startPostLockWheelSuppress();
+          startPostLockWheelSuppress({
+            maxMs: NATIVE_BOUNDARY_RELEASE_MS,
+            reason: isInternal ? "native-internal-boundary" : "native-boundary",
+            section,
+            silenceMs: DESKTOP_POST_LOCK_WHEEL_SUPPRESS_SILENCE_MS,
+          });
           lockedRef.current = false;
           wheelDeltaRef.current = 0;
           return;
@@ -724,12 +963,16 @@ export function SectionScroller({ children }: SectionScrollerProps) {
         clearSameDirectionSuppress();
         sameDirectionSuppressRef.current = {
           direction,
+          lastDeltaAbs: 0,
           maxMs: stepEvent.detail.sameDirectionMaxMs ?? 1200,
           resetTimer: null,
+          sectionId: section.id || null,
           silenceMs: stepEvent.detail.sameDirectionSilenceMs,
           startedAt: performance.now(),
+          suppressDirectionChanges: Boolean(
+            stepEvent.detail.suppressDirectionChanges,
+          ),
         };
-        scheduleSameDirectionSuppressClear();
       }
 
       const unlockDelay = prefersReducedMotion
@@ -739,10 +982,27 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
       const unlockWhenInputIsSilent = () => {
         const inputIsSilent =
+          isDesktopLayout() ||
           performance.now() - lastInputAtRef.current >= inputSilenceMs;
 
         if (inputIsSilent) {
-          startPostLockWheelSuppress();
+          activateSameDirectionSuppressAfterLock();
+          if (
+            isDesktopLayout() &&
+            section.hasAttribute("data-desktop-step-section")
+          ) {
+            startPostLockWheelSuppress({
+              maxMs: DESKTOP_STEP_HANDOFF_WHEEL_SUPPRESS_MAX_MS,
+              reason: "desktop-step-section-step",
+              section,
+              silenceMs: DESKTOP_STEP_HANDOFF_WHEEL_SUPPRESS_SILENCE_MS,
+            });
+          } else {
+            startPostLockWheelSuppress({
+              reason: "section-step",
+              section,
+            });
+          }
           lockedRef.current = false;
           wheelDeltaRef.current = 0;
           return;
@@ -771,22 +1031,15 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       const sections = getSections();
       const currentIndex = getCurrentIndex();
       const currentSection = sections[currentIndex];
-      const currentSectionIsNative = Boolean(
-        currentSection?.hasAttribute("data-native-scroll-section"),
-      );
+      const currentSectionIsNative = isNativeScrollSection(currentSection);
       const currentSectionCanScrollNative = canScrollNativeSection(
-        currentSection,
-        direction,
-      );
-      const currentSectionNearNativeBoundary = isNearNativeBoundary(
         currentSection,
         direction,
       );
 
       if (
         currentSectionIsNative &&
-        currentSectionCanScrollNative &&
-        !currentSectionNearNativeBoundary
+        currentSectionCanScrollNative
       ) {
         scrollNativeSectionToBoundary(currentSection, direction);
         return;
@@ -819,57 +1072,20 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       }
 
       const direction = event.deltaY > 0 ? 1 : -1;
-      const currentSection = getSections()[getCurrentIndex()];
-      const canNativeScroll = canScrollNativeSection(currentSection, direction);
-      const nearNativeBoundary = isNearNativeBoundary(currentSection, direction);
-
-      if (
-        !lockedRef.current &&
-        canNativeScroll &&
-        !nearNativeBoundary
-      ) {
-        const wheelDeltaContinuesDirection =
-          wheelDeltaRef.current === 0 ||
-          (wheelDeltaRef.current > 0 ? 1 : -1) === direction;
-
-        wheelDeltaRef.current = wheelDeltaContinuesDirection
-          ? wheelDeltaRef.current + event.deltaY
-          : event.deltaY;
-        resetWheelDeltaSoon();
-
-        if (
-          Math.abs(wheelDeltaRef.current) >=
-          FAST_NATIVE_BOUNDARY_WHEEL_THRESHOLD
-        ) {
-          event.preventDefault();
-          scrollNativeSectionToBoundary(currentSection, direction);
-          return;
-        }
-
-        markInput();
-        markNativeWheelScroll();
-        return;
-      }
-
       event.preventDefault();
 
       if (lockedRef.current) {
         wheelDeltaRef.current = 0;
         lockedWheelMomentumRef.current = {
           direction,
+          lastDeltaAbs: Math.abs(event.deltaY),
           lastAt: performance.now(),
         };
+
         return;
       }
 
-      if (nativeWheelScrollRef.current) {
-        wheelDeltaRef.current = 0;
-        markInput();
-        markNativeWheelScroll();
-        return;
-      }
-
-      if (shouldSuppressPostLockWheel(direction)) {
+      if (shouldSuppressPostLockWheel(direction, event.deltaY)) {
         wheelDeltaRef.current = 0;
         return;
       }
@@ -878,20 +1094,37 @@ export function SectionScroller({ children }: SectionScrollerProps) {
 
       const suppression = sameDirectionSuppressRef.current;
       if (suppression) {
-        if (suppression.direction === direction) {
-          const elapsed = performance.now() - suppression.startedAt;
-          if (elapsed >= suppression.maxMs) {
+        const elapsed = performance.now() - suppression.startedAt;
+        if (elapsed >= suppression.maxMs) {
+          clearSameDirectionSuppress();
+        } else if (suppression.direction !== direction) {
+          if (
+            shouldReleaseSameDirectionForDirectionChange(
+              suppression,
+              direction,
+              event.deltaY,
+              elapsed,
+            )
+          ) {
             clearSameDirectionSuppress();
-          } else {
+          } else if (suppression.suppressDirectionChanges) {
             wheelDeltaRef.current = 0;
             scheduleSameDirectionSuppressClear();
             return;
+          } else {
+            clearSameDirectionSuppress();
           }
-        } else {
+        } else if (
+          shouldReleaseSameDirectionForRepeatGesture(
+            suppression,
+            direction,
+          event.deltaY,
+          elapsed,
+        )
+      ) {
           clearSameDirectionSuppress();
-        }
-
-        if (sameDirectionSuppressRef.current) {
+        } else {
+          suppression.lastDeltaAbs = Math.abs(event.deltaY);
           wheelDeltaRef.current = 0;
           scheduleSameDirectionSuppressClear();
           return;
@@ -905,6 +1138,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
         const stepDirection = wheelDeltaRef.current > 0 ? 1 : -1;
         wheelDeltaRef.current = 0;
         moveBy(stepDirection);
+        return;
       }
     };
 
@@ -991,9 +1225,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
         return;
       }
 
-      const isNativeSection = currentSection?.hasAttribute(
-        "data-native-scroll-section",
-      );
+      const isNativeSection = isNativeScrollSection(currentSection);
       const startedAtBoundary =
         direction === 1
           ? touchStartBoundaryRef.current?.down
@@ -1057,9 +1289,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
           return;
         }
 
-        const isNativeSection = currentSection?.hasAttribute(
-          "data-native-scroll-section",
-        );
+        const isNativeSection = isNativeScrollSection(currentSection);
         const startedAtBoundary =
           direction === 1 ? startBoundary?.down : startBoundary?.up;
         const hasRelease =
@@ -1096,8 +1326,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
         const currentSection = getSections()[getCurrentIndex()];
         if (
           !lockedRef.current &&
-          canScrollNativeSection(currentSection, 1) &&
-          !isNearNativeBoundary(currentSection, 1)
+          canScrollNativeSection(currentSection, 1)
         ) {
           event.preventDefault();
           scrollNativeSectionToBoundary(currentSection, 1);
@@ -1117,8 +1346,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
         const currentSection = getSections()[getCurrentIndex()];
         if (
           !lockedRef.current &&
-          canScrollNativeSection(currentSection, -1) &&
-          !isNearNativeBoundary(currentSection, -1)
+          canScrollNativeSection(currentSection, -1)
         ) {
           event.preventDefault();
           scrollNativeSectionToBoundary(currentSection, -1);

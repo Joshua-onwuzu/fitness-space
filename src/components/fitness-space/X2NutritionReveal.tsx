@@ -13,6 +13,7 @@ type SectionStepEvent = CustomEvent<{
   sameDirectionMaxMs?: number;
   sameDirectionSilenceMs?: number;
   silenceMs?: number;
+  suppressDirectionChanges?: boolean;
 }>;
 
 type X2NutritionCard = {
@@ -36,10 +37,11 @@ export const x2RevealTiming = {
   cardExitDuration: 0.18,
   cardReverseEnterDuration: 0.26,
   cardReverseExitDuration: 0.34,
+  firstStepLockMs: 380,
   frameworkFadeDuration: 0.48,
-  sameDirectionMaxMs: 1280,
-  sameDirectionSilenceMs: 260,
-  stepLockMs: 640,
+  sameDirectionMaxMs: 1200,
+  sameDirectionSilenceMs: 80,
+  stepLockMs: 160,
   slideDistance: 210,
 } as const;
 export const x2CardEase = [0.22, 1, 0.36, 1] as const;
@@ -104,7 +106,8 @@ export function useX2NutritionOrderReveal(cardCount: number) {
     }
 
     const onSectionStep = (event: Event) => {
-      const direction = (event as SectionStepEvent).detail.direction;
+      const stepEvent = event as SectionStepEvent;
+      const direction = stepEvent.detail.direction;
       const currentStage = stageRef.current;
       const nextStage = Math.min(
         Math.max(currentStage + direction, 0),
@@ -116,12 +119,16 @@ export function useX2NutritionOrderReveal(cardCount: number) {
       }
 
       event.preventDefault();
-      (event as SectionStepEvent).detail.lockMs = x2RevealTiming.stepLockMs;
-      (event as SectionStepEvent).detail.silenceMs = 0;
-      (event as SectionStepEvent).detail.sameDirectionMaxMs =
+      stepEvent.detail.lockMs =
+        currentStage === 0 || nextStage === 0
+          ? x2RevealTiming.firstStepLockMs
+          : x2RevealTiming.stepLockMs;
+      stepEvent.detail.silenceMs = 0;
+      stepEvent.detail.sameDirectionMaxMs =
         x2RevealTiming.sameDirectionMaxMs;
-      (event as SectionStepEvent).detail.sameDirectionSilenceMs =
+      stepEvent.detail.sameDirectionSilenceMs =
         x2RevealTiming.sameDirectionSilenceMs;
+      stepEvent.detail.suppressDirectionChanges = true;
       setTransitionDirection(direction);
       stageRef.current = nextStage;
       setStage(nextStage);

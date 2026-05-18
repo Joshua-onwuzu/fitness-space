@@ -250,6 +250,7 @@ export function BodyFoodSection() {
     <ScrollSection
       className="px-5 pt-16 max-sm:px-0 max-sm:pt-0 sm:px-8 lg:px-12"
       contentClassName="mx-auto flex max-w-[1180px] items-center justify-center max-sm:max-w-none"
+      desktopStepSection
       id="body-food"
       intensity={54}
       mobileNativeScroll
@@ -549,6 +550,7 @@ export function X2FrameworkSection() {
     <ScrollSection
       className="px-0 py-14 sm:px-8 lg:px-12 min-h-screen"
       contentClassName="flex items-center justify-center"
+      desktopStepSection
       id="x2-framework"
       intensity={42}
       mobileNativeScroll
@@ -1038,6 +1040,7 @@ export function RemainingSystemSections() {
       <ScrollSection
         className="hidden px-4 py-14 md:block sm:px-8 lg:px-12"
         contentClassName="flex items-center justify-center"
+        desktopStepSection
         id="one-system"
         intensity={42}
       >
