@@ -260,9 +260,9 @@ export default function PrivacyPolicy() {
         {/* 5 */}
         <Heading size="md">5. App Tracking Transparency (iOS)</Heading>
         <Text>
-          On iOS devices, Fitness Space complies with Apple's App Tracking
+          On iOS devices, Fitness Space complies with Apple&apos;s App Tracking
           Transparency (ATT) framework. We do not track you across other
-          companies' apps or websites for advertising purposes.
+          companies&apos; apps or websites for advertising purposes.
         </Text>
         <Text>
           Our analytics (Google Analytics) are scoped exclusively to activity
@@ -277,7 +277,7 @@ export default function PrivacyPolicy() {
         <Heading size="md">6. Apple Platform Disclosures</Heading>
         <Text>
           The following disclosures apply specifically to the iOS version of
-          Fitness Space and are required under Apple's App Store guidelines:
+          Fitness Space and are required under Apple&apos;s App Store guidelines:
         </Text>
         <Stack gap={4}>
           <Heading size="md">Device Permissions Used</Heading>
@@ -413,7 +413,7 @@ export default function PrivacyPolicy() {
           You have the right to lodge a complaint with your local data
           protection authority if you believe your rights have been violated. In
           the EU, this is your national Data Protection Authority (DPA). In the
-          UK, this is the Information Commissioner's Office (ICO) at ico.org.uk.
+          UK, this is the Information Commissioner&apos;s Office (ICO) at ico.org.uk.
         </Text>
 
         {/* Legal Basis */}
@@ -502,7 +502,7 @@ export default function PrivacyPolicy() {
           analytics (Google Analytics for Firebase) to understand how the app is
           used. This tracking is limited to activity within Fitness Space and is
           not used for cross-app advertising. On iOS, this operates in
-          compliance with Apple's App Tracking Transparency framework.
+          compliance with Apple&apos;s App Tracking Transparency framework.
         </Text>
 
         {/* 13 */}
@@ -545,7 +545,7 @@ export default function PrivacyPolicy() {
         </ListRoot>
 
         {/* 14 */}
-        <Heading size="md">14. Children's Privacy</Heading>
+        <Heading size="md">14. Children&apos;s Privacy</Heading>
         <Text>
           Fitness Space is not intended for users under the age of 16. We do not
           knowingly collect personal information from children under 16. If we
@@ -561,7 +561,7 @@ export default function PrivacyPolicy() {
           We may update this Privacy Policy from time to time to reflect changes
           in our practices, technology, legal requirements, or other factors. We
           will notify you of any material changes by posting the updated policy
-          on this site, updating the "Last Updated" date, and sending you an
+          on this site, updating the &quot;Last Updated&quot; date, and sending you an
           in-app notification. Your continued use of the Service after such
           changes constitutes your acceptance of the revised policy.
         </Text>

@@ -23,15 +23,15 @@ export default function TermsOfUse() {
         {/* 1 */}
         <Heading size="md">1. Introduction & Acceptance of Terms</Heading>
         <Text>
-          Welcome to Fitness Space ("we," "our," or "us"). Our application
+          Welcome to Fitness Space (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). Our application
           provides a digital platform that promotes a healthier lifestyle
           through guided home workouts, AI-assisted nutritional guidance,
           community support, and coaching.
         </Text>
         <Text>
           By accessing or using the Fitness Space website, mobile application,
-          and services (collectively, the "Service"), you agree to be bound by
-          these Terms of Use ("Terms"). If you do not agree to these Terms, you
+          and services (collectively, the &quot;Service&quot;), you agree to be bound by
+          these Terms of Use (&quot;Terms&quot;). If you do not agree to these Terms, you
           may not access or use the Service. Your use of the Service also
           constitutes your agreement to our Privacy Policy, which is
           incorporated herein by reference.
@@ -40,7 +40,7 @@ export default function TermsOfUse() {
           The Service is not intended for users under the age of 16, and you
           must be at least 18 years old to use it. If you are between 16 and the
           age of majority in your jurisdiction, you must have your parent or
-          guardian's permission to use the Service.
+          guardian&apos;s permission to use the Service.
         </Text>
         {/* 2 */}
         <Heading size="md">
@@ -136,7 +136,7 @@ export default function TermsOfUse() {
           payment processing, and receipts for iOS transactions. Your
           subscription pricing on iOS is based on the closest available Apple
           price tier to your calculated Health Score price. By purchasing
-          through Apple IAP, you agree to Apple's payment terms and conditions.
+          through Apple IAP, you agree to Apple&apos;s payment terms and conditions.
           Apple Inc. is not a party to these Terms and has no responsibility for
           the Service or its content.
         </Text>
@@ -144,24 +144,24 @@ export default function TermsOfUse() {
         <Text>
           For users subscribing through the Android app, payments may be
           processed through Google Play Billing or Paystack, depending on your
-          region and preference. Google Play's billing terms apply to
+          region and preference. Google Play&apos;s billing terms apply to
           transactions processed through Google Play.
         </Text>
         <Text fontWeight="semibold">Web (getfitness.space):</Text>
         <Text>
           For users subscribing through our website, payments are processed
           through Paystack. Full dynamic Health Score pricing with your exact
-          personalised discount applies to web purchases. Paystack's terms and
+          personalised discount applies to web purchases. Paystack&apos;s terms and
           conditions apply to all web transactions.
         </Text>
         <Text fontWeight="bold">4.6 Refunds</Text>
         <Text>
           iOS purchases: Refunds for purchases made through Apple In-App
-          Purchase are handled entirely by Apple in accordance with Apple's
+          Purchase are handled entirely by Apple in accordance with Apple&apos;s
           refund policy.
         </Text>
         <Text>
-          Android/Google Play purchases: Refunds are subject to Google Play's
+          Android/Google Play purchases: Refunds are subject to Google Play&apos;s
           refund policy.
         </Text>
         <Text>
@@ -214,7 +214,7 @@ export default function TermsOfUse() {
         </Text>
         <Text>
           You retain ownership of any content you post, such as progress photos
-          or comments ("User Content"). By posting User Content, you grant
+          or comments (&quot;User Content&quot;). By posting User Content, you grant
           Fitness Space a worldwide, royalty-free, sublicensable license to use,
           display, and distribute that content in connection with providing the
           Service.
@@ -222,11 +222,11 @@ export default function TermsOfUse() {
         {/* 7 */}
         <Heading size="md">7. Disclaimers & Limitation of Liability</Heading>
         <Text>
-          The Service and all content are provided on an "as is" and "as
-          available" basis without any warranties of any kind. Fitness Space
+          The Service and all content are provided on an &quot;as is&quot; and &quot;as
+          available&quot; basis without any warranties of any kind. Fitness Space
           makes no guarantees, representations, or warranties regarding specific
           fitness, health, or weight-loss results. Individual results will vary
-          based on a user's dedication, effort, genetics, diet, and other
+          based on a user&apos;s dedication, effort, genetics, diet, and other
           factors beyond our control.
         </Text>
         <Text>
@@ -273,7 +273,7 @@ export default function TermsOfUse() {
         <Text>
           We reserve the right, at our sole discretion, to modify or replace
           these Terms at any time. We will notify you of any material changes by
-          posting the new Terms on this site, updating the "Last Updated" date,
+          posting the new Terms on this site, updating the &quot;Last Updated&quot; date,
           and/or by sending you an in-app notification. Your continued use of
           the Service after the effective date of the revised Terms constitutes
           your acceptance of them.
@@ -335,7 +335,7 @@ export default function TermsOfUse() {
         <Heading size="md">13. Apple Inc. — Third-Party Beneficiary</Heading>
         <Text>
           These Terms of Use are entered into between you and Fitness Space
-          only, and not with Apple Inc. ("Apple"). Apple is not responsible for
+          only, and not with Apple Inc. (&quot;Apple&quot;). Apple is not responsible for
           the Fitness Space application or its content. Apple has no obligation
           whatsoever to furnish any maintenance and support services with
           respect to the application.
@@ -356,7 +356,7 @@ export default function TermsOfUse() {
           under consumer protection, privacy, or similar legislation.
         </Text>
         <Text>
-          Apple and Apple's subsidiaries are third-party beneficiaries of these
+          Apple and Apple&apos;s subsidiaries are third-party beneficiaries of these
           Terms of Use. Upon your acceptance of these Terms, Apple will have the
           right (and will be deemed to have accepted the right) to enforce these
           Terms against you as a third-party beneficiary thereof.
