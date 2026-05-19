@@ -9,6 +9,7 @@ import { ScrollSection } from "./ScrollSection";
 import { WHATSAPP_LINK } from "./lib/constants";
 
 import { useEffect, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 
 const rotatingTexts = [
   "Weight Loss.",
@@ -212,7 +213,7 @@ export function StatementSection({
             {eyebrow}
           </p>
         ) : null}
-        <h2 className="text-4xl font-normal leading-tight sm:leading-[1.2] text-white max-sm:w-[277px] max-sm:text-[42px] max-sm:font-medium max-sm:leading-normal sm:text-5xl lg:text-[64px]">
+        <h2 className="text-4xl font-normal leading-tight sm:leading-[1.2] text-white max-sm:w-[277px] max-sm:text-[42px] max-sm:font-medium max-sm:leading-[1.3] sm:text-5xl lg:text-[64px]">
           <span className="max-sm:block sm:inline">{firstLine}</span>
 
           <span className="max-sm:block sm:inline">
@@ -317,10 +318,34 @@ function MobileIntroMock() {
         <div className="pointer-events-none absolute bottom-[-248px] left-1/2 h-[397px] w-[926px] -translate-x-1/2 bg-gradient-to-b from-black/10 to-black" />
       </div>
 
-      <div className="absolute left-[calc(50%+0.5px)] top-[996px] flex w-[312px] -translate-x-1/2 flex-col gap-[17px]">
+      <motion.div
+        className="absolute left-1/2 top-[996px] flex w-[312px] -translate-x-1/2 flex-col gap-[17px]"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+        variants={{
+          visible: {
+            transition: {
+              staggerChildren: 0.28,
+            },
+          },
+        }}
+      >
         {benefitCards.map((label) => (
-          <div
+          <motion.div
             className="flex h-[74px] items-center gap-3 overflow-hidden rounded-lg bg-white px-[17px] text-left text-sm capitalize leading-normal text-black"
+            variants={{
+              hidden: { opacity: 0, y: 30, scale: 0.97 },
+              visible: {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                transition: {
+                  duration: 0.7,
+                  ease: "easeOut",
+                },
+              },
+            }}
             key={label}
           >
             <Image
@@ -331,9 +356,9 @@ function MobileIntroMock() {
               width={24}
             />
             <span>{label}</span>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 }

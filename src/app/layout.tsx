@@ -5,6 +5,24 @@ export const metadata: Metadata = {
   title: "Fitness space",
   description:
     "Bibi is the AI coach from Fitness Space for sustainable weight loss.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      {
+        url: "/android-chrome-192x192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        url: "/android-chrome-512x512.png",
+        sizes: "512x512",
+        type: "image/png",
+      },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
 };
 
 export const viewport: Viewport = {
@@ -20,6 +38,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/figma/logo.png" />
+      </head>
       <body>{children}</body>
     </html>
   );

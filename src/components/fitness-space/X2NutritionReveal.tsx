@@ -124,8 +124,7 @@ export function useX2NutritionOrderReveal(cardCount: number) {
           ? x2RevealTiming.firstStepLockMs
           : x2RevealTiming.stepLockMs;
       stepEvent.detail.silenceMs = 0;
-      stepEvent.detail.sameDirectionMaxMs =
-        x2RevealTiming.sameDirectionMaxMs;
+      stepEvent.detail.sameDirectionMaxMs = x2RevealTiming.sameDirectionMaxMs;
       stepEvent.detail.sameDirectionSilenceMs =
         x2RevealTiming.sameDirectionSilenceMs;
       stepEvent.detail.suppressDirectionChanges = true;
@@ -215,7 +214,7 @@ export function HealthScorePayoffReveal() {
 
   return (
     <div
-      className="relative flex h-[min(calc(100svh-7rem),625px)] min-h-[520px] w-full max-w-[1284px] items-center justify-center overflow-visible max-md:min-h-[420px]"
+      className="relative flex h-[min(calc(100svh-7rem),625px)] min-h-[520px] w-full max-w-[1284px] items-center justify-center overflow-visible max-md:min-h-[420px] "
       ref={rootRef}
     >
       <span
@@ -223,20 +222,20 @@ export function HealthScorePayoffReveal() {
         className="sr-only"
         id="health-score-payoff-system"
       />
-      <article className="relative h-full w-full overflow-hidden rounded-[22px] bg-black text-white">
+      <article className="relative h-full w-full overflow-hidden rounded-[22px] bg-black text-white ">
         <motion.div
           animate={{
             opacity: stage === 0 ? 1 : 0.18,
             scale: stage === 0 ? 1 : 0.965,
           }}
-          className="relative z-10 h-full w-full text-center"
+          className="relative z-10 h-full w-full text-center "
           transition={{
             duration: prefersReducedMotion
               ? 0
               : x2RevealTiming.frameworkFadeDuration,
           }}
         >
-          <p className="absolute left-1/2 top-[10.56%] inline-flex h-[37.5px] min-w-[147px] -translate-x-1/2 items-center justify-center rounded-full border border-white px-[32.25px] text-xs font-normal uppercase leading-none text-white sm:text-base">
+          <p className="absolute left-1/2 top-[10.56%] inline-flex h-[37.5px] min-w-[166px] -translate-x-1/2 items-center justify-center rounded-full border border-white px-[32.25px] text-xs font-normal uppercase leading-none text-white sm:text-base">
             HEALTH SCORE
           </p>
           <h2 className="absolute left-1/2 top-[43.68%] w-[min(90%,1120px)] -translate-x-1/2 -translate-y-1/2 text-[43px] font-medium leading-normal text-white md:text-[90px] lg:leading-[1.2]">
@@ -279,48 +278,54 @@ function X2NutritionOrderCard({
   motionContext: X2CardMotionContext;
 }) {
   return (
-    <div className="absolute left-1/2 top-[63%] z-20 h-[min(52svh,530px)] min-h-[390px] w-[88%] max-w-[1080px] -translate-x-1/2 -translate-y-1/2 sm:w-[84%]">
+    <div className="absolute left-1/2 top-[56%] z-20 h-[420px] w-[92%] max-w-[1080px] -translate-x-1/2 -translate-y-1/2 sm:top-[63%] sm:h-[min(52svh,530px)] sm:min-h-[390px] sm:w-[84%]">
       <motion.article
         animate="visible"
-        className="relative h-full w-full overflow-hidden rounded-t-[20px] bg-black shadow-[0_36px_110px_rgba(0,0,0,0.48)]"
+        className="relative h-full w-full overflow-hidden rounded-[20px] bg-black shadow-[0_36px_110px_rgba(0,0,0,0.48)]"
         custom={motionContext}
         exit="exit"
         initial="initial"
         variants={x2CardVariants}
       >
-        {/* BACKGROUND PATTERN */}
+        {/* ================= BACKGROUND PATTERN ================= */}
         <Image
           alt=""
-          className="absolute left-[-30%] top-[-30%] sm:-left-[48%] sm:-top-[42%] h-[202%] w-[162%] object-cover opacity-[0.12] sm:opacity-[0.07] mix-blend-screen"
+          className="absolute left-[-30%] top-[-30%] h-[202%] w-[162%] object-cover opacity-[0.12] mix-blend-screen sm:left-[-48%] sm:top-[-42%] sm:opacity-[0.07]"
           height={1071}
           src={assets.x2SystemPattern}
           width={1752}
         />
 
-        {/* CONTENT */}
-        <div className="relative z-10 flex h-full flex-col justify-center gap-5 px-6 py-7 sm:flex-row sm:items-center sm:justify-start sm:gap-7 sm:px-[9.8%] sm:py-0 items-center text-center sm:text-left">
-          {/* FULL WIDTH ON MOBILE */}
+        {/* ================= MOBILE IMAGE ================= */}
+        <div className="absolute left-1/2 top-[72px] z-10 w-[150px] -translate-x-1/2 sm:hidden">
+          <NutritionScoreCardAsset image={card.image} />
+        </div>
+
+        {/* ================= CONTENT ================= */}
+        <div className="relative z-20 flex h-full flex-col items-center justify-end px-6 pb-8 pt-[180px] text-center sm:flex-row sm:items-center sm:justify-start sm:gap-7 sm:px-[9.8%] sm:py-0 sm:text-left">
+          {/* ================= TEXT CONTENT ================= */}
           <div className="w-full max-w-[370px] text-center sm:text-left">
-            <h2 className="text-xl font-semibold capitalize leading-[1.25] text-white sm:text-2xl">
+            <h2 className="text-[22px] font-semibold capitalize leading-[1.3] text-white sm:text-2xl">
               {card.text}
             </h2>
 
-            <p className="mt-3 text-sm font-normal leading-[1.72] text-white sm:mt-4 sm:text-base sm:leading-[1.875]">
+            <p className="mt-3 text-[13px] font-normal leading-[1.7] text-white/80 sm:mt-4 sm:text-base sm:leading-[1.875]">
               {card.description}
             </p>
 
             <a
-              className="mt-5 mx-auto sm:mx-0 inline-flex rounded-[7px] bg-white px-[11px] py-2 text-xs font-semibold capitalize text-black transition hover:bg-white/90 sm:mt-7 sm:text-sm"
+              className="mt-5 inline-flex h-[46px] w-[220px] whitespace-nowrap items-center justify-center rounded-[7px] bg-white px-[20px] py-[14px] text-[15px] font-semibold capitalize text-black transition hover:bg-white/90 sm:mt-7 sm:h-auto sm:w-auto sm:px-4 sm:py-2 sm:text-sm"
               href={WHATSAPP_LINK}
             >
-              Meet Bibi — It&apos;s Free
+              Meet Bibi &mdash; It&apos;s Free
             </a>
           </div>
         </div>
 
-        {/* RIGHT PANEL (DESKTOP ONLY) */}
+        {/* ================= DESKTOP RIGHT PANEL ================= */}
         <div className="absolute bottom-0 right-[-3%] top-0 hidden w-[41.5%] overflow-hidden bg-[#f54900] sm:block">
           <div className="absolute inset-0 bg-[linear-gradient(180deg,#f54900_0%,#f54900_48%,#f35d0c_100%)]" />
+
           <div className="absolute left-1/2 top-[48%] w-[72%] max-w-[330px] -translate-x-1/2 -translate-y-1/2">
             <NutritionScoreCardAsset image={card.image} />
           </div>

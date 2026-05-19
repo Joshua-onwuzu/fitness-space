@@ -224,7 +224,9 @@ function MobileRealResultTestimonialCard({
         zIndex: isActive ? 20 : isPrevious ? 10 : 0,
       }}
       transition={{
-        duration: prefersReducedMotion ? 0 : mobileRealResultsTiming.cardDuration,
+        duration: prefersReducedMotion
+          ? 0
+          : mobileRealResultsTiming.cardDuration,
         ease: [0.22, 1, 0.36, 1],
       }}
     >
@@ -402,9 +404,12 @@ function MobileRealResultsReveal() {
         clearTimeout(unlockTimer);
       }
 
-      unlockTimer = setTimeout(() => {
-        inputLockedRef.current = false;
-      }, prefersReducedMotion ? 0 : mobileRealResultsTiming.stepLockMs);
+      unlockTimer = setTimeout(
+        () => {
+          inputLockedRef.current = false;
+        },
+        prefersReducedMotion ? 0 : mobileRealResultsTiming.stepLockMs,
+      );
     };
 
     const resetWheelDeltaSoon = () => {
@@ -560,7 +565,7 @@ function MobileRealResultsReveal() {
 
   return (
     <div className="absolute inset-0 md:hidden" ref={rootRef}>
-      <h2 className="absolute left-[calc(50%+3px)] top-[162px] w-[288px] -translate-x-1/2 -translate-y-1/2 text-center text-[64px] font-extrabold capitalize leading-normal text-white/15">
+      <h2 className="absolute left-[calc(50%+3px)] top-[185px] lg:top-[162px] w-[288px] -translate-x-1/2 -translate-y-1/2 text-center text-[64px] font-extrabold capitalize leading-[1.1] lg:leading-normal text-white/15">
         Real People. Real Results.
       </h2>
       <p className="absolute left-[calc(50%+3.5px)] top-[392px] w-[243px] -translate-x-1/2 -translate-y-1/2 text-center text-[16px] font-normal leading-normal text-white">
@@ -613,7 +618,7 @@ function FourteenDayPayoffSection() {
   return (
     <ScrollSection
       className="px-4 py-10 sm:px-8 lg:px-12"
-      contentClassName="flex items-center justify-center"
+      contentClassName="flex items-center justify-center max-sm:!translate-y-0 max-sm:!opacity-100"
       id="fourteen-day-payoff"
       intensity={42}
     >
@@ -656,7 +661,7 @@ function FourteenDayPayoffSection() {
 function FinalFooterCtaSection() {
   return (
     <ScrollSection
-      className="px-4 py-10 sm:px-8 lg:px-12"
+      className="px-0 py-10 sm:px-8 lg:px-12"
       contentClassName="flex items-start justify-center"
       id="final-cta"
       intensity={42}
@@ -702,18 +707,33 @@ function FinalFooterCtaSection() {
           src={assets.finalBibi}
           width={1086}
         />
-        <p className="absolute left-1/2 top-[650px] -translate-x-[45%] whitespace-nowrap text-center text-[clamp(8rem,21.8svh,280px)] font-bold capitalize leading-[99.915%] text-white/10">
+        {/* ================= DESKTOP BIBI TEXT ================= */}
+        <p className="hidden md:block absolute left-1/2 top-[650px] -translate-x-[45%] whitespace-nowrap text-center text-[clamp(8rem,21.8svh,280px)] font-bold capitalize leading-[99.915%] text-white/10">
           Bibi. Bibi. Bibi.
         </p>
-        <div className="md:hidden flex flex-col items-center gap-3 mt-6 text-center text-white">
-          <p className="text-[80px] font-bold capitalize leading-[90%] text-white/10">
-            Bibi. Bibi. Bibi.
+
+        {/* ================= MOBILE ONLY ================= */}
+        <div className="md:hidden absolute bottom-6 left-1/2 z-20 flex w-full -translate-x-1/2 flex-col items-center px-4 text-center">
+          {/* MOBILE BIBI TEXT */}
+          <p className="whitespace-nowrap text-[clamp(120px,28vw,220px)] font-bold leading-[0.82] text-white/10 ">
+            Bibi.
           </p>
 
-          <p className="text-[10px] font-bold capitalize leading-[99.915%] text-white">
-            © 2026 All rights reserved. · <span>Privacy</span> ·{" "}
-            <span>Terms</span>
-          </p>
+          {/* MOBILE FOOTER */}
+          <div className="mt-4 flex flex-col items-center gap-3">
+            <Image
+              alt="Fitness Space logo"
+              className="h-[24px] w-[150px] object-contain"
+              src={assets.finalFooterLogo}
+              height={201}
+              width={1733}
+            />
+
+            <p className="text-[11px] font-medium leading-relaxed text-white/80">
+              © 2026 All rights reserved. · <span>Privacy</span> ·{" "}
+              <span>Terms</span>
+            </p>
+          </div>
         </div>
       </article>
     </ScrollSection>
