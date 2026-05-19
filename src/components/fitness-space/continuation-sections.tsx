@@ -381,19 +381,19 @@ function MobileBodyFoodCardsReveal() {
 
 function MobileBodyFoodMock() {
   return (
-    <div className="relative hidden h-[1018px] w-full overflow-hidden bg-black text-center text-white max-sm:block">
-      <div className="-translate-x-1/2 -translate-y-1/2 absolute left-1/2 top-[calc(50%-350px)] w-[296px] flex flex-col items-start justify-center text-center leading-[0] capitalize font-normal">
-        <p className="text-[52px]">
-          <span className="leading-[normal] text-[#fe9a00]">Bibi</span>
-          <span className="leading-[normal]"> Knows Your Body.</span>
+    <div className="relative hidden h-screen w-full bg-black text-white max-sm:flex max-sm:flex-col max-sm:items-center max-sm:justify-center max-sm:px-5">
+      {/* TOP TEXT */}
+      <div className="text-center">
+        <p className="text-[42px] leading-tight font-normal mb-[-49px] lg:mb-[0px] ">
+          <span className="text-[#fe9a00]">Bibi</span> Knows Your Body.
         </p>
       </div>
 
-      <div className="-translate-x-1/2 -translate-y-1/2 absolute left-1/2 top-[calc(50%-22px)] h-[582px] w-[388px]">
-        {/* IMAGE */}
+      {/* IMAGE */}
+      <div className="flex items-center justify-center">
         <Image
           alt="Bibi standing in Fitness Space gear"
-          className="absolute inset-0 max-w-none object-cover pointer-events-none size-full"
+          className="h-[80%] w-auto object-contain lg:h-[92%]"
           height={1536}
           priority={false}
           src={assets.bibiStanding}
@@ -401,23 +401,22 @@ function MobileBodyFoodMock() {
         />
       </div>
 
-      <div className="-translate-x-1/2 -translate-y-1/2 absolute left-1/2 top-[calc(50%+277px)] w-[273px] flex flex-col items-start justify-center text-center leading-[0] capitalize font-normal">
-        <p className="text-[52px]">
-          <span className="leading-[normal] text-[#fe9a00]">Bibi</span>
-          <span className="leading-[normal]"> Knows Your Food.</span>
+      {/* BOTTOM TEXT + CTA */}
+      <div className="flex flex-col items-center gap-3 text-center">
+        <p className="text-[42px] leading-tight font-normal mt-[-52px] lg-mt-[0px]">
+          <span className="text-[#fe9a00]">Bibi</span> Knows Your Food.
         </p>
-      </div>
 
-      <a
-        className="-translate-x-1/2 absolute bottom-[93.5px] left-1/2 inline-flex items-center justify-center rounded-[7px] bg-white px-[14px] py-[12px] text-[14px] leading-[normal] font-semibold capitalize text-black"
-        href={WHATSAPP_LINK}
-      >
-        Meet Bibi — It&apos;s Free
-      </a>
+        <a
+          className="inline-flex items-center justify-center rounded-[7px] bg-white px-5 py-3 text-sm font-semibold text-black"
+          href={WHATSAPP_LINK}
+        >
+          Meet Bibi — It&apos;s Free
+        </a>
+      </div>
     </div>
   );
 }
-
 export function DataCoachCtaSection() {
   return (
     <ScrollSection
@@ -436,15 +435,15 @@ export function DataCoachCtaSection() {
           src={assets.coachPattern}
           width={2054}
         />
-        <div className="relative z-10 flex h-full flex-col items-center px-[27px] pt-[72px] text-center sm:flex-row sm:items-center sm:px-12 sm:text-left lg:px-20">
+        <div className="relative z-10 flex h-full flex-col items-center px-[12px] pt-[52px] text-center sm:flex-row sm:items-center sm:px-12 sm:text-left lg:px-20">
           <div className="max-w-[560px] flex flex-col items-center text-center sm:items-start sm:text-left">
-            <h2 className="w-[337px] text-[40px] font-bold capitalize leading-[41px] text-white sm:w-auto sm:text-5xl lg:text-[36px] lg:font-semibold lg:leading-[1.2]">
+            <h2 className="w-[337px] text-[30px] font-bold  leading-[41px] text-white sm:w-auto sm:text-5xl lg:text-[36px] lg:font-semibold lg:leading-[1.2]">
               Bibi does not just track you. She coaches you. Every day. Based on
               your data.
             </h2>
 
             <a
-              className="mt-7 inline-flex h-[46px] w-[183px] items-center justify-center rounded-[7px] bg-white px-[20px] py-[14px] text-[15px] font-semibold leading-[1.2] capitalize text-black transition hover:bg-white/90 sm:mt-8 sm:h-auto sm:w-auto sm:px-4 sm:py-2 sm:text-sm sm:leading-normal"
+              className="mt-7 inline-flex h-[46px] w-[200px] lg:w-[183px] items-center justify-center rounded-[7px] bg-white px-[20px] py-[14px] text-[15px] font-semibold leading-[1.2] capitalize text-black transition hover:bg-white/90 sm:mt-8 sm:h-auto sm:w-auto sm:px-4 sm:py-2 sm:text-sm sm:leading-normal"
               href={WHATSAPP_LINK}
             >
               Meet Bibi &mdash; It&apos;s Free
@@ -508,42 +507,25 @@ export function PowerfulFeaturesSection() {
         </div>
 
         {/* ================= MOBILE ================= */}
-        <div className="relative mt-[3px] h-[848px] w-full max-w-[389px] border-x border-white/10 md:hidden">
-          <span className="pointer-events-none absolute left-0 right-0 top-[395px] h-px bg-white/10" />
-          {powerfulFeatures.slice(0, 2).map((feature, index) => {
-            const layout = mobilePowerfulFeatureLayout[index];
-            if (!layout) {
-              return null;
-            }
+        <div className="mt-6 flex w-full max-w-[389px] flex-col divide-y divide-white/10 border-y border-white/10 md:hidden">
+          {powerfulFeatures.map((feature) => (
+            <article
+              key={feature.number}
+              className="relative flex min-h-[220px] flex-col justify-end px-8 pb-10 pt-16 text-white"
+            >
+              <p className="absolute right-6 top-4 text-[72px] font-bold leading-none text-white/[0.04]">
+                {feature.number}
+              </p>
 
-            return (
-              <article
-                className="absolute inset-0 text-white"
-                key={feature.number}
-              >
-                <p
-                  className="absolute right-[67px] text-[72px] font-bold leading-none text-white/[0.04]"
-                  style={{ top: layout.numberTop }}
-                >
-                  {feature.number}
-                </p>
+              <h3 className="max-w-[240px] text-[24px] font-bold leading-[30px]">
+                {feature.title}
+              </h3>
 
-                <h3
-                  className="absolute left-[68px] whitespace-nowrap text-[24px] font-bold leading-[30px] font-normal"
-                  style={{ top: layout.titleTop, width: layout.titleWidth }}
-                >
-                  {feature.title}
-                </h3>
-
-                <p
-                  className="absolute left-[68px] w-[254px] text-[12px] font-normal leading-[18px] text-white/70"
-                  style={{ top: layout.bodyTop }}
-                >
-                  {feature.body}
-                </p>
-              </article>
-            );
-          })}
+              <p className="mt-4 max-w-[260px] text-[12px] leading-[20px] text-white/70">
+                {feature.body}
+              </p>
+            </article>
+          ))}
         </div>
       </div>
     </ScrollSection>
@@ -604,7 +586,7 @@ export function DailySystemPointsSection() {
       mobileNativeScroll
       nativeScroll
     >
-      <article className="relative mx-auto flex h-[1108px] w-full max-w-[410px] flex-col items-center bg-black text-white md:h-auto md:max-w-none md:pt-[7.4svh]">
+      <article className="relative mx-auto flex h-[1108px] w-full max-w-[410px] flex-col items-center bg-black text-white md:h-auto md:max-w-none md:pt-[7.4svh] mt-[-4rem] lg:mt-[0px]">
         <SectionPill className="mt-[64px] !h-[42.3px] !w-[247.76px] !px-0 !py-0 !text-[19px] sm:mt-0 sm:!h-[37px] sm:!w-auto sm:!px-8 sm:!py-5 sm:!text-base">
           YOUR DAILY SYSTEM
         </SectionPill>
@@ -686,7 +668,7 @@ export function DailySystemPointsSection() {
           </div>
         </div>
 
-        <p className="absolute left-1/2 top-[1019px] w-[341px] -translate-x-1/2 text-center text-[16px] font-normal leading-[30px] text-white md:hidden">
+        <p className="absolute left-1/2 top-[1073px] lg:top-[1019px]  w-[341px] -translate-x-1/2 text-center text-[16px] font-normal leading-[30px] text-white md:hidden">
           Complete everything. Earn 100 Health Score points. Every point moves
           you closer to a bigger discount at renewal.
         </p>
@@ -704,11 +686,11 @@ export function MealPlanFailureSection() {
   return (
     <ScrollSection
       className="px-5 py-12 sm:px-8 lg:px-12"
-      contentClassName="mx-auto flex max-w-[1284px] items-center justify-center"
+      contentClassName="mx-auto flex max-w-[1284px] items-center justify-center max-sm:!translate-y-0 max-sm:!opacity-100"
       id="meal-plan-failure"
       intensity={42}
     >
-      <FadeInOnScroll className="flex w-full flex-col items-center justify-center text-center text-white">
+      <FadeInOnScroll className="flex w-full flex-col items-center justify-center text-center text-white max-sm:!translate-y-0 max-sm:!opacity-100">
         {/* DESKTOP */}
         <h2 className="hidden md:block max-w-[1115px] text-[64px] font-normal leading-tight">
           Why Every Meal Plan
@@ -717,7 +699,7 @@ export function MealPlanFailureSection() {
         </h2>
 
         {/* MOBILE */}
-        <h2 className="md:hidden w-[349px] text-center text-[32px] font-medium leading-[1.5] tracking-tight text-white">
+        <h2 className="md:hidden w-[349px] text-center text-[32px] font-medium leading-[1.5] tracking-tight text-white ">
           <span className="block"> Why Every Meal Plan You Have Tried Has</span>
           <span className="block">
             <span className="text-[#f54900]">Failed You</span>
@@ -727,8 +709,8 @@ export function MealPlanFailureSection() {
         {/* TEXT CONTENT */}
         <div className="mt-8 max-w-[1098px] text-white">
           {/* MOBILE */}
-          <div className="md:hidden w-[275px] space-y-4 text-center text-[14px] leading-[1.5] text-white">
-            <p>
+          <div className="md:hidden w-[275px] space-y-4 text-center ">
+            <p className="text-[14px] leading-[1.7] text-white">
               Food prices in Nigeria change weekly. Your meal plan does not. The
               ingredients it needs are not always in your market.You travel. You
               attend owambes. You visit family. The plan breaks. Meal plans
@@ -843,8 +825,8 @@ export function BibiDifferentSection() {
 export function HealthScorePayoffSection() {
   return (
     <ScrollSection
-      className="px-4 py-14 sm:px-8 lg:px-12"
-      contentClassName="flex items-center justify-center"
+      className="px-4 py-14 sm:px-8 lg:px-12 "
+      contentClassName="flex items-center justify-center max-sm:!translate-y-0 max-sm:!opacity-100"
       id="health-score-payoff"
       intensity={42}
     >
@@ -1233,8 +1215,8 @@ function RemainingCommunitySupportSection() {
 function RemainingWeHearYouSection() {
   return (
     <ScrollSection
-      className="px-4 py-14 sm:px-8 lg:px-12"
-      contentClassName="flex items-center justify-center"
+      className="px-0 py-14 sm:px-8 lg:px-12"
+      contentClassName="flex items-center justify-center max-sm:!translate-y-0 max-sm:!opacity-100"
       id="we-hear-you"
       intensity={42}
     >
