@@ -112,7 +112,7 @@ function StartFreeTrialSection() {
       <div className="absolute bottom-[40px] left-1/2 flex w-full max-w-[430px] -translate-x-1/2 flex-col items-center gap-4 px-5 md:hidden ">
         {finalTrialFacts.map((fact) => (
           <div
-            className="flex min-h-[48px] w-full items-center justify-center rounded-[8px] bg-white/10 px-4 text-center text-xs font-normal capitalize leading-normal text-white border border-white/10 rounded-[8px]"
+            className="flex min-h-[48px] w-full items-center justify-center rounded-[8px] bg-white/10 px-4 text-center text-xs font-normal capitalize leading-normal text-white border border-white/10"
             key={fact.text}
           >
             {fact.text}
