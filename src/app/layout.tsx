@@ -1,16 +1,11 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import "./globals.css";
+import { Providers } from "./Providers";
 
 export const metadata: Metadata = {
   title: "Fitness space",
   description:
     "Bibi is the AI coach from Fitness Space for sustainable weight loss.",
-};
-
-export const viewport: Viewport = {
-  initialScale: 1,
-  viewportFit: "cover",
-  width: "device-width",
 };
 
 export default function RootLayout({
@@ -20,7 +15,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

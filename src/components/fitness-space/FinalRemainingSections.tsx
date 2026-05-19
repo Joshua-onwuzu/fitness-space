@@ -1,28 +1,12 @@
-"use client";
-
 import Image from "next/image";
-import { motion, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useState } from "react";
+
+import Link from "next/link";
 
 import { assets, finalTestimonials, finalTrialFacts } from "./data";
 import { ScrollSection } from "./ScrollSection";
 import { WHATSAPP_LINK } from "./lib/constants";
-
-type SectionStepEvent = CustomEvent<{
-  direction: -1 | 1;
-  lockMs?: number;
-  sameDirectionMaxMs?: number;
-  sameDirectionSilenceMs?: number;
-  silenceMs?: number;
-}>;
-
-const mobileRealResultsTiming = {
-  cardDuration: 0.48,
-  sameDirectionMaxMs: 1800,
-  sameDirectionSilenceMs: 1800,
-  stepLockMs: 620,
-} as const;
 
 function FinalFrame({
   children,
@@ -69,9 +53,13 @@ function TrialFactPill({
 function FinalButton({
   className = "",
   variant = "orange",
+  onClick,
+  disabled = false,
 }: {
   className?: string;
   variant?: "orange" | "white";
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  disabled?: boolean;
 }) {
   return (
     <a
@@ -79,8 +67,10 @@ function FinalButton({
         variant === "orange"
           ? "bg-[#f54900] text-white hover:bg-[#ff6420]"
           : "bg-white text-black hover:bg-white/90"
-      } ${className}`}
-      href={WHATSAPP_LINK}
+      } ${className} ${disabled ? "pointer-events-none opacity-50" : ""}`}
+      href={disabled ? undefined : WHATSAPP_LINK}
+      onClick={onClick}
+      style={{ cursor: disabled ? "not-allowed" : "pointer" }}
     >
       &nbsp;&nbsp;Meet Bibi — It&apos;s Free&nbsp;
     </a>
@@ -122,7 +112,7 @@ function StartFreeTrialSection() {
       <div className="absolute bottom-[40px] left-1/2 flex w-full max-w-[430px] -translate-x-1/2 flex-col items-center gap-4 px-5 md:hidden ">
         {finalTrialFacts.map((fact) => (
           <div
-            className="flex min-h-[48px] w-full items-center justify-center bg-white/10 px-4 text-center text-xs font-normal capitalize leading-normal text-white border border-white/10 rounded-[8px]"
+            className="flex min-h-[48px] w-full items-center justify-center rounded-[8px] bg-white/10 px-4 text-center text-xs font-normal capitalize leading-normal text-white border border-white/10 rounded-[8px]"
             key={fact.text}
           >
             {fact.text}
@@ -177,435 +167,57 @@ function TestimonialCard({
   );
 }
 
-function MobileRealResultTestimonialCard({
-  isActive,
-  isPrevious,
-  prefersReducedMotion,
+function MobileTestimonialCard({
   testimonial,
 }: {
-  isActive: boolean;
-  isPrevious: boolean;
-  prefersReducedMotion: boolean | null;
   testimonial: (typeof finalTestimonials)[number];
 }) {
-  const wrapper = isPrevious
-    ? {
-        height: 399.438,
-        left: "calc(50% - 162.5465px)",
-        top: 501.38,
-        width: 341.253,
-      }
-    : {
-        height: 415.233,
-        left: "calc(50% - 171.496px)",
-        top: 496,
-        width: 367.072,
-      };
-  const card = isPrevious
-    ? { rotation: 4.59, width: 312.204 }
-    : { rotation: -7.73, width: 319.427 };
-
   return (
-    <motion.div
-      animate={{
-        opacity: isActive || isPrevious ? 1 : 0,
-        rotate: isPrevious ? -3 : 0,
-        scale: isPrevious ? 0.955 : 1,
-        y: isPrevious ? 18 : 0,
-      }}
-      className="absolute flex items-center justify-center"
-      data-mobile-real-results-card={testimonial.id}
-      initial={false}
-      style={{
-        height: `${wrapper.height}px`,
-        left: wrapper.left,
-        top: `${wrapper.top}px`,
-        width: `${wrapper.width}px`,
-        zIndex: isActive ? 20 : isPrevious ? 10 : 0,
-      }}
-      transition={{
-        duration: prefersReducedMotion ? 0 : mobileRealResultsTiming.cardDuration,
-        ease: [0.22, 1, 0.36, 1],
-      }}
-    >
-      <article
-        className="relative h-[375.668px] overflow-hidden rounded-[20px] bg-white text-left text-black"
-        style={{
-          transform: `rotate(${card.rotation}deg)`,
-          width: `${card.width}px`,
-        }}
-      >
-        <div className="absolute left-[40.65px] top-[100px] w-[239.008px] whitespace-pre-wrap text-left text-black">
-          <p className="mb-8 text-[24px] font-normal leading-normal">
-            {testimonial.quote}
-          </p>
-          <p className="text-[16px] font-bold leading-normal">
-            {testimonial.name}
-          </p>
-        </div>
-        <span
-          aria-hidden="true"
-          className="absolute left-[30.58px] top-[72.58px] -translate-x-1/2 -translate-y-1/2 rotate-[1.31deg] text-center text-[128px] font-semibold capitalize leading-none text-black/20"
-        >
-          “
-        </span>
-        <span
-          aria-hidden="true"
-          className="absolute bottom-[76.42px] right-[22px] translate-x-1/2 translate-y-1/2 rotate-180 text-center text-[128px] font-semibold capitalize leading-none text-black/20"
-        >
-          “
-        </span>
-      </article>
-    </motion.div>
-  );
-}
-
-function MobileRealResultsReveal() {
-  const rootRef = useRef<HTMLDivElement>(null);
-  const testimonials = [finalTestimonials[1], finalTestimonials[0]];
-  const [stage, setStage] = useState(0);
-  const [previousStage, setPreviousStage] = useState<number | null>(
-    testimonials.length > 1 ? testimonials.length - 1 : null,
-  );
-  const inputLockedRef = useRef(false);
-  const stageRef = useRef(stage);
-  const touchStartYRef = useRef<number | null>(null);
-  const prefersReducedMotion = useReducedMotion();
-
-  const stepByDirection = useCallback(
-    (direction: -1 | 1) => {
-      const currentStage = stageRef.current;
-      const nextStage = Math.min(
-        Math.max(currentStage + direction, 0),
-        testimonials.length - 1,
-      );
-
-      if (nextStage === currentStage) {
-        return false;
-      }
-
-      stageRef.current = nextStage;
-      setPreviousStage(currentStage);
-      setStage(nextStage);
-      return true;
-    },
-    [testimonials.length],
-  );
-
-  useEffect(() => {
-    stageRef.current = stage;
-  }, [stage]);
-
-  useEffect(() => {
-    const section = rootRef.current?.closest<HTMLElement>("[data-section]");
-    if (!section) {
-      return;
-    }
-
-    const onSectionStep = (event: Event) => {
-      if (!window.matchMedia("(max-width: 767px)").matches) {
-        return;
-      }
-
-      const stepEvent = event as SectionStepEvent;
-      const direction = stepEvent.detail.direction;
-      if (!stepByDirection(direction)) {
-        return;
-      }
-
-      event.preventDefault();
-      stepEvent.detail.lockMs = mobileRealResultsTiming.stepLockMs;
-      stepEvent.detail.sameDirectionMaxMs =
-        mobileRealResultsTiming.sameDirectionMaxMs;
-      stepEvent.detail.sameDirectionSilenceMs =
-        mobileRealResultsTiming.sameDirectionSilenceMs;
-      stepEvent.detail.silenceMs = 0;
-    };
-
-    section.addEventListener("fitness-space:section-step", onSectionStep);
-    return () => {
-      section.removeEventListener("fitness-space:section-step", onSectionStep);
-    };
-  }, [stepByDirection]);
-
-  useEffect(() => {
-    const root = rootRef.current;
-    const section = root?.closest<HTMLElement>("[data-section]");
-    if (!root || !section) {
-      return;
-    }
-
-    let unlockTimer: ReturnType<typeof setTimeout> | null = null;
-    let suppressedDirection: -1 | 1 | null = null;
-    let suppressTimer: ReturnType<typeof setTimeout> | null = null;
-    let wheelDelta = 0;
-    let wheelResetTimer: ReturnType<typeof setTimeout> | null = null;
-
-    const isMobile = () => window.matchMedia("(max-width: 767px)").matches;
-
-    const canStep = (direction: -1 | 1) => {
-      const currentStage = stageRef.current;
-      const nextStage = Math.min(
-        Math.max(currentStage + direction, 0),
-        testimonials.length - 1,
-      );
-
-      return nextStage !== currentStage;
-    };
-
-    const isAtCardStepBoundary = () => {
-      if (section.hasAttribute("data-internal-scroll-section")) {
-        const maxScrollTop = section.scrollHeight - section.clientHeight;
-        return section.scrollTop >= maxScrollTop - 2;
-      }
-
-      const rect = section.getBoundingClientRect();
-      return rect.bottom <= window.innerHeight + 32;
-    };
-
-    const clearSuppression = () => {
-      suppressedDirection = null;
-
-      if (suppressTimer) {
-        clearTimeout(suppressTimer);
-        suppressTimer = null;
-      }
-    };
-
-    const isDirectionSuppressed = (direction: -1 | 1) => {
-      if (suppressedDirection === null) {
-        return false;
-      }
-
-      if (suppressedDirection !== direction) {
-        clearSuppression();
-        return false;
-      }
-
-      return true;
-    };
-
-    const suppressSameDirection = (direction: -1 | 1) => {
-      clearSuppression();
-      suppressedDirection = direction;
-      suppressTimer = setTimeout(() => {
-        suppressedDirection = null;
-        suppressTimer = null;
-      }, mobileRealResultsTiming.sameDirectionSilenceMs);
-    };
-
-    const lockInput = (direction: -1 | 1) => {
-      inputLockedRef.current = true;
-      suppressSameDirection(direction);
-
-      if (unlockTimer) {
-        clearTimeout(unlockTimer);
-      }
-
-      unlockTimer = setTimeout(() => {
-        inputLockedRef.current = false;
-      }, prefersReducedMotion ? 0 : mobileRealResultsTiming.stepLockMs);
-    };
-
-    const resetWheelDeltaSoon = () => {
-      if (wheelResetTimer) {
-        clearTimeout(wheelResetTimer);
-      }
-
-      wheelResetTimer = setTimeout(() => {
-        wheelDelta = 0;
-      }, 180);
-    };
-
-    const onWheel = (event: WheelEvent) => {
-      if (event.deltaY === 0) {
-        return;
-      }
-
-      const direction = event.deltaY > 0 ? 1 : -1;
-      if (!isMobile() || !isAtCardStepBoundary()) {
-        return;
-      }
-
-      if (inputLockedRef.current || isDirectionSuppressed(direction)) {
-        event.preventDefault();
-        event.stopPropagation();
-        return;
-      }
-
-      if (!canStep(direction)) {
-        return;
-      }
-
-      event.preventDefault();
-      event.stopPropagation();
-
-      wheelDelta += event.deltaY;
-      resetWheelDeltaSoon();
-
-      if (Math.abs(wheelDelta) < 36) {
-        return;
-      }
-
-      wheelDelta = 0;
-      if (stepByDirection(direction)) {
-        lockInput(direction);
-      }
-    };
-
-    const onTouchStart = (event: TouchEvent) => {
-      touchStartYRef.current = event.touches[0]?.clientY ?? null;
-    };
-
-    const onTouchMove = (event: TouchEvent) => {
-      const startY = touchStartYRef.current;
-      const currentY = event.touches[0]?.clientY;
-      if (startY === null || currentY === undefined) {
-        return;
-      }
-
-      const delta = startY - currentY;
-      if (Math.abs(delta) <= 8) {
-        return;
-      }
-
-      const direction = delta > 0 ? 1 : -1;
-      if (!isMobile() || !isAtCardStepBoundary()) {
-        return;
-      }
-
-      const directionIsSuppressed = isDirectionSuppressed(direction);
-      if (
-        !canStep(direction) &&
-        !inputLockedRef.current &&
-        !directionIsSuppressed
-      ) {
-        return;
-      }
-
-      event.preventDefault();
-      event.stopPropagation();
-    };
-
-    const onTouchEnd = (event: TouchEvent) => {
-      const startY = touchStartYRef.current;
-      touchStartYRef.current = null;
-
-      const endY = event.changedTouches[0]?.clientY;
-      if (startY === null || endY === undefined) {
-        return;
-      }
-
-      const delta = startY - endY;
-      if (Math.abs(delta) < 48) {
-        return;
-      }
-
-      const direction = delta > 0 ? 1 : -1;
-      if (!isMobile() || !isAtCardStepBoundary()) {
-        return;
-      }
-
-      if (inputLockedRef.current || isDirectionSuppressed(direction)) {
-        event.preventDefault();
-        event.stopPropagation();
-        return;
-      }
-
-      if (!canStep(direction)) {
-        return;
-      }
-
-      event.preventDefault();
-      event.stopPropagation();
-
-      if (stepByDirection(direction)) {
-        lockInput(direction);
-      }
-    };
-
-    root.addEventListener("wheel", onWheel, { capture: true, passive: false });
-    root.addEventListener("touchstart", onTouchStart, {
-      capture: true,
-      passive: true,
-    });
-    root.addEventListener("touchmove", onTouchMove, {
-      capture: true,
-      passive: false,
-    });
-    root.addEventListener("touchend", onTouchEnd, {
-      capture: true,
-      passive: false,
-    });
-
-    return () => {
-      root.removeEventListener("wheel", onWheel, { capture: true });
-      root.removeEventListener("touchstart", onTouchStart, { capture: true });
-      root.removeEventListener("touchmove", onTouchMove, { capture: true });
-      root.removeEventListener("touchend", onTouchEnd, { capture: true });
-
-      if (unlockTimer) {
-        clearTimeout(unlockTimer);
-      }
-
-      if (suppressTimer) {
-        clearTimeout(suppressTimer);
-      }
-
-      if (wheelResetTimer) {
-        clearTimeout(wheelResetTimer);
-      }
-    };
-  }, [prefersReducedMotion, stepByDirection, testimonials.length]);
-
-  return (
-    <div className="absolute inset-0 md:hidden" ref={rootRef}>
-      <h2 className="absolute left-[calc(50%+3px)] top-[162px] w-[288px] -translate-x-1/2 -translate-y-1/2 text-center text-[64px] font-extrabold capitalize leading-normal text-white/15">
-        Real People. Real Results.
-      </h2>
-      <p className="absolute left-[calc(50%+3.5px)] top-[392px] w-[243px] -translate-x-1/2 -translate-y-1/2 text-center text-[16px] font-normal leading-normal text-white">
-        Our members eat jollof rice, beans, eba and their favourite Nigerian
-        meals. Just smarter.
+    <article className="relative min-h-[176px] w-full max-w-[252px] overflow-hidden rounded-[16px] bg-white px-7 py-7 text-left text-black">
+      <p className="text-[14px] font-normal capitalize leading-tight">
+        {testimonial.quote}
       </p>
-      {testimonials.map((testimonial, index) => (
-        <MobileRealResultTestimonialCard
-          isActive={index === stage}
-          isPrevious={index === previousStage && index !== stage}
-          key={testimonial.id}
-          prefersReducedMotion={prefersReducedMotion}
-          testimonial={testimonial}
-        />
-      ))}
-    </div>
+      <p className="mt-3 text-xs font-bold capitalize leading-normal">
+        {testimonial.name}
+      </p>
+      <span
+        aria-hidden="true"
+        className="absolute left-5 top-8 -translate-y-1/2 text-[64px] font-semibold leading-none text-black/20"
+      >
+        “
+      </span>
+      <span
+        aria-hidden="true"
+        className="absolute bottom-5 right-5 rotate-180 text-[64px] font-semibold leading-none text-black/20"
+      >
+        “
+      </span>
+    </article>
   );
 }
 
 function RealResultsSection() {
   return (
-    <ScrollSection
-      className="px-0 py-0 md:px-4 md:py-14 lg:px-12"
-      contentClassName="flex items-start justify-center md:items-center"
-      id="real-results"
-      intensity={42}
-      mobileNativeScroll
-      stepAtNativeBoundary
-    >
-      <article className="relative h-[923px] w-full max-w-[393px] overflow-hidden bg-black text-white md:h-[min(calc(100svh-5rem),680px)] md:min-h-[500px] md:max-w-[1284px]">
-        <MobileRealResultsReveal />
-        <div className="hidden md:block">
-          <h2 className="absolute left-1/2 top-[221px] w-[288px] -translate-x-1/2 text-center text-[64px] font-extrabold capitalize leading-normal text-white/15">
-            Real People. Real Results.
-          </h2>
-          <p className="absolute left-1/2 top-[607px] w-[243px] -translate-x-1/2 text-center text-[16px] font-normal capitalize leading-normal text-white">
-            Our members eat jollof rice, beans, eba and their favourite Nigerian
-            meals. Just smarter.
-          </p>
-          {finalTestimonials.map((testimonial) => (
-            <TestimonialCard key={testimonial.id} testimonial={testimonial} />
-          ))}
-        </div>
-      </article>
-    </ScrollSection>
+    <FinalFrame id="real-results">
+      <h2 className="absolute left-1/2 top-[221px] w-[288px] -translate-x-1/2 text-center text-[64px] font-extrabold capitalize leading-normal text-white/15 max-md:top-[42px] max-md:w-[250px] max-md:text-[38px] max-md:leading-none">
+        Real People. Real Results.
+      </h2>
+      <p className="absolute left-1/2 top-[607px] w-[243px] -translate-x-1/2 text-center text-[16px] font-normal capitalize leading-normal text-white max-md:bottom-8 max-md:top-auto max-md:w-[260px] max-md:text-xs">
+        Our members eat jollof rice, beans, eba and their favourite Nigerian
+        meals. Just smarter.
+      </p>
+      {finalTestimonials.map((testimonial) => (
+        <TestimonialCard key={testimonial.id} testimonial={testimonial} />
+      ))}
+      <div className="absolute left-1/2 top-[164px] flex w-full -translate-x-1/2 flex-col items-center gap-3 px-5 md:hidden">
+        {finalTestimonials.map((testimonial) => (
+          <MobileTestimonialCard
+            key={testimonial.id}
+            testimonial={testimonial}
+          />
+        ))}
+      </div>
+    </FinalFrame>
   );
 }
 
@@ -654,6 +266,20 @@ function FourteenDayPayoffSection() {
 }
 
 function FinalFooterCtaSection() {
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
+  const [agreeToPrivacy, setAgreeToPrivacy] = useState(false);
+  const [showError, setShowError] = useState(false);
+
+  const isButtonEnabled = agreeToTerms && agreeToPrivacy;
+
+  const handleButtonClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!isButtonEnabled) {
+      e.preventDefault();
+      setShowError(true);
+      setTimeout(() => setShowError(false), 3000);
+    }
+  };
+
   return (
     <ScrollSection
       className="px-4 py-10 sm:px-8 lg:px-12"
@@ -662,7 +288,7 @@ function FinalFooterCtaSection() {
       intensity={42}
       nativeScroll
     >
-      <article className="relative w-full max-w-[1284px] overflow-visible bg-black text-white">
+      <article className="relative min-h-[960px] w-full max-w-[1284px] overflow-visible bg-black text-white max-md:min-h-[900px]">
         <div className="absolute left-1/2 top-0 h-[625px] w-[min(100%,1185px)] -translate-x-1/2 overflow-hidden rounded-[22px] bg-[#f25602]">
           <div className="absolute left-1/2 top-0 h-[625px] w-[1284px] -translate-x-1/2 rounded-[10px] bg-[#f25602]" />
           <Image
@@ -676,10 +302,64 @@ function FinalFooterCtaSection() {
             <span className="block">Your body has been waiting for</span>
             <span className="block">a system built for it.</span>
           </h2>
+
+          {/* Checkboxes Section */}
+          <div className="absolute left-1/2 top-[200px] flex -translate-x-1/2 flex-col gap-3">
+            {/* Terms of Use Checkbox */}
+            <label className="flex cursor-pointer items-center gap-2 text-white">
+              <input
+                type="checkbox"
+                checked={agreeToTerms}
+                onChange={(e) => {
+                  setAgreeToTerms(e.target.checked);
+                  setShowError(false);
+                }}
+                className="h-4 w-4 cursor-pointer rounded border-white bg-transparent checked:bg-orange-500"
+              />
+              <span className="text-sm">
+                I agree to the{" "}
+                <Link href="/terms" className="underline hover:text-orange-300">
+                  Terms of Use
+                </Link>
+              </span>
+            </label>
+
+            {/* Privacy Policy Checkbox */}
+            <label className="flex cursor-pointer items-center gap-2 text-white">
+              <input
+                type="checkbox"
+                checked={agreeToPrivacy}
+                onChange={(e) => {
+                  setAgreeToPrivacy(e.target.checked);
+                  setShowError(false);
+                }}
+                className="h-4 w-4 cursor-pointer rounded border-white bg-transparent checked:bg-orange-500"
+              />
+              <span className="text-sm">
+                I agree to the{" "}
+                <Link href="/privacy" className="underline hover:text-orange-300">
+                  Privacy Policy
+                </Link>
+              </span>
+            </label>
+
+            {/* Error Message */}
+            {showError && (
+              <p className="text-xs text-red-300">
+                Please agree to both the Terms of Use and Privacy Policy to continue.
+              </p>
+            )}
+          </div>
+
           <FinalButton
-            className="absolute left-1/2 top-[241px] -translate-x-1/2"
+            className={`absolute left-1/2 top-[280px] -translate-x-1/2 transition-opacity ${
+              !isButtonEnabled ? "cursor-not-allowed opacity-50" : ""
+            }`}
             variant="white"
+            onClick={handleButtonClick}
+            disabled={!isButtonEnabled}
           />
+
           <Image
             alt="Fitness Space logo"
             className="absolute bottom-[31.8px] left-10 h-[23.197px] w-[200px] object-contain max-md:left-5 max-md:w-[150px]"
@@ -709,6 +389,49 @@ function FinalFooterCtaSection() {
           <p className="text-[80px] font-bold capitalize leading-[90%] text-white/10">
             Bibi. Bibi. Bibi.
           </p>
+
+          {/* Mobile Checkboxes */}
+          <div className="flex flex-col items-start gap-2 px-5">
+            <label className="flex cursor-pointer items-center gap-2 text-white">
+              <input
+                type="checkbox"
+                checked={agreeToTerms}
+                onChange={(e) => {
+                  setAgreeToTerms(e.target.checked);
+                  setShowError(false);
+                }}
+                className="h-4 w-4 cursor-pointer rounded border-white bg-transparent checked:bg-orange-500"
+              />
+              <span className="text-xs">
+                I agree to the{" "}
+                <Link href="/terms" className="underline hover:text-orange-300">
+                  Terms of Use
+                </Link>
+              </span>
+            </label>
+            <label className="flex cursor-pointer items-center gap-2 text-white">
+              <input
+                type="checkbox"
+                checked={agreeToPrivacy}
+                onChange={(e) => {
+                  setAgreeToPrivacy(e.target.checked);
+                  setShowError(false);
+                }}
+                className="h-4 w-4 cursor-pointer rounded border-white bg-transparent checked:bg-orange-500"
+              />
+              <span className="text-xs">
+                I agree to the{" "}
+                <Link href="/privacy" className="underline hover:text-orange-300">
+                  Privacy Policy
+                </Link>
+              </span>
+            </label>
+            {showError && (
+              <p className="text-xs text-red-300">
+                Please agree to both policies to continue.
+              </p>
+            )}
+          </div>
 
           <p className="text-[10px] font-bold capitalize leading-[99.915%] text-white">
             © 2026 All rights reserved. · <span>Privacy</span> ·{" "}
