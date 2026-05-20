@@ -34,6 +34,8 @@ export const bodyFoodRevealTiming = {
   dailyCardLift: 18,
   dailyShrinkDuration: 0.36,
   firstStepLockMs: 380,
+  mobileAutoplayFirstDelayMs: 3200,
+  mobileAutoplayIntervalMs: 1600,
   sameDirectionMaxMs: 1200,
   sameDirectionSilenceMs: 80,
   stepLockMs: 160,
@@ -153,6 +155,56 @@ export function BodyFoodReveal() {
       section.removeEventListener("fitness-space:section-step", onSectionStep);
     };
   }, []);
+
+  useEffect(() => {
+    if (!isInViewport || prefersReducedMotion) {
+      return;
+    }
+
+    const mobileQuery = window.matchMedia("(max-width: 767px)");
+    if (!mobileQuery.matches) {
+      return;
+    }
+
+    stageRef.current = 0;
+    setStage(0);
+    setAnimationCycle((cycle) => cycle + 1);
+
+    const advance = () => {
+      const currentStage = stageRef.current;
+      const nextStage = Math.min(currentStage + 1, coachingCardPairs.length);
+
+      if (nextStage === currentStage) {
+        return false;
+      }
+
+      stageRef.current = nextStage;
+      setStage(nextStage);
+      setAnimationCycle((cycle) => cycle + 1);
+      return true;
+    };
+
+    let interval: number | undefined;
+    const startTimer = window.setTimeout(() => {
+      if (!advance()) {
+        return;
+      }
+
+      interval = window.setInterval(() => {
+        if (!advance() && interval !== undefined) {
+          window.clearInterval(interval);
+          interval = undefined;
+        }
+      }, bodyFoodRevealTiming.mobileAutoplayIntervalMs);
+    }, bodyFoodRevealTiming.mobileAutoplayFirstDelayMs);
+
+    return () => {
+      window.clearTimeout(startTimer);
+      if (interval !== undefined) {
+        window.clearInterval(interval);
+      }
+    };
+  }, [isInViewport, prefersReducedMotion]);
 
   return (
     <motion.div

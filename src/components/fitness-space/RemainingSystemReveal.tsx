@@ -21,6 +21,7 @@ type SectionStepEvent = CustomEvent<{
 
 const remainingSystemRevealTiming = {
   headlineScale: 0.375,
+  mobileAutoplayDelayMs: 900,
   panelEnterDelay: 0.22,
   panelEnterDuration: 0.46,
   panelExitDuration: 0.18,
@@ -77,6 +78,29 @@ export function RemainingSystemReveal({
       section.removeEventListener("fitness-space:section-step", onSectionStep);
     };
   }, []);
+
+  useEffect(() => {
+    if (!isInView || prefersReducedMotion) {
+      return;
+    }
+
+    const mobileQuery = window.matchMedia("(max-width: 767px)");
+    if (!mobileQuery.matches) {
+      return;
+    }
+
+    stageRef.current = 0;
+    setStage(0);
+
+    const timer = window.setTimeout(() => {
+      stageRef.current = 1;
+      setStage(1);
+    }, remainingSystemRevealTiming.mobileAutoplayDelayMs);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [isInView, prefersReducedMotion]);
 
   return (
     <div

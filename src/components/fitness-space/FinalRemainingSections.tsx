@@ -1,14 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useInView, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { assets, finalTestimonials, finalTrialFacts } from "./data";
 import { ScrollSection } from "./ScrollSection";
 import { WHATSAPP_LINK } from "./lib/constants";
 
 const mobileRealResultsTiming = {
+  autoplayDelayMs: 900,
+  autoplayIntervalMs: 2400,
   cardDuration: 0.48,
 } as const;
 
@@ -251,13 +254,57 @@ function MobileRealResultTestimonialCard({
 }
 
 function MobileRealResultsReveal() {
+  const rootRef = useRef<HTMLDivElement>(null);
   const testimonials = [finalTestimonials[1], finalTestimonials[0]];
-  const stage = 0;
-  const previousStage = testimonials.length > 1 ? testimonials.length - 1 : null;
+  const [stage, setStage] = useState(0);
+  const [previousStage, setPreviousStage] = useState<number | null>(
+    testimonials.length > 1 ? testimonials.length - 1 : null,
+  );
+  const stageRef = useRef(stage);
   const prefersReducedMotion = useReducedMotion();
+  const isInView = useInView(rootRef, { amount: 0.46 });
+
+  useEffect(() => {
+    stageRef.current = stage;
+  }, [stage]);
+
+  useEffect(() => {
+    if (!isInView || prefersReducedMotion || testimonials.length < 2) {
+      return;
+    }
+
+    stageRef.current = 0;
+    setStage(0);
+    setPreviousStage(testimonials.length - 1);
+
+    const advance = () => {
+      const currentStage = stageRef.current;
+      const nextStage = (currentStage + 1) % testimonials.length;
+
+      stageRef.current = nextStage;
+      setPreviousStage(currentStage);
+      setStage(nextStage);
+    };
+
+    let interval: number | undefined;
+    const startTimer = window.setTimeout(() => {
+      advance();
+      interval = window.setInterval(
+        advance,
+        mobileRealResultsTiming.autoplayIntervalMs,
+      );
+    }, mobileRealResultsTiming.autoplayDelayMs);
+
+    return () => {
+      window.clearTimeout(startTimer);
+      if (interval !== undefined) {
+        window.clearInterval(interval);
+      }
+    };
+  }, [isInView, prefersReducedMotion, testimonials.length]);
 
   return (
-    <div className="absolute inset-0 md:hidden">
+    <div className="absolute inset-0 md:hidden" ref={rootRef}>
       <h2 className="absolute left-[calc(50%+3px)] top-[185px] lg:top-[162px] w-[288px] -translate-x-1/2 -translate-y-1/2 text-center text-[64px] font-extrabold capitalize leading-[1.1] lg:leading-normal text-white/15">
         Real People. Real Results.
       </h2>

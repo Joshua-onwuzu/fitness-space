@@ -1,7 +1,8 @@
 "use client";
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useInView, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import type { ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { BodyFoodReveal, CoachingCardAsset } from "./BodyFoodReveal";
 import {
@@ -84,6 +85,8 @@ function RemainingPhoneMockup({
 const mobileCoachingCards = coachingCardPairs.flat();
 
 const mobileCardSectionTiming = {
+  autoplayDelayMs: 700,
+  autoplayIntervalMs: 1700,
   cardDuration: 0.48,
 } as const;
 
@@ -251,14 +254,59 @@ export function MobileCardSection() {
 }
 
 function MobileBodyFoodCardsReveal() {
+  const rootRef = useRef<HTMLDivElement>(null);
   const cards = mobileCoachingCards;
-  const stage = 0;
-  const previousStage = cards.length > 1 ? cards.length - 1 : null;
+  const [stage, setStage] = useState(0);
+  const [previousStage, setPreviousStage] = useState<number | null>(
+    cards.length > 1 ? cards.length - 1 : null,
+  );
+  const stageRef = useRef(stage);
   const prefersReducedMotion = useReducedMotion();
+  const isInView = useInView(rootRef, { amount: 0.6 });
+
+  useEffect(() => {
+    stageRef.current = stage;
+  }, [stage]);
+
+  useEffect(() => {
+    if (!isInView || prefersReducedMotion || cards.length < 2) {
+      return;
+    }
+
+    stageRef.current = 0;
+    setStage(0);
+    setPreviousStage(cards.length - 1);
+
+    const advance = () => {
+      const currentStage = stageRef.current;
+      const nextStage = (currentStage + 1) % cards.length;
+
+      stageRef.current = nextStage;
+      setPreviousStage(currentStage);
+      setStage(nextStage);
+    };
+
+    let interval: number | undefined;
+    const startTimer = window.setTimeout(() => {
+      advance();
+      interval = window.setInterval(
+        advance,
+        mobileCardSectionTiming.autoplayIntervalMs,
+      );
+    }, mobileCardSectionTiming.autoplayDelayMs);
+
+    return () => {
+      window.clearTimeout(startTimer);
+      if (interval !== undefined) {
+        window.clearInterval(interval);
+      }
+    };
+  }, [cards.length, isInView, prefersReducedMotion]);
 
   return (
     <div
       className="relative flex h-svh w-full items-center justify-center overflow-hidden bg-black px-0"
+      ref={rootRef}
     >
       <span
         aria-hidden="true"
