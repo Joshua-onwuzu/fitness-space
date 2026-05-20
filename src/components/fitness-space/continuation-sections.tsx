@@ -2,7 +2,6 @@
 import { motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
 
 import { BodyFoodReveal, CoachingCardAsset } from "./BodyFoodReveal";
 import {
@@ -82,37 +81,11 @@ function RemainingPhoneMockup({
   );
 }
 
-type SectionStepEvent = CustomEvent<{
-  direction: -1 | 1;
-  lockMs?: number;
-  sameDirectionMaxMs?: number;
-  sameDirectionSilenceMs?: number;
-  silenceMs?: number;
-}>;
+const mobileCoachingCards = coachingCardPairs.flat();
 
 const mobileCardSectionTiming = {
   cardDuration: 0.48,
-  sameDirectionMaxMs: 1800,
-  sameDirectionSilenceMs: 1800,
-  stepLockMs: 620,
 } as const;
-
-const mobileCoachingCards = coachingCardPairs.flat();
-
-const mobilePowerfulFeatureLayout = [
-  {
-    bodyTop: "253px",
-    numberTop: "90px",
-    titleTop: "198px",
-    titleWidth: "148px",
-  },
-  {
-    bodyTop: "602px",
-    numberTop: "448px",
-    titleTop: "556px",
-    titleWidth: "157px",
-  },
-] as const;
 
 const healthScoreDiscountRows = [
   { discount: "No discount - base price", score: "0 - 500" },
@@ -278,60 +251,14 @@ export function MobileCardSection() {
 }
 
 function MobileBodyFoodCardsReveal() {
-  const rootRef = useRef<HTMLDivElement>(null);
   const cards = mobileCoachingCards;
-  const [stage, setStage] = useState(0);
-  const [previousStage, setPreviousStage] = useState<number | null>(
-    cards.length > 1 ? cards.length - 1 : null,
-  );
-  const stageRef = useRef(stage);
+  const stage = 0;
+  const previousStage = cards.length > 1 ? cards.length - 1 : null;
   const prefersReducedMotion = useReducedMotion();
-
-  useEffect(() => {
-    stageRef.current = stage;
-  }, [stage]);
-
-  useEffect(() => {
-    const section = rootRef.current?.closest<HTMLElement>("[data-section]");
-    if (!section) {
-      return;
-    }
-
-    const onSectionStep = (event: Event) => {
-      const stepEvent = event as SectionStepEvent;
-      const direction = stepEvent.detail.direction;
-      const currentStage = stageRef.current;
-      const nextStage = Math.min(
-        Math.max(currentStage + direction, 0),
-        cards.length - 1,
-      );
-
-      if (nextStage === currentStage) {
-        return;
-      }
-
-      event.preventDefault();
-      stepEvent.detail.lockMs = mobileCardSectionTiming.stepLockMs;
-      stepEvent.detail.sameDirectionMaxMs =
-        mobileCardSectionTiming.sameDirectionMaxMs;
-      stepEvent.detail.sameDirectionSilenceMs =
-        mobileCardSectionTiming.sameDirectionSilenceMs;
-      stepEvent.detail.silenceMs = 0;
-      stageRef.current = nextStage;
-      setPreviousStage(currentStage);
-      setStage(nextStage);
-    };
-
-    section.addEventListener("fitness-space:section-step", onSectionStep);
-    return () => {
-      section.removeEventListener("fitness-space:section-step", onSectionStep);
-    };
-  }, [cards.length]);
 
   return (
     <div
       className="relative flex h-svh w-full items-center justify-center overflow-hidden bg-black px-0"
-      ref={rootRef}
     >
       <span
         aria-hidden="true"

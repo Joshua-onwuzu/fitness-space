@@ -116,6 +116,10 @@ export function BodyFoodReveal() {
     }
 
     const onSectionStep = (event: Event) => {
+      if (window.matchMedia("(max-width: 767px)").matches) {
+        return;
+      }
+
       const stepEvent = event as SectionStepEvent;
       const direction = stepEvent.detail.direction;
       const currentStage = stageRef.current;

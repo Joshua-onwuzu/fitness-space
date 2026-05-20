@@ -42,18 +42,13 @@ export function ScrollSection({
   const usesMobileOverflowLayout =
     isMobileViewport && (isOverflowingViewport || mobileNativeScroll);
   const usesNativeScrollLayout = nativeScroll || usesMobileOverflowLayout;
-  const usesMobileInternalScroll = isMobileViewport && usesNativeScrollLayout;
   const centersShortMobileContent =
     isMobileViewport && mobileNativeScroll && !isOverflowingViewport;
   const sectionSizingClass = usesNativeScrollLayout
-    ? usesMobileInternalScroll
-      ? "h-svh overflow-y-auto overscroll-contain"
-      : "min-h-svh overflow-visible"
+    ? "min-h-svh overflow-visible"
     : "h-svh overflow-hidden";
   const contentSizingClass = usesNativeScrollLayout
-    ? usesMobileInternalScroll
-      ? "min-h-full pb-8"
-      : "min-h-svh"
+    ? "min-h-svh"
     : "h-full";
   const mobileNativeVisibilityClass = mobileNativeScroll
     ? "max-sm:!translate-y-0 max-sm:!opacity-100"
@@ -83,7 +78,7 @@ export function ScrollSection({
       return;
     }
 
-    const mobileQuery = window.matchMedia("(max-width: 639px)");
+    const mobileQuery = window.matchMedia("(max-width: 767px)");
 
     const measureOverflow = () => {
       const sectionStyles = window.getComputedStyle(section);
@@ -105,11 +100,13 @@ export function ScrollSection({
       const visualContentHeight =
         childBounds.bottom - Math.min(childBounds.top, 0);
 
-      setIsMobileViewport(mobileQuery.matches);
-      setIsOverflowingViewport(
+      const nextIsMobileViewport = mobileQuery.matches;
+      const nextIsOverflowingViewport =
         Math.max(content.scrollHeight, visualContentHeight) >
-          availableHeight + 2,
-      );
+        availableHeight + 2;
+
+      setIsMobileViewport(nextIsMobileViewport);
+      setIsOverflowingViewport(nextIsOverflowingViewport);
     };
 
     measureOverflow();
@@ -132,7 +129,6 @@ export function ScrollSection({
       data-section
       data-boundary-step-section={stepAtNativeBoundary ? "" : undefined}
       data-desktop-step-section={desktopStepSection ? "" : undefined}
-      data-internal-scroll-section={usesMobileInternalScroll ? "" : undefined}
       data-native-scroll-section={usesNativeScrollLayout ? "" : undefined}
       id={id}
       ref={sectionRef}
