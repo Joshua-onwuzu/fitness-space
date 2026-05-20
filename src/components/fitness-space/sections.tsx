@@ -10,6 +10,7 @@ import { WHATSAPP_LINK } from "./lib/constants";
 
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
+import { getAgreementState, subscribeToAgreementState } from "./lib/agreement-store";
 
 const rotatingTexts = [
   "Weight Loss.",
@@ -17,6 +18,66 @@ const rotatingTexts = [
   "Insulin Resistance.",
   "Lifestyle Changes.",
 ];
+
+// Reusable CTA Button component that respects agreement
+function HeroCTAAgreementButton({ 
+  className = "", 
+  children,
+  showError = false,
+  icon
+}: { 
+  className?: string;
+  children?: React.ReactNode;
+  showError?: boolean;
+  icon?: React.ReactNode;
+}) {
+  const [isAgreed, setIsAgreed] = useState(false);
+  const [localShowError, setLocalShowError] = useState(false);
+
+  useEffect(() => {
+    // Set initial state
+    const initialState = getAgreementState();
+    setIsAgreed(initialState.terms && initialState.privacy);
+
+    // Subscribe to changes
+    const unsubscribe = subscribeToAgreementState((state) => {
+      setIsAgreed(state.terms && state.privacy);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!isAgreed) {
+      e.preventDefault();
+      setLocalShowError(true);
+      setTimeout(() => setLocalShowError(false), 3000);
+    }
+  };
+
+  return (
+    <>
+      <a
+        className={`inline-flex items-center justify-center rounded-[7px] transition ${
+          isAgreed 
+            ? "hover:bg-white/90 cursor-pointer" 
+            : "opacity-50 cursor-not-allowed"
+        } ${className}`}
+        href={isAgreed ? WHATSAPP_LINK : undefined}
+        onClick={handleClick}
+        style={{ cursor: isAgreed ? "pointer" : "not-allowed" }}
+      >
+        {icon && icon}
+        {children || "Meet Bibi — It's Free"}
+      </a>
+      {(showError || localShowError) && !isAgreed && (
+        <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-red-500/90 px-4 py-2 text-center text-xs text-white whitespace-nowrap">
+          Please agree to Terms of Use and Privacy Policy to continue
+        </div>
+      )}
+    </>
+  );
+}
 
 export function HeroSection() {
   // desktop fade state
@@ -91,20 +152,20 @@ export function HeroSection() {
               your food and your goals. Real results. Starting free.
             </p>
 
-            <a
+            <HeroCTAAgreementButton
               className="mt-5 inline-flex w-fit items-center gap-2 rounded-[7px] bg-white px-4 py-2 text-xs font-semibold text-black hover:bg-white/90 max-sm:mx-auto"
-              href={WHATSAPP_LINK}
-            >
-              <Image
-                src={assets.whatsappIcon}
-                alt="WhatsApp"
-                className="h-8 w-8"
-                height={16}
-                priority
-                width={16}
-              />
-              Meet Bibi — It&apos;s Free
-            </a>
+              showError
+              icon={
+                <Image
+                  src={assets.whatsappIcon}
+                  alt="WhatsApp"
+                  className="h-8 w-8"
+                  height={16}
+                  priority
+                  width={16}
+                />
+              }
+            />
 
             {/* TEXT BELOW BUTTON */}
             <h2 className="mt-5 sm:mt-14 lg:mt-20 text-base font-semibold leading-[1.4] text-white sm:text-xl">
@@ -159,20 +220,20 @@ export function HeroSection() {
             fasting and tracks your daily habits — all based on your body, your
             food and your goals. Real results. Starting free.
           </p>
-          <a
-            className="absolute left-1/2 top-[calc(50%+20.25px)] flex w-[260px] -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-2 rounded-[7px] bg-white px-4 py-3 text-[14px] font-semibold text-black transition hover:bg-white/90"
-            href={WHATSAPP_LINK}
-          >
-            <Image
-              src={assets.whatsappIcon}
-              alt="WhatsApp"
-              className="h-8 w-8"
-              height={16}
-              priority
-              width={16}
-            />
-            Meet Bibi — It&apos;s Free
-          </a>
+          <HeroCTAAgreementButton
+            className="absolute left-1/2 top-[calc(50%+20.25px)] flex w-[260px] -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-2 rounded-[7px] bg-white px-4 py-3 text-[14px] font-semibold text-black hover:bg-white/90"
+            showError
+            icon={
+              <Image
+                src={assets.whatsappIcon}
+                alt="WhatsApp"
+                className="h-8 w-8"
+                height={16}
+                priority
+                width={16}
+              />
+            }
+          />
           <p className="absolute left-1/2 top-[497px] w-[239px] -translate-x-1/2 -translate-y-1/2 text-center text-[14px] font-semibold leading-normal text-white">
             No meal plans. No starvation. No guesswork. Just Bibi.
           </p>

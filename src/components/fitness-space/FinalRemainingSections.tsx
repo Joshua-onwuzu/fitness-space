@@ -5,6 +5,9 @@ import { motion, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { updateAgreementState } from "./lib/agreement-store";
+
+import Link from "next/link";
 import { assets, finalTestimonials, finalTrialFacts } from "./data";
 import { ScrollSection } from "./ScrollSection";
 import { WHATSAPP_LINK } from "./lib/constants";
@@ -69,9 +72,13 @@ function TrialFactPill({
 function FinalButton({
   className = "",
   variant = "orange",
+  onClick,
+  disabled = false,
 }: {
   className?: string;
   variant?: "orange" | "white";
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  disabled?: boolean;
 }) {
   return (
     <a
@@ -79,8 +86,10 @@ function FinalButton({
         variant === "orange"
           ? "bg-[#f54900] text-white hover:bg-[#ff6420]"
           : "bg-white text-black hover:bg-white/90"
-      } ${className}`}
-      href={WHATSAPP_LINK}
+      } ${className} ${disabled ? "pointer-events-none opacity-50" : ""}`}
+      href={disabled ? undefined : WHATSAPP_LINK}
+      onClick={onClick}
+      style={{ cursor: disabled ? "not-allowed" : "pointer" }}
     >
       &nbsp;&nbsp;Meet Bibi — It&apos;s Free&nbsp;
     </a>
@@ -615,6 +624,42 @@ function RealResultsSection() {
 }
 
 function FourteenDayPayoffSection() {
+  const [isButtonEnabled, setIsButtonEnabled] = useState(false);
+  const [showError, setShowError] = useState(false);
+
+  useEffect(() => {
+    // Check initial agreement state
+    const checkAgreement = () => {
+      // You'll need to import getAgreementState from your store
+      import("./lib/agreement-store").then(({ getAgreementState }) => {
+        const state = getAgreementState();
+        setIsButtonEnabled(state.terms && state.privacy);
+      });
+    };
+
+    checkAgreement();
+
+    // Listen for agreement changes
+    const handleAgreementChange = (event: CustomEvent) => {
+      const { terms, privacy } = event.detail;
+      setIsButtonEnabled(terms && privacy);
+    };
+
+    window.addEventListener('fitness-space:agreement-changed', handleAgreementChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('fitness-space:agreement-changed', handleAgreementChange as EventListener);
+    };
+  }, []);
+
+  const handleButtonClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!isButtonEnabled) {
+      e.preventDefault();
+      setShowError(true);
+      setTimeout(() => setShowError(false), 3000);
+    }
+  };
+
   return (
     <ScrollSection
       className="px-4 py-10 sm:px-8 lg:px-12"
@@ -644,7 +689,21 @@ function FourteenDayPayoffSection() {
             Not starvation. <span className="italic">Just consistency</span>
           </span>
         </h2>
-        <FinalButton className="absolute left-1/2 top-[238px] h-[50px] w-[273px] -translate-x-1/2 md:top-[229px]" />
+        
+        <FinalButton 
+          className={`absolute left-1/2 top-[238px] h-[50px] w-[273px] -translate-x-1/2 md:top-[229px] transition-opacity ${
+            !isButtonEnabled ? "cursor-not-allowed opacity-50" : ""
+          }`}
+          onClick={handleButtonClick}
+          disabled={!isButtonEnabled}
+        />
+        
+        {showError && (
+          <div className="absolute left-1/2 top-[300px] z-20 -translate-x-1/2 rounded-lg bg-red-500/90 px-4 py-2 text-center text-xs text-white md:top-[290px]">
+            Please agree to Terms of Use and Privacy Policy to continue
+          </div>
+        )}
+        
         <Image
           alt="Bibi fitness coach"
           className="absolute bottom-[16px] left-1/2 z-10 h-[434px] w-[325px] translate-y-1/3 -translate-x-1/2 object-cover max-md:h-[360px] max-md:w-[270px]"
@@ -659,6 +718,34 @@ function FourteenDayPayoffSection() {
 }
 
 function FinalFooterCtaSection() {
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
+  const [agreeToPrivacy, setAgreeToPrivacy] = useState(false);
+  const [showError, setShowError] = useState(false);
+
+  const isButtonEnabled = agreeToTerms && agreeToPrivacy;
+
+  const handleCheckboxChange = (type: 'terms' | 'privacy', checked: boolean) => {
+  if (type === 'terms') {
+    setAgreeToTerms(checked);
+  } else {
+    setAgreeToPrivacy(checked);
+  }
+  setShowError(false);
+  
+  // Update global state
+  const newTerms = type === 'terms' ? checked : agreeToTerms;
+  const newPrivacy = type === 'privacy' ? checked : agreeToPrivacy;
+  updateAgreementState(newTerms, newPrivacy);
+};
+
+  const handleButtonClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!isButtonEnabled) {
+      e.preventDefault();
+      setShowError(true);
+      setTimeout(() => setShowError(false), 3000);
+    }
+  };
+
   return (
     <ScrollSection
       className="px-0 py-10 sm:px-8 lg:px-12"
@@ -681,10 +768,58 @@ function FinalFooterCtaSection() {
             <span className="block">Your body has been waiting for</span>
             <span className="block">a system built for it.</span>
           </h2>
+
+          {/* Checkboxes Section - Desktop */}
+          <div className="absolute left-1/2 top-[200px] hidden -translate-x-1/2 flex-col gap-3 md:flex">
+            {/* Terms of Use Checkbox */}
+            <label className="flex cursor-pointer items-center gap-2 text-white">
+              <input
+                type="checkbox"
+                checked={agreeToTerms}
+                onChange={(e) => handleCheckboxChange('terms', e.target.checked)}
+                className="h-4 w-4 cursor-pointer rounded border-white bg-transparent checked:bg-orange-500"
+              />
+              <span className="text-sm">
+                I agree to the{" "}
+                <Link href="/terms" className="underline hover:text-orange-300">
+                  Terms of Use
+                </Link>
+              </span>
+            </label>
+
+            {/* Privacy Policy Checkbox */}
+            <label className="flex cursor-pointer items-center gap-2 text-white">
+              <input
+                type="checkbox"
+                checked={agreeToPrivacy}
+                onChange={(e) => handleCheckboxChange('privacy', e.target.checked)}
+                className="h-4 w-4 cursor-pointer rounded border-white bg-transparent checked:bg-orange-500"
+              />
+              <span className="text-sm">
+                I agree to the{" "}
+                <Link href="/privacy" className="underline hover:text-orange-300">
+                  Privacy Policy
+                </Link>
+              </span>
+            </label>
+
+            {/* Error Message */}
+            {showError && (
+              <p className="text-xs text-red-300">
+                Please agree to both the Terms of Use and Privacy Policy to continue.
+              </p>
+            )}
+          </div>
+
           <FinalButton
-            className="absolute left-1/2 top-[241px] -translate-x-1/2"
+            className={`absolute left-1/2 top-[280px] -translate-x-1/2 transition-opacity ${
+              !isButtonEnabled ? "cursor-not-allowed opacity-50" : ""
+            }`}
             variant="white"
+            onClick={handleButtonClick}
+            disabled={!isButtonEnabled}
           />
+
           <Image
             alt="Fitness Space logo"
             className="absolute bottom-[31.8px] left-10 h-[23.197px] w-[200px] object-contain max-md:left-5 max-md:w-[150px]"
@@ -707,17 +842,55 @@ function FinalFooterCtaSection() {
           src={assets.finalBibi}
           width={1086}
         />
-        {/* ================= DESKTOP BIBI TEXT ================= */}
+        
+        {/* DESKTOP BIBI TEXT */}
         <p className="hidden md:block absolute left-1/2 top-[650px] -translate-x-[45%] whitespace-nowrap text-center text-[clamp(8rem,21.8svh,280px)] font-bold capitalize leading-[99.915%] text-white/10">
           Bibi. Bibi. Bibi.
         </p>
 
-        {/* ================= MOBILE ONLY ================= */}
+        {/* MOBILE ONLY */}
         <div className="md:hidden absolute bottom-6 left-1/2 z-20 flex w-full -translate-x-1/2 flex-col items-center px-4 text-center">
           {/* MOBILE BIBI TEXT */}
-          <p className="whitespace-nowrap text-[clamp(120px,28vw,220px)] font-bold leading-[0.82] text-white/10 ">
+          <p className="whitespace-nowrap text-[clamp(120px,28vw,220px)] font-bold leading-[0.82] text-white/10">
             Bibi.
           </p>
+
+          {/* MOBILE CHECKBOXES */}
+          <div className="mt-4 flex flex-col items-start gap-2">
+            <label className="flex cursor-pointer items-center gap-2 text-white">
+              <input
+                type="checkbox"
+                checked={agreeToTerms}
+                onChange={(e) => handleCheckboxChange('terms', e.target.checked)}
+                className="h-4 w-4 cursor-pointer rounded border-white bg-transparent checked:bg-orange-500"
+              />
+              <span className="text-xs">
+                I agree to the{" "}
+                <Link href="/terms" className="underline hover:text-orange-300">
+                  Terms of Use
+                </Link>
+              </span>
+            </label>
+            <label className="flex cursor-pointer items-center gap-2 text-white">
+              <input
+                type="checkbox"
+                checked={agreeToPrivacy}
+                onChange={(e) => handleCheckboxChange('privacy', e.target.checked)}
+                className="h-4 w-4 cursor-pointer rounded border-white bg-transparent checked:bg-orange-500"
+              />
+              <span className="text-xs">
+                I agree to the{" "}
+                <Link href="/privacy" className="underline hover:text-orange-300">
+                  Privacy Policy
+                </Link>
+              </span>
+            </label>
+            {showError && (
+              <p className="text-xs text-red-300">
+                Please agree to both policies to continue.
+              </p>
+            )}
+          </div>
 
           {/* MOBILE FOOTER */}
           <div className="mt-4 flex flex-col items-center gap-3">

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { assets, healthScorePayoffCards, x2NutritionCards } from "./data";
 import { WHATSAPP_LINK } from "./lib/constants";
+import { getAgreementState, subscribeToAgreementState } from "./lib/agreement-store";
 
 type SectionStepEvent = CustomEvent<{
   direction: -1 | 1;
@@ -82,6 +83,63 @@ export const x2CardVariants = {
     },
   }),
 };
+
+// CTA Button component that respects agreement
+function X2CTAAgreementButton({ 
+  className = "", 
+  children,
+  showError = false,
+}: { 
+  className?: string;
+  children?: React.ReactNode;
+  showError?: boolean;
+}) {
+  const [isAgreed, setIsAgreed] = useState(false);
+  const [localShowError, setLocalShowError] = useState(false);
+
+  useEffect(() => {
+    // Set initial state
+    const initialState = getAgreementState();
+    setIsAgreed(initialState.terms && initialState.privacy);
+
+    // Subscribe to changes
+    const unsubscribe = subscribeToAgreementState((state) => {
+      setIsAgreed(state.terms && state.privacy);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!isAgreed) {
+      e.preventDefault();
+      setLocalShowError(true);
+      setTimeout(() => setLocalShowError(false), 3000);
+    }
+  };
+
+  return (
+    <>
+      <a
+        className={`inline-flex h-[46px] w-[220px] whitespace-nowrap items-center justify-center rounded-[7px] bg-white px-[20px] py-[14px] text-[15px] font-semibold capitalize text-black transition hover:bg-white/90 sm:mt-7 sm:h-auto sm:w-auto sm:px-4 sm:py-2 sm:text-sm ${
+          isAgreed 
+            ? "cursor-pointer" 
+            : "opacity-50 cursor-not-allowed"
+        } ${className}`}
+        href={isAgreed ? WHATSAPP_LINK : undefined}
+        onClick={handleClick}
+        style={{ cursor: isAgreed ? "pointer" : "not-allowed" }}
+      >
+        {children || "Meet Bibi — It's Free"}
+      </a>
+      {(showError || localShowError) && !isAgreed && (
+        <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-red-500/90 px-4 py-2 text-center text-xs text-white whitespace-nowrap">
+          Please agree to Terms of Use and Privacy Policy to continue
+        </div>
+      )}
+    </>
+  );
+}
 
 export function useX2NutritionOrderReveal(cardCount: number) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -313,12 +371,7 @@ function X2NutritionOrderCard({
               {card.description}
             </p>
 
-            <a
-              className="mt-5 inline-flex h-[46px] w-[220px] whitespace-nowrap items-center justify-center rounded-[7px] bg-white px-[20px] py-[14px] text-[15px] font-semibold capitalize text-black transition hover:bg-white/90 sm:mt-7 sm:h-auto sm:w-auto sm:px-4 sm:py-2 sm:text-sm"
-              href={WHATSAPP_LINK}
-            >
-              Meet Bibi &mdash; It&apos;s Free
-            </a>
+            <X2CTAAgreementButton showError />
           </div>
         </div>
 
