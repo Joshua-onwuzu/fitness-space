@@ -9,7 +9,7 @@ import { ScrollSection } from "./ScrollSection";
 import { WHATSAPP_LINK } from "./lib/constants";
 
 import { useEffect, useState } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { getAgreementState, subscribeToAgreementState } from "./lib/agreement-store";
 
 const rotatingTexts = [

@@ -167,21 +167,6 @@ const mobileCardSectionTiming = {
 
 const mobileCoachingCards = coachingCardPairs.flat();
 
-const mobilePowerfulFeatureLayout = [
-  {
-    bodyTop: "253px",
-    numberTop: "90px",
-    titleTop: "198px",
-    titleWidth: "148px",
-  },
-  {
-    bodyTop: "602px",
-    numberTop: "448px",
-    titleTop: "556px",
-    titleWidth: "157px",
-  },
-] as const;
-
 const healthScoreDiscountRows = [
   { discount: "No discount - base price", score: "0 - 500" },
   { discount: "20% off your renewal", score: "600 – 749" },
