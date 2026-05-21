@@ -23,6 +23,74 @@ import {
 import { RemainingWeHearYouReveal } from "./RemainingWeHearYouReveal";
 import { RemainingSystemReveal } from "./RemainingSystemReveal";
 import { WHATSAPP_LINK } from "./lib/constants";
+import { getAgreementState, subscribeToAgreementState } from "./lib/agreement-store";
+
+// Custom hook to track agreement state
+const useAgreementState = () => {
+  const [isAgreed, setIsAgreed] = useState(false);
+
+  useEffect(() => {
+    // Set initial state
+    const initialState = getAgreementState();
+    setIsAgreed(initialState.terms && initialState.privacy);
+
+    // Subscribe to changes
+    const unsubscribe = subscribeToAgreementState((state) => {
+      setIsAgreed(state.terms && state.privacy);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  return isAgreed;
+};
+
+// Reusable CTA Button component that respects agreement
+function CTAAgreementButton({ 
+  className = "", 
+  children,
+  showError = false,
+  onError
+}: { 
+  className?: string;
+  children?: React.ReactNode;
+  showError?: boolean;
+  onError?: () => void;
+}) {
+  const isAgreed = useAgreementState();
+  const [localShowError, setLocalShowError] = useState(false);
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!isAgreed) {
+      e.preventDefault();
+      setLocalShowError(true);
+      onError?.();
+      setTimeout(() => setLocalShowError(false), 3000);
+    }
+  };
+
+  return (
+    <>
+      <a
+        className={`inline-flex items-center justify-center rounded-[7px] px-[11.25px] py-[8.25px] text-center text-[14px] font-semibold capitalize leading-normal transition ${
+          isAgreed 
+            ? "hover:bg-white/90 cursor-pointer" 
+            : "opacity-50 cursor-not-allowed"
+        } ${className}`}
+        href={isAgreed ? WHATSAPP_LINK : undefined}
+        onClick={handleClick}
+        style={{ cursor: isAgreed ? "pointer" : "not-allowed" }}
+      >
+        {children || "Meet Bibi — It's Free"}
+      </a>
+      {(showError || localShowError) && !isAgreed && (
+        <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-red-500/90 px-4 py-2 text-center text-xs text-white whitespace-nowrap">
+          Please agree to Terms of Use and Privacy Policy to continue
+        </div>
+      )}
+    </>
+  );
+}
 
 function SectionPill({
   children,
@@ -382,16 +450,12 @@ function MobileBodyFoodMock() {
           <span className="text-[#fe9a00]">Bibi</span> Knows Your Food.
         </p>
 
-        <a
-          className="inline-flex items-center justify-center rounded-[7px] bg-white px-5 py-3 text-sm font-semibold text-black"
-          href={WHATSAPP_LINK}
-        >
-          Meet Bibi — It&apos;s Free
-        </a>
+        <CTAAgreementButton showError />
       </div>
     </div>
   );
 }
+
 export function DataCoachCtaSection() {
   return (
     <ScrollSection
@@ -417,12 +481,10 @@ export function DataCoachCtaSection() {
               your data.
             </h2>
 
-            <a
+            <CTAAgreementButton 
               className="mt-7 inline-flex h-[46px] w-[200px] lg:w-[183px] items-center justify-center rounded-[7px] bg-white px-[20px] py-[14px] text-[15px] font-semibold leading-[1.2] capitalize text-black transition hover:bg-white/90 sm:mt-8 sm:h-auto sm:w-auto sm:px-4 sm:py-2 sm:text-sm sm:leading-normal"
-              href={WHATSAPP_LINK}
-            >
-              Meet Bibi &mdash; It&apos;s Free
-            </a>
+              showError
+            />
           </div>
           <div className="absolute bottom-0 left-1/2 h-[511.78px] w-[316.57px] -translate-x-1/2 sm:bottom-[-45px] sm:left-auto sm:right-[7%] sm:h-[112%] sm:w-[min(28vw,256.84px)] sm:translate-x-0 lg:bottom-[-51px]">
             <Image
@@ -746,12 +808,10 @@ export function BibiDifferentSection() {
               every single time.
             </p>
 
-            <a
+            <CTAAgreementButton 
               className="mt-[3.7svh] inline-flex h-[50px] min-w-[273px] items-center justify-center rounded-[7px] bg-[#f54900] px-6 text-center text-sm font-semibold text-white transition hover:bg-[#ff6420] mx-auto lg:mx-0"
-              href={WHATSAPP_LINK}
-            >
-              Meet Bibi — It’s Free
-            </a>
+              showError
+            />
           </div>
         </div>
         <div className="relative z-10 flex flex-col items-center text-center md:hidden">
@@ -765,12 +825,10 @@ export function BibiDifferentSection() {
             every single time.
           </p>
 
-          <a
+          <CTAAgreementButton 
             className="mt-10 flex h-[50px] w-[273px] items-center justify-center rounded-[7px] bg-[#f54900] text-sm font-semibold text-white transition hover:bg-[#ff6420]"
-            href={WHATSAPP_LINK}
-          >
-            Meet Bibi — It’s Free
-          </a>
+            showError
+          />
         </div>
         <div className="absolute right-0 top-[477px] z-30 h-[442px] w-[331px] overflow-hidden md:hidden">
           <Image
@@ -855,12 +913,10 @@ function MobileHealthScoreRewardCard() {
           Every activity earns Health Score points — up to 100 per day. Your
           cumulative score determines your renewal discount.
         </p>
-        <a
+        <CTAAgreementButton 
           className="absolute left-1/2 top-[552px] z-10 inline-flex -translate-x-1/2 items-center justify-center rounded-[7px] bg-white px-[11.25px] py-[8.25px] text-[14px] font-semibold capitalize leading-normal text-black transition hover:bg-white/90"
-          href={WHATSAPP_LINK}
-        >
-          &nbsp;&nbsp;Meet Bibi — It&apos;s Free&nbsp;
-        </a>
+          showError
+        />
       </article>
     </MobileFigmaScrollSection>
   );
@@ -1110,12 +1166,10 @@ function RemainingProductPanelSection({
           ))}
 
           {"cta" in panel ? (
-            <a
+            <CTAAgreementButton 
               className="mt-[2px] inline-flex rounded-[7px] bg-white px-[11px] py-2 text-sm font-semibold capitalize text-black transition hover:bg-white/90"
-              href={WHATSAPP_LINK}
-            >
-              &nbsp;&nbsp;Meet Bibi — It&apos;s Free&nbsp;
-            </a>
+              showError
+            />
           ) : null}
         </div>
 

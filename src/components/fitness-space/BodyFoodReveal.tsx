@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { assets, coachingCardPairs } from "./data";
 import { WHATSAPP_LINK } from "./lib/constants";
+import { getAgreementState, subscribeToAgreementState } from "./lib/agreement-store";
 
 type SectionStepEvent = CustomEvent<{
   direction: -1 | 1;
@@ -70,6 +71,88 @@ function getDailyImageScale() {
   const dailyHeight = Math.min(viewportHeight * (isMedium ? 0.43 : 0.34), 420);
 
   return dailyHeight / bodyHeight;
+}
+
+// CTA Button component that respects agreement
+function BodyFoodCTAAgreementButton({ 
+  className = "", 
+  children,
+  showError = false,
+  customDelay
+}: { 
+  className?: string;
+  children?: React.ReactNode;
+  showError?: boolean;
+  customDelay?: number;
+}) {
+  const [isAgreed, setIsAgreed] = useState(false);
+  const [localShowError, setLocalShowError] = useState(false);
+
+  useEffect(() => {
+    // Set initial state
+    const initialState = getAgreementState();
+    setIsAgreed(initialState.terms && initialState.privacy);
+
+    // Subscribe to changes
+    const unsubscribe = subscribeToAgreementState((state) => {
+      setIsAgreed(state.terms && state.privacy);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!isAgreed) {
+      e.preventDefault();
+      setLocalShowError(true);
+      setTimeout(() => setLocalShowError(false), 3000);
+    }
+  };
+
+  const buttonElement = (
+    <a
+      className={`inline-flex rounded-[7px] bg-white px-4 py-2 text-xs font-semibold capitalize text-black transition hover:bg-white/90 sm:text-sm ${
+        isAgreed 
+          ? "cursor-pointer" 
+          : "opacity-50 cursor-not-allowed"
+      } ${className}`}
+      href={isAgreed ? WHATSAPP_LINK : undefined}
+      onClick={handleClick}
+      style={{ cursor: isAgreed ? "pointer" : "not-allowed" }}
+    >
+      {children || "Meet Bibi — It's Free"}
+    </a>
+  );
+
+  return (
+    <>
+      {customDelay !== undefined ? (
+        <motion.a
+          animate="visible"
+          className={`inline-flex rounded-[7px] bg-white px-4 py-2 text-xs font-semibold capitalize text-black transition hover:bg-white/90 sm:text-sm ${
+            isAgreed 
+              ? "cursor-pointer" 
+              : "opacity-50 cursor-not-allowed"
+          } ${className}`}
+          custom={customDelay}
+          href={isAgreed ? WHATSAPP_LINK : undefined}
+          initial="hidden"
+          onClick={handleClick}
+          style={{ cursor: isAgreed ? "pointer" : "not-allowed" }}
+          variants={revealVariants}
+        >
+          {children || "Meet Bibi — It's Free"}
+        </motion.a>
+      ) : (
+        buttonElement
+      )}
+      {(showError || localShowError) && !isAgreed && (
+        <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-red-500/90 px-4 py-2 text-center text-xs text-white whitespace-nowrap">
+          Please agree to Terms of Use and Privacy Policy to continue
+        </div>
+      )}
+    </>
+  );
 }
 
 export function BodyFoodReveal() {
@@ -294,16 +377,11 @@ export function BodyFoodReveal() {
             >
               <BibiHeadline suffix="Knows Your Food." />
             </motion.div>
-            <motion.a
-              animate="visible"
-              className="mt-5 inline-flex rounded-[7px] bg-white px-4 py-2 text-xs font-semibold capitalize text-black transition hover:bg-white/90 sm:text-sm"
-              custom={bodyFoodRevealTiming.ctaDelay}
-              href={WHATSAPP_LINK}
-              initial={initial}
-              variants={revealVariants}
-            >
-              Meet Bibi &mdash; It&apos;s Free
-            </motion.a>
+            <BodyFoodCTAAgreementButton 
+              className="mt-5"
+              customDelay={bodyFoodRevealTiming.ctaDelay}
+              showError
+            />
           </motion.div>
         ) : null}
       </AnimatePresence>
