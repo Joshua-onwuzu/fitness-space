@@ -86,16 +86,56 @@ export function HeroSection() {
 
   // DESKTOP: fade rotation
   useEffect(() => {
-    const interval = setInterval(() => {
+    const desktopQuery = window.matchMedia("(min-width: 640px)");
+    let interval: ReturnType<typeof setInterval> | null = null;
+    let fadeTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    const stop = () => {
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+      }
+
+      if (fadeTimeout) {
+        clearTimeout(fadeTimeout);
+        fadeTimeout = null;
+      }
+    };
+
+    const start = () => {
+      stop();
+
+      if (!desktopQuery.matches) {
+        return;
+      }
+
+      interval = setInterval(() => {
       setFade(false);
 
-      setTimeout(() => {
+      fadeTimeout = setTimeout(() => {
         setIndex((prev) => (prev + 1) % rotatingTexts.length);
         setFade(true);
       }, 250);
     }, 3000);
+    };
 
-    return () => clearInterval(interval);
+    const onDesktopQueryChange = () => {
+      if (!desktopQuery.matches) {
+        stop();
+        setFade(true);
+        return;
+      }
+
+      start();
+    };
+
+    start();
+    desktopQuery.addEventListener("change", onDesktopQueryChange);
+
+    return () => {
+      desktopQuery.removeEventListener("change", onDesktopQueryChange);
+      stop();
+    };
   }, []);
 
   return (

@@ -1,5 +1,5 @@
 "use client";
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useInView, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
@@ -150,22 +150,13 @@ function RemainingPhoneMockup({
   );
 }
 
-type SectionStepEvent = CustomEvent<{
-  direction: -1 | 1;
-  lockMs?: number;
-  sameDirectionMaxMs?: number;
-  sameDirectionSilenceMs?: number;
-  silenceMs?: number;
-}>;
+const mobileCoachingCards = coachingCardPairs.flat();
 
 const mobileCardSectionTiming = {
+  autoplayDelayMs: 700,
+  autoplayIntervalMs: 1700,
   cardDuration: 0.48,
-  sameDirectionMaxMs: 1800,
-  sameDirectionSilenceMs: 1800,
-  stepLockMs: 620,
 } as const;
-
-const mobileCoachingCards = coachingCardPairs.flat();
 
 const healthScoreDiscountRows = [
   { discount: "No discount - base price", score: "0 - 500" },
@@ -339,47 +330,46 @@ function MobileBodyFoodCardsReveal() {
   );
   const stageRef = useRef(stage);
   const prefersReducedMotion = useReducedMotion();
+  const isInView = useInView(rootRef, { amount: 0.6 });
 
   useEffect(() => {
     stageRef.current = stage;
   }, [stage]);
 
   useEffect(() => {
-    const section = rootRef.current?.closest<HTMLElement>("[data-section]");
-    if (!section) {
+    if (!isInView || prefersReducedMotion || cards.length < 2) {
       return;
     }
 
-    const onSectionStep = (event: Event) => {
-      const stepEvent = event as SectionStepEvent;
-      const direction = stepEvent.detail.direction;
+    stageRef.current = 0;
+    setStage(0);
+    setPreviousStage(cards.length - 1);
+
+    const advance = () => {
       const currentStage = stageRef.current;
-      const nextStage = Math.min(
-        Math.max(currentStage + direction, 0),
-        cards.length - 1,
-      );
+      const nextStage = (currentStage + 1) % cards.length;
 
-      if (nextStage === currentStage) {
-        return;
-      }
-
-      event.preventDefault();
-      stepEvent.detail.lockMs = mobileCardSectionTiming.stepLockMs;
-      stepEvent.detail.sameDirectionMaxMs =
-        mobileCardSectionTiming.sameDirectionMaxMs;
-      stepEvent.detail.sameDirectionSilenceMs =
-        mobileCardSectionTiming.sameDirectionSilenceMs;
-      stepEvent.detail.silenceMs = 0;
       stageRef.current = nextStage;
       setPreviousStage(currentStage);
       setStage(nextStage);
     };
 
-    section.addEventListener("fitness-space:section-step", onSectionStep);
+    let interval: number | undefined;
+    const startTimer = window.setTimeout(() => {
+      advance();
+      interval = window.setInterval(
+        advance,
+        mobileCardSectionTiming.autoplayIntervalMs,
+      );
+    }, mobileCardSectionTiming.autoplayDelayMs);
+
     return () => {
-      section.removeEventListener("fitness-space:section-step", onSectionStep);
+      window.clearTimeout(startTimer);
+      if (interval !== undefined) {
+        window.clearInterval(interval);
+      }
     };
-  }, [cards.length]);
+  }, [cards.length, isInView, prefersReducedMotion]);
 
   return (
     <div

@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useInView, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { updateAgreementState } from "./lib/agreement-store";
 
@@ -12,19 +12,10 @@ import { assets, finalTestimonials, finalTrialFacts } from "./data";
 import { ScrollSection } from "./ScrollSection";
 import { WHATSAPP_LINK } from "./lib/constants";
 
-type SectionStepEvent = CustomEvent<{
-  direction: -1 | 1;
-  lockMs?: number;
-  sameDirectionMaxMs?: number;
-  sameDirectionSilenceMs?: number;
-  silenceMs?: number;
-}>;
-
 const mobileRealResultsTiming = {
+  autoplayDelayMs: 900,
+  autoplayIntervalMs: 2400,
   cardDuration: 0.48,
-  sameDirectionMaxMs: 1800,
-  sameDirectionSilenceMs: 1800,
-  stepLockMs: 620,
 } as const;
 
 function FinalFrame({
@@ -278,299 +269,48 @@ function MobileRealResultsReveal() {
   const [previousStage, setPreviousStage] = useState<number | null>(
     testimonials.length > 1 ? testimonials.length - 1 : null,
   );
-  const inputLockedRef = useRef(false);
   const stageRef = useRef(stage);
-  const touchStartYRef = useRef<number | null>(null);
   const prefersReducedMotion = useReducedMotion();
-
-  const stepByDirection = useCallback(
-    (direction: -1 | 1) => {
-      const currentStage = stageRef.current;
-      const nextStage = Math.min(
-        Math.max(currentStage + direction, 0),
-        testimonials.length - 1,
-      );
-
-      if (nextStage === currentStage) {
-        return false;
-      }
-
-      stageRef.current = nextStage;
-      setPreviousStage(currentStage);
-      setStage(nextStage);
-      return true;
-    },
-    [testimonials.length],
-  );
+  const isInView = useInView(rootRef, { amount: 0.46 });
 
   useEffect(() => {
     stageRef.current = stage;
   }, [stage]);
 
   useEffect(() => {
-    const section = rootRef.current?.closest<HTMLElement>("[data-section]");
-    if (!section) {
+    if (!isInView || prefersReducedMotion || testimonials.length < 2) {
       return;
     }
 
-    const onSectionStep = (event: Event) => {
-      if (!window.matchMedia("(max-width: 767px)").matches) {
-        return;
-      }
+    stageRef.current = 0;
+    setStage(0);
+    setPreviousStage(testimonials.length - 1);
 
-      const stepEvent = event as SectionStepEvent;
-      const direction = stepEvent.detail.direction;
-      if (!stepByDirection(direction)) {
-        return;
-      }
-
-      event.preventDefault();
-      stepEvent.detail.lockMs = mobileRealResultsTiming.stepLockMs;
-      stepEvent.detail.sameDirectionMaxMs =
-        mobileRealResultsTiming.sameDirectionMaxMs;
-      stepEvent.detail.sameDirectionSilenceMs =
-        mobileRealResultsTiming.sameDirectionSilenceMs;
-      stepEvent.detail.silenceMs = 0;
-    };
-
-    section.addEventListener("fitness-space:section-step", onSectionStep);
-    return () => {
-      section.removeEventListener("fitness-space:section-step", onSectionStep);
-    };
-  }, [stepByDirection]);
-
-  useEffect(() => {
-    const root = rootRef.current;
-    const section = root?.closest<HTMLElement>("[data-section]");
-    if (!root || !section) {
-      return;
-    }
-
-    let unlockTimer: ReturnType<typeof setTimeout> | null = null;
-    let suppressedDirection: -1 | 1 | null = null;
-    let suppressTimer: ReturnType<typeof setTimeout> | null = null;
-    let wheelDelta = 0;
-    let wheelResetTimer: ReturnType<typeof setTimeout> | null = null;
-
-    const isMobile = () => window.matchMedia("(max-width: 767px)").matches;
-
-    const canStep = (direction: -1 | 1) => {
+    const advance = () => {
       const currentStage = stageRef.current;
-      const nextStage = Math.min(
-        Math.max(currentStage + direction, 0),
-        testimonials.length - 1,
+      const nextStage = (currentStage + 1) % testimonials.length;
+
+      stageRef.current = nextStage;
+      setPreviousStage(currentStage);
+      setStage(nextStage);
+    };
+
+    let interval: number | undefined;
+    const startTimer = window.setTimeout(() => {
+      advance();
+      interval = window.setInterval(
+        advance,
+        mobileRealResultsTiming.autoplayIntervalMs,
       );
-
-      return nextStage !== currentStage;
-    };
-
-    const isAtCardStepBoundary = () => {
-      if (section.hasAttribute("data-internal-scroll-section")) {
-        const maxScrollTop = section.scrollHeight - section.clientHeight;
-        return section.scrollTop >= maxScrollTop - 2;
-      }
-
-      const rect = section.getBoundingClientRect();
-      return rect.bottom <= window.innerHeight + 32;
-    };
-
-    const clearSuppression = () => {
-      suppressedDirection = null;
-
-      if (suppressTimer) {
-        clearTimeout(suppressTimer);
-        suppressTimer = null;
-      }
-    };
-
-    const isDirectionSuppressed = (direction: -1 | 1) => {
-      if (suppressedDirection === null) {
-        return false;
-      }
-
-      if (suppressedDirection !== direction) {
-        clearSuppression();
-        return false;
-      }
-
-      return true;
-    };
-
-    const suppressSameDirection = (direction: -1 | 1) => {
-      clearSuppression();
-      suppressedDirection = direction;
-      suppressTimer = setTimeout(() => {
-        suppressedDirection = null;
-        suppressTimer = null;
-      }, mobileRealResultsTiming.sameDirectionSilenceMs);
-    };
-
-    const lockInput = (direction: -1 | 1) => {
-      inputLockedRef.current = true;
-      suppressSameDirection(direction);
-
-      if (unlockTimer) {
-        clearTimeout(unlockTimer);
-      }
-
-      unlockTimer = setTimeout(
-        () => {
-          inputLockedRef.current = false;
-        },
-        prefersReducedMotion ? 0 : mobileRealResultsTiming.stepLockMs,
-      );
-    };
-
-    const resetWheelDeltaSoon = () => {
-      if (wheelResetTimer) {
-        clearTimeout(wheelResetTimer);
-      }
-
-      wheelResetTimer = setTimeout(() => {
-        wheelDelta = 0;
-      }, 180);
-    };
-
-    const onWheel = (event: WheelEvent) => {
-      if (event.deltaY === 0) {
-        return;
-      }
-
-      const direction = event.deltaY > 0 ? 1 : -1;
-      if (!isMobile() || !isAtCardStepBoundary()) {
-        return;
-      }
-
-      if (inputLockedRef.current || isDirectionSuppressed(direction)) {
-        event.preventDefault();
-        event.stopPropagation();
-        return;
-      }
-
-      if (!canStep(direction)) {
-        return;
-      }
-
-      event.preventDefault();
-      event.stopPropagation();
-
-      wheelDelta += event.deltaY;
-      resetWheelDeltaSoon();
-
-      if (Math.abs(wheelDelta) < 36) {
-        return;
-      }
-
-      wheelDelta = 0;
-      if (stepByDirection(direction)) {
-        lockInput(direction);
-      }
-    };
-
-    const onTouchStart = (event: TouchEvent) => {
-      touchStartYRef.current = event.touches[0]?.clientY ?? null;
-    };
-
-    const onTouchMove = (event: TouchEvent) => {
-      const startY = touchStartYRef.current;
-      const currentY = event.touches[0]?.clientY;
-      if (startY === null || currentY === undefined) {
-        return;
-      }
-
-      const delta = startY - currentY;
-      if (Math.abs(delta) <= 8) {
-        return;
-      }
-
-      const direction = delta > 0 ? 1 : -1;
-      if (!isMobile() || !isAtCardStepBoundary()) {
-        return;
-      }
-
-      const directionIsSuppressed = isDirectionSuppressed(direction);
-      if (
-        !canStep(direction) &&
-        !inputLockedRef.current &&
-        !directionIsSuppressed
-      ) {
-        return;
-      }
-
-      event.preventDefault();
-      event.stopPropagation();
-    };
-
-    const onTouchEnd = (event: TouchEvent) => {
-      const startY = touchStartYRef.current;
-      touchStartYRef.current = null;
-
-      const endY = event.changedTouches[0]?.clientY;
-      if (startY === null || endY === undefined) {
-        return;
-      }
-
-      const delta = startY - endY;
-      if (Math.abs(delta) < 48) {
-        return;
-      }
-
-      const direction = delta > 0 ? 1 : -1;
-      if (!isMobile() || !isAtCardStepBoundary()) {
-        return;
-      }
-
-      if (inputLockedRef.current || isDirectionSuppressed(direction)) {
-        event.preventDefault();
-        event.stopPropagation();
-        return;
-      }
-
-      if (!canStep(direction)) {
-        return;
-      }
-
-      event.preventDefault();
-      event.stopPropagation();
-
-      if (stepByDirection(direction)) {
-        lockInput(direction);
-      }
-    };
-
-    root.addEventListener("wheel", onWheel, { capture: true, passive: false });
-    root.addEventListener("touchstart", onTouchStart, {
-      capture: true,
-      passive: true,
-    });
-    root.addEventListener("touchmove", onTouchMove, {
-      capture: true,
-      passive: false,
-    });
-    root.addEventListener("touchend", onTouchEnd, {
-      capture: true,
-      passive: false,
-    });
+    }, mobileRealResultsTiming.autoplayDelayMs);
 
     return () => {
-      root.removeEventListener("wheel", onWheel, { capture: true });
-      root.removeEventListener("touchstart", onTouchStart, { capture: true });
-      root.removeEventListener("touchmove", onTouchMove, { capture: true });
-      root.removeEventListener("touchend", onTouchEnd, { capture: true });
-
-      if (unlockTimer) {
-        clearTimeout(unlockTimer);
-      }
-
-      if (suppressTimer) {
-        clearTimeout(suppressTimer);
-      }
-
-      if (wheelResetTimer) {
-        clearTimeout(wheelResetTimer);
+      window.clearTimeout(startTimer);
+      if (interval !== undefined) {
+        window.clearInterval(interval);
       }
     };
-  }, [prefersReducedMotion, stepByDirection, testimonials.length]);
+  }, [isInView, prefersReducedMotion, testimonials.length]);
 
   return (
     <div className="absolute inset-0 md:hidden" ref={rootRef}>
@@ -602,7 +342,6 @@ function RealResultsSection() {
       id="real-results"
       intensity={42}
       mobileNativeScroll
-      stepAtNativeBoundary
     >
       <article className="relative h-[923px] w-full max-w-[393px] overflow-hidden bg-black text-white md:h-[min(calc(100svh-5rem),680px)] md:min-h-[500px] md:max-w-[1284px]">
         <MobileRealResultsReveal />

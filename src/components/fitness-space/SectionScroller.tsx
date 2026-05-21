@@ -107,7 +107,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
       );
 
     const isMobileLayout = () =>
-      window.matchMedia("(max-width: 639px)").matches;
+      window.matchMedia("(max-width: 767px)").matches;
 
     const isDesktopLayout = () => !isMobileLayout();
 
@@ -120,8 +120,7 @@ export function SectionScroller({ children }: SectionScrollerProps) {
             section.offsetHeight > getViewportHeight() + 2),
       );
 
-    const getScrollContainer = () =>
-      isMobileLayout() ? containerRef.current : null;
+    const getScrollContainer = (): HTMLElement | null => null;
 
     const getViewportHeight = () =>
       getScrollContainer()?.clientHeight ??
@@ -1067,6 +1066,10 @@ export function SectionScroller({ children }: SectionScrollerProps) {
     };
 
     const onWheel = (event: WheelEvent) => {
+      if (isMobileLayout()) {
+        return;
+      }
+
       if (event.deltaY === 0) {
         return;
       }
@@ -1143,6 +1146,10 @@ export function SectionScroller({ children }: SectionScrollerProps) {
     };
 
     const onTouchStart = (event: TouchEvent) => {
+      if (isMobileLayout()) {
+        return;
+      }
+
       markInput();
       touchSteppedRef.current = false;
       touchUsedNativeScrollRef.current = false;
@@ -1177,6 +1184,10 @@ export function SectionScroller({ children }: SectionScrollerProps) {
     };
 
     const onTouchMove = (event: TouchEvent) => {
+      if (isMobileLayout()) {
+        return;
+      }
+
       if (lockedRef.current) {
         event.preventDefault();
         markInput();
@@ -1240,6 +1251,10 @@ export function SectionScroller({ children }: SectionScrollerProps) {
     };
 
     const onTouchEnd = (event: TouchEvent) => {
+      if (isMobileLayout()) {
+        return;
+      }
+
       const startY = touchStartYRef.current;
       const touchedSection = touchSectionRef.current;
       const startBoundary = touchStartBoundaryRef.current;
@@ -1313,6 +1328,10 @@ export function SectionScroller({ children }: SectionScrollerProps) {
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
+      if (isMobileLayout()) {
+        return;
+      }
+
       const tagName = (event.target as HTMLElement | null)?.tagName;
       if (tagName === "INPUT" || tagName === "TEXTAREA" || tagName === "SELECT") {
         return;
@@ -1360,6 +1379,10 @@ export function SectionScroller({ children }: SectionScrollerProps) {
     };
 
     const onAnchorClick = (event: MouseEvent) => {
+      if (isMobileLayout()) {
+        return;
+      }
+
       const anchor = (event.target as Element | null)?.closest("a[href^='#']");
       const targetId = anchor?.getAttribute("href")?.slice(1);
       const target = targetId ? document.getElementById(targetId) : null;
@@ -1387,50 +1410,71 @@ export function SectionScroller({ children }: SectionScrollerProps) {
     const touchStartListener = onTouchStart as EventListener;
     const touchMoveListener = onTouchMove as EventListener;
     const touchEndListener = onTouchEnd as EventListener;
+    const mobileQuery = window.matchMedia("(max-width: 767px)");
+    let removeDesktopListeners: (() => void) | null = null;
 
-    scrollEventTarget.addEventListener("wheel", wheelListener, {
-      passive: false,
-    });
-    scrollEventTarget.addEventListener("touchstart", touchStartListener, {
-      capture: true,
-      passive: true,
-    });
-    scrollEventTarget.addEventListener("touchmove", touchMoveListener, {
-      capture: true,
-      passive: false,
-    });
-    scrollEventTarget.addEventListener("touchend", touchEndListener, {
-      capture: true,
-      passive: true,
-    });
-    window.addEventListener("keydown", onKeyDown);
-    document.addEventListener("click", onAnchorClick);
+    const syncDesktopListeners = () => {
+      removeDesktopListeners?.();
+      removeDesktopListeners = null;
+      resetInteractionState();
+
+      if (mobileQuery.matches) {
+        return;
+      }
+
+      scrollEventTarget.addEventListener("wheel", wheelListener, {
+        passive: false,
+      });
+      scrollEventTarget.addEventListener("touchstart", touchStartListener, {
+        capture: true,
+        passive: true,
+      });
+      scrollEventTarget.addEventListener("touchmove", touchMoveListener, {
+        capture: true,
+        passive: false,
+      });
+      scrollEventTarget.addEventListener("touchend", touchEndListener, {
+        capture: true,
+        passive: true,
+      });
+      window.addEventListener("keydown", onKeyDown);
+      document.addEventListener("click", onAnchorClick);
+
+      removeDesktopListeners = () => {
+        scrollEventTarget.removeEventListener("wheel", wheelListener);
+        scrollEventTarget.removeEventListener(
+          "touchstart",
+          touchStartListener,
+          captureListenerOptions,
+        );
+        scrollEventTarget.removeEventListener(
+          "touchmove",
+          touchMoveListener,
+          captureListenerOptions,
+        );
+        scrollEventTarget.removeEventListener(
+          "touchend",
+          touchEndListener,
+          captureListenerOptions,
+        );
+        window.removeEventListener("keydown", onKeyDown);
+        document.removeEventListener("click", onAnchorClick);
+        resetInteractionState();
+      };
+    };
+
+    syncDesktopListeners();
+    mobileQuery.addEventListener("change", syncDesktopListeners);
 
     return () => {
-      scrollEventTarget.removeEventListener("wheel", wheelListener);
-      scrollEventTarget.removeEventListener(
-        "touchstart",
-        touchStartListener,
-        captureListenerOptions,
-      );
-      scrollEventTarget.removeEventListener(
-        "touchmove",
-        touchMoveListener,
-        captureListenerOptions,
-      );
-      scrollEventTarget.removeEventListener(
-        "touchend",
-        touchEndListener,
-        captureListenerOptions,
-      );
-      window.removeEventListener("keydown", onKeyDown);
-      document.removeEventListener("click", onAnchorClick);
+      mobileQuery.removeEventListener("change", syncDesktopListeners);
+      removeDesktopListeners?.();
       resetInteractionState();
     };
   }, [prefersReducedMotion]);
 
   return (
-    <div ref={containerRef} className="fitness-mobile-layout snap-y snap-mandatory">
+    <div ref={containerRef} className="fitness-mobile-layout md:snap-y md:snap-mandatory">
       {children}
     </div>
   );

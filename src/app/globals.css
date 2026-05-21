@@ -46,29 +46,40 @@ img {
   display: block;
 }
 
-@media (max-width: 639px) {
+@media (max-width: 767px) {
   html,
   body {
-    height: 100%;
-    overflow: hidden;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: auto;
+    scroll-behavior: auto;
   }
 
   .fitness-mobile-layout {
-    height: 100vh;
-    height: 100dvh;
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior-y: contain;
+    min-height: 100%;
+    overflow-x: clip;
+    overflow-y: visible;
+    overscroll-behavior-y: auto;
+    scroll-snap-type: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .fitness-mobile-layout [data-section] {
+    scroll-margin-top: 0;
+    scroll-snap-align: none;
+  }
+}
+
+@media (max-width: 639px) {
+  .fitness-mobile-layout {
     padding-left: 16px;
     padding-right: 16px;
-    scroll-snap-type: y mandatory;
-    -webkit-overflow-scrolling: touch;
   }
 
   .fitness-mobile-layout [data-section] {
     min-height: 100vh;
     min-height: 100dvh;
-    scroll-margin-top: 0;
   }
 
   .fitness-mobile-layout [data-section] > .fitness-section-content {
@@ -88,11 +99,11 @@ img {
   }
 
   .fitness-mobile-layout [data-internal-scroll-section] {
-    height: 100vh;
-    height: 100dvh;
+    height: auto;
     min-height: 100vh;
     min-height: 100dvh;
-    overscroll-behavior-y: contain;
+    overflow-y: visible;
+    overscroll-behavior-y: auto;
     -webkit-overflow-scrolling: touch;
   }
 

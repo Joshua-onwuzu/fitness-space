@@ -1,6 +1,11 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import {
+  AnimatePresence,
+  motion,
+  useInView,
+  useReducedMotion,
+} from "motion/react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
@@ -40,6 +45,8 @@ export const x2RevealTiming = {
   cardReverseExitDuration: 0.34,
   firstStepLockMs: 380,
   frameworkFadeDuration: 0.48,
+  mobileAutoplayFirstDelayMs: 1100,
+  mobileAutoplayIntervalMs: 1900,
   sameDirectionMaxMs: 1200,
   sameDirectionSilenceMs: 80,
   stepLockMs: 160,
@@ -148,6 +155,7 @@ export function useX2NutritionOrderReveal(cardCount: number) {
     useState<X2TransitionDirection>(1);
   const stageRef = useRef(stage);
   const prefersReducedMotion = useReducedMotion();
+  const isInView = useInView(rootRef, { amount: 0.55 });
   const cardMotionContext = {
     direction: transitionDirection,
     prefersReducedMotion,
@@ -164,6 +172,10 @@ export function useX2NutritionOrderReveal(cardCount: number) {
     }
 
     const onSectionStep = (event: Event) => {
+      if (window.matchMedia("(max-width: 767px)").matches) {
+        return;
+      }
+
       const stepEvent = event as SectionStepEvent;
       const direction = stepEvent.detail.direction;
       const currentStage = stageRef.current;
@@ -196,6 +208,56 @@ export function useX2NutritionOrderReveal(cardCount: number) {
       section.removeEventListener("fitness-space:section-step", onSectionStep);
     };
   }, [cardCount]);
+
+  useEffect(() => {
+    if (!isInView || prefersReducedMotion || cardCount < 1) {
+      return;
+    }
+
+    const mobileQuery = window.matchMedia("(max-width: 767px)");
+    if (!mobileQuery.matches) {
+      return;
+    }
+
+    stageRef.current = 0;
+    setTransitionDirection(1);
+    setStage(0);
+
+    const advance = () => {
+      const currentStage = stageRef.current;
+      const nextStage = Math.min(currentStage + 1, cardCount);
+
+      if (nextStage === currentStage) {
+        return false;
+      }
+
+      stageRef.current = nextStage;
+      setTransitionDirection(1);
+      setStage(nextStage);
+      return true;
+    };
+
+    let interval: number | undefined;
+    const startTimer = window.setTimeout(() => {
+      if (!advance()) {
+        return;
+      }
+
+      interval = window.setInterval(() => {
+        if (!advance() && interval !== undefined) {
+          window.clearInterval(interval);
+          interval = undefined;
+        }
+      }, x2RevealTiming.mobileAutoplayIntervalMs);
+    }, x2RevealTiming.mobileAutoplayFirstDelayMs);
+
+    return () => {
+      window.clearTimeout(startTimer);
+      if (interval !== undefined) {
+        window.clearInterval(interval);
+      }
+    };
+  }, [cardCount, isInView, prefersReducedMotion]);
 
   return {
     cardMotionContext,
