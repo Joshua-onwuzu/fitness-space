@@ -153,7 +153,7 @@ const mobileSystemFeatureSections = [
     height: 1093,
     id: "mobile-remaining-daily-system",
     phone: {
-      alt: "Daily task system app screen",
+      alt: "Daily task system app screen ",
       bottom: -72,
       height: 516,
       src: assets.remainingDailySystemScreen,
