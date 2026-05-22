@@ -800,7 +800,7 @@ export function BibiDifferentSection() {
 export function HealthScorePayoffSection() {
   return (
     <ScrollSection
-      className="px-4 py-14 sm:px-8 lg:px-12 "
+      className="px-4 py-0 sm:px-8 lg:px-12 "
       contentClassName="flex items-center justify-center max-sm:!translate-y-0 max-sm:!opacity-100"
       id="health-score-payoff"
       intensity={42}
