@@ -442,13 +442,14 @@ export function DataCoachCtaSection() {
 export function PowerfulFeaturesSection() {
   return (
     <ScrollSection
-      className="px-0 sm:px-8 lg:px-12"
+      className="px-0 sm:px-8 md:py-8 lg:px-12"
       contentClassName="mx-auto w-full max-w-[1093px]"
       id="features"
       intensity={50}
       mobileNativeScroll
+      nativeScroll
     >
-      <div className="flex h-full w-full flex-col items-center pt-[91px] md:pt-[7svh] lg:pt-[0svh]">
+      <div className="flex h-full w-full flex-col items-center pt-[91px] md:pt-[7svh]">
         <h2 className="w-[331px] text-center text-[32px] font-normal capitalize leading-[38px] text-white md:w-auto md:whitespace-nowrap md:text-[clamp(2rem,4.57svh,50px)] md:leading-normal">
           Six Powerful Features. One Smart Coach.
         </h2>
