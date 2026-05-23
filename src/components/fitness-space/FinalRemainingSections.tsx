@@ -4,6 +4,7 @@ import Image from "next/image";
 import { motion, useInView, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 
 import { assets, finalTestimonials, finalTrialFacts } from "./data";
 import { ScrollSection } from "./ScrollSection";
@@ -437,7 +438,9 @@ function FinalFooterCtaSection() {
             />
             <p className="absolute bottom-[35px] right-[48px] text-[14px] font-bold capitalize leading-[99.915%] text-white">
               © 2026 All rights reserved. · <span>Privacy</span> ·
-              <span>Terms</span>
+            <Link href="/terms" className="hover:underline">
+              Terms
+            </Link>
             </p>
           </div>
         </div>
