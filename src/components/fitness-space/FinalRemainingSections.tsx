@@ -9,6 +9,7 @@ import Link from "next/link";
 import { assets, finalTestimonials, finalTrialFacts } from "./data";
 import { ScrollSection } from "./ScrollSection";
 import { WHATSAPP_LINK } from "./lib/constants";
+import { span } from "motion/react-client";
 
 const mobileRealResultsTiming = {
   autoplayDelayMs: 900,
@@ -408,6 +409,7 @@ function FinalFooterCtaSection() {
       nativeScroll
     >
       <article className="relative w-full max-w-[1284px] overflow-visible bg-black text-white">
+        {/* ================= BACKGROUND CARD ================= */}
         <div className="absolute left-1/2 top-0 h-[625px] w-[min(100%,1185px)] -translate-x-1/2 overflow-hidden rounded-[22px] bg-[#f25602]">
           <div className="absolute left-1/2 top-0 h-[625px] w-[1284px] -translate-x-1/2 rounded-[10px] bg-[#f25602]" />
           <Image
@@ -425,47 +427,46 @@ function FinalFooterCtaSection() {
             className="absolute left-1/2 top-[241px] -translate-x-1/2"
             variant="white"
           />
-          <Image
-            alt="Fitness Space logo"
-            className="absolute bottom-[31.8px] left-10 h-[23.197px] w-[200px] object-contain max-md:left-5 max-md:w-[150px]"
-            height={201}
-            src={assets.finalFooterLogo}
-            width={1733}
-          />
-          <p className="hidden md:block absolute bottom-[35px] right-[48px] text-center text-[14px] font-bold capitalize leading-[99.915%] text-white max-md:right-5 max-md:text-[10px]">
-            © 2026 All rights reserved. ·&nbsp;
-            <Link href="/privacy" className="hover:underline">
-              Privacy
-            </Link>
-            &nbsp;·&nbsp;
+          {/* ================= DESKTOP FOOTER ================= */}
+          <div className="hidden md:block">
+            <Image
+              alt="Fitness Space logo"
+              className="absolute bottom-[31.8px] left-10 h-[23.197px] w-[200px] object-contain"
+              height={201}
+              src={assets.finalFooterLogo}
+              width={1733}
+            />
+            <p className="absolute bottom-[35px] right-[48px] text-[14px] font-bold capitalize leading-[99.915%] text-white">
+              © 2026 All rights reserved. · <span>Privacy</span> ·
             <Link href="/terms" className="hover:underline">
               Terms
             </Link>
-
-          </p>
+            </p>
+          </div>
         </div>
-
-        <Image
-          alt="Bibi fitness coach"
-          className="absolute left-1/2 top-[416px] z-10 h-[438px] w-[329px] -translate-x-1/2 object-cover max-md:top-[370px] max-md:h-[360px] max-md:w-[270px]"
-          height={1448}
-          src={assets.finalBibi}
-          width={1086}
-        />
-        {/* ================= DESKTOP BIBI TEXT ================= */}
-        <p className="hidden md:block absolute left-1/2 top-[650px] -translate-x-[45%] whitespace-nowrap text-center text-[clamp(8rem,21.8svh,280px)] font-bold capitalize leading-[99.915%] text-white/10">
-          Bibi. Bibi. Bibi.
-        </p>
-
-        {/* ================= MOBILE ONLY ================= */}
-        <div className="md:hidden absolute bottom-6 left-1/2 z-20 flex w-full -translate-x-1/2 flex-col items-center px-4 text-center">
-          {/* MOBILE BIBI TEXT */}
-          <p className="whitespace-nowrap text-[clamp(120px,28vw,220px)] font-bold leading-[0.82] text-white/10 ">
-            Bibi.
+        {/* ================= BIBI SECTION ================= */}
+        <div className="absolute  lg:left-1/2 top-[416px] z-10 lg:-translate-x-1/2 max-md:top-[300px]">
+          {/* BIBI TEXT */}
+          <p className="absolute left-1/2 top-[250px] z-20 -translate-x-1/2 whitespace-nowrap font-bold text-white/10 md:top-[250px]">
+            {/* MOBILE */}
+            <span className="text-[200px] leading-none md:hidden">Bibi.</span>
+            {/* DESKTOP */}
+            <span className="hidden md:block text-[260px] leading-[1] py-[1rem]">
+              bi. Bibi. Bi
+            </span>
           </p>
-
-          {/* MOBILE FOOTER */}
-          <div className="mt-4 flex flex-col items-center gap-3">
+          {/* BIBI IMAGE */}
+          <Image
+            alt="Bibi fitness coach"
+            className="h-[450px] w-[340px] object-cover md:h-[438px] md:w-[329px]"
+            height={1448}
+            src={assets.finalBibi}
+            width={1086}
+          />
+        </div>
+        {/* ================= MOBILE FOOTER ================= */}
+        <div className="md:hidden absolute left-1/2 top-[760px] z-20 flex w-full -translate-x-1/2 flex-col items-center px-4 py-6 text-center">
+          <div className="mt-6 flex flex-col items-center gap-3">
             <Image
               alt="Fitness Space logo"
               className="h-[24px] w-[150px] object-contain"
@@ -473,10 +474,11 @@ function FinalFooterCtaSection() {
               height={201}
               width={1733}
             />
-
-            <p className="text-[11px] font-medium leading-relaxed text-white/80">
-              © 2026 All rights reserved. · <span>Privacy</span> ·{" "}
-              <span>Terms</span>
+            <p className="text-[14px] font-medium leading-relaxed text-white/80">
+              © 2026 All rights reserved.
+            </p>
+            <p className="my-4">
+              <span>Privacy</span> · <span>Terms</span>
             </p>
           </div>
         </div>
