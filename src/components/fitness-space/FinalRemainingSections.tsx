@@ -9,7 +9,7 @@ import Link from "next/link";
 import { assets, finalTestimonials, finalTrialFacts } from "./data";
 import { ScrollSection } from "./ScrollSection";
 import { WHATSAPP_LINK } from "./lib/constants";
-import { span } from "motion/react-client";
+// import { span } from "motion/react-client";
 
 const mobileRealResultsTiming = {
   autoplayDelayMs: 900,
@@ -437,7 +437,9 @@ function FinalFooterCtaSection() {
               width={1733}
             />
             <p className="absolute bottom-[35px] right-[48px] text-[14px] font-bold capitalize leading-[99.915%] text-white">
-              © 2026 All rights reserved. · <span>Privacy</span> ·
+              © 2026 All rights reserved. · <Link href="/privacy" className="hover:underline">
+              Privacy
+            </Link> ·
             <Link href="/terms" className="hover:underline">
               Terms
             </Link>
@@ -478,7 +480,11 @@ function FinalFooterCtaSection() {
               © 2026 All rights reserved.
             </p>
             <p className="my-4">
-              <span>Privacy</span> · <span>Terms</span>
+              <Link href="/privacy" className="hover:underline">
+              Privacy
+            </Link> · <Link href="/terms" className="hover:underline">
+              Terms
+            </Link>
             </p>
           </div>
         </div>
