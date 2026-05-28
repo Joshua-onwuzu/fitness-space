@@ -216,7 +216,7 @@ export function X2NutritionReveal() {
 
   return (
     <div
-      className="relative flex h-[57svh] min-h-[420px] w-full max-w-[1284px] items-center justify-center overflow-visible"
+      className="relative mx-auto flex h-[57svh] min-h-[420px] w-full max-w-[1284px] items-center justify-center overflow-visible"
       ref={rootRef}
     >
       <span aria-hidden="true" className="sr-only" id="x2-system" />

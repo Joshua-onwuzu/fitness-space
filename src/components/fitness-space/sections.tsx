@@ -49,13 +49,13 @@ export function HeroSection() {
       }
 
       interval = setInterval(() => {
-      setFade(false);
+        setFade(false);
 
-      fadeTimeout = setTimeout(() => {
-        setIndex((prev) => (prev + 1) % rotatingTexts.length);
-        setFade(true);
-      }, 250);
-    }, 3000);
+        fadeTimeout = setTimeout(() => {
+          setIndex((prev) => (prev + 1) % rotatingTexts.length);
+          setFade(true);
+        }, 250);
+      }, 3000);
     };
 
     const onDesktopQueryChange = () => {
@@ -103,7 +103,7 @@ export function HeroSection() {
 
           {/* CONTENT */}
           <div className="relative z-10 flex h-full max-w-full flex-col justify-center lg:justify-start lg:translate-y-4 px-7 pt-[5rem] sm:px-12 lg:pl-[83px] lg:pr-[54px] lg:pt-[8rem]">
-            <h1 className="text-[40px] font-bold text-white sm:text-5xl lg:text-[48px] leading-tight">
+            <h1 className="text-[40px] font-bold leading-tight text-white sm:text-5xl min-[700px]:max-[996px]:text-2xl lg:text-[48px]">
               <span className="block">Meet Bibi.</span>
               <span className="block leading-tight">
                 <span className="block">Your AI Coach for</span>
@@ -125,7 +125,7 @@ export function HeroSection() {
               </span>
             </h1>
 
-            <p className="mt-4 max-w-[600px] text-xs leading-5 text-white sm:text-sm">
+            <p className="mt-4 max-w-[600px] text-xs leading-5 text-white sm:text-sm min-[700px]:max-[996px]:w-[400px]">
               Bibi personalises your meals, selects your workouts, guides your
               fasting and tracks your daily habits — all based on your body,
               your food and your goals. Real results. Starting free.
