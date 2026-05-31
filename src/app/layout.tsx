@@ -2,10 +2,46 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Providers } from "./Providers";
 
+const siteName = "Fitness Space";
+const tagline =
+  "Your System for Healthy Living, Sustainable Weight Loss & Long-Term Wellness";
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://www.getfitness.space";
+const ogImage = "/og-image.png";
+
 export const metadata: Metadata = {
-  title: "Fitness space",
-  description:
-    "Bibi is the AI coach from Fitness Space for sustainable weight loss.",
+  title: siteName,
+  description: tagline,
+  metadataBase: new URL(siteUrl),
+  alternates: {
+    canonical: siteUrl,
+  },
+  openGraph: {
+    title: siteName,
+    description: tagline,
+    url: siteUrl,
+    siteName,
+    type: "website",
+    images: [
+      {
+        url: ogImage,
+        width: 1536,
+        height: 1024,
+        alt: `${siteName}: ${tagline}`,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteName,
+    description: tagline,
+    images: [
+      {
+        url: ogImage,
+        alt: `${siteName}: ${tagline}`,
+      },
+    ],
+  },
   icons: {
     icon: [
       { url: "/favicon.ico" },
