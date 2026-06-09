@@ -66,9 +66,9 @@ function RemainingPhoneMockup({
       className="absolute bottom-0 right-0 hidden overflow-hidden md:block"
       style={{
         bottom: `${phone.bottom}px`,
-        height: `${phone.height}px`,
         right: `${phone.right}px`,
-        width: `${phone.width}px`,
+        width: `${phone.width * 0.85}px`,
+        height: `${phone.height * 0.85}px`,
       }}
     >
       <Image
@@ -920,9 +920,10 @@ function MobileSystemProductMock({
   return (
     <MobileFigmaScrollSection id={section.id}>
       <article
-        className="relative w-full max-w-[425px] overflow-hidden bg-black text-center text-white"
+        className="relative w-full max-w-[425px] overflow-hidden bg-black text-center text-white pt-[40px] md:pt-0"
         style={{ height: `${section.height}px` }}
       >
+        <div></div>
         <p className="absolute left-1/2 top-[17px] -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-center text-[16px] font-normal capitalize leading-normal text-white">
           One System. Everything You Need.
         </p>
@@ -946,17 +947,14 @@ function MobileSystemProductMock({
         ))}
 
         <div
-          className="absolute left-1/2 overflow-hidden"
+          className="absolute left-1/2 w-[270px] h-[420px] overflow-hidden -translate-x-1/2 md:w-auto md:h-auto"
           style={{
-            bottom: `${section.phone.bottom}px`,
-            height: `${section.phone.height}px`,
-            transform: "translateX(-50%)",
-            width: `${section.phone.width}px`,
+            bottom: `${section.phone.bottom + 40}px`, // 👈 move UP by increasing bottom offset
           }}
         >
           <Image
             alt={section.phone.alt}
-            className="h-full w-full object-cover object-top"
+            className="h-full w-full object-contain object-top"
             height={1870}
             src={section.phone.src}
             width={1083}

@@ -251,9 +251,9 @@ function RemainingRevealPhoneMockup({
       className="absolute bottom-0 right-0 hidden overflow-hidden md:block"
       style={{
         bottom: `${phone.bottom}px`,
-        height: `${phone.height}px`,
         right: `${phone.right}px`,
-        width: `${phone.width}px`,
+        width: `${phone.width * 0.85}px`,
+        height: `${phone.height * 0.85}px`,
       }}
     >
       <Image
