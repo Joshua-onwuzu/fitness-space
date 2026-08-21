@@ -437,7 +437,7 @@ function FinalFooterCtaSection() {
               width={1733}
             />
             <p className="absolute bottom-[35px] right-[48px] text-[14px] font-bold capitalize leading-[99.915%] text-white">
-              © 2026 All rights reserved. · <Link href="/privacy" className="hover:underline">
+              © 2026 All rights reserved. · <Link href="/privacy-policy" className="hover:underline">
               Privacy
             </Link> ·
             <Link href="/terms" className="hover:underline">
